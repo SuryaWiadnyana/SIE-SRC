@@ -23,5 +23,5 @@ func GetAppPort() string {
 	if env != "" {
 		return env
 	}
-	return "8000"
+	return "8080"
 }
