@@ -1,15 +1,21 @@
 // Login functionality
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Login page loaded');
+    
     // Check if user is already logged in
     const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole');
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     
-    if (token && userRole) {
-        redirectBasedOnRole(userRole);
+    if (token && userData.role) {
+        redirectBasedOnRole(userData.role);
         return;
     }
 
     const loginForm = document.querySelector('form.user');
+    if (!loginForm) {
+        console.error('Login form not found');
+        return;
+    }
     
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -23,46 +29,100 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            const response = await ApiService.login({ username, password });
+            // Clear any existing auth data
+            localStorage.clear();
             
-            if (response.token) {
-                redirectBasedOnRole(response.role);
-            } else {
-                showError(response.message || 'Invalid credentials');
+            // Kirim request ke API untuk login
+            const response = await fetch('http://localhost:8080/user/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Login failed');
             }
+
+            const data = await response.json();
+            
+            // Simpan token dan data user
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userData', JSON.stringify({
+                username: data.username,
+                role: data.role
+            }));
+            
+            console.log('Login berhasil:', {
+                username: data.username,
+                role: data.role
+            });
+            
+            // Redirect berdasarkan role
+            redirectBasedOnRole(data.role);
+            
         } catch (error) {
             console.error('Login error:', error);
-            showError('Login failed. Please try again.');
+            showError(error.message || 'Username atau password tidak valid');
+            localStorage.clear();
         }
     });
 });
 
 function redirectBasedOnRole(role) {
-    switch (role.toLowerCase()) {
+    if (!role) {
+        showError('Role tidak valid');
+        localStorage.clear();
+        return;
+    }
+
+    const normalizedRole = role.toLowerCase().trim();
+    let targetPath;
+    
+    switch (normalizedRole) {
         case 'admin':
-            window.location.href = 'admin-dashboard.html';
+            targetPath = 'Admin Dashboard/index.html';
             break;
         case 'owner':
-            window.location.href = 'owner-dashboard.html';
+            targetPath = 'Owner Dashboard/index.html';
             break;
         default:
-            showError('Invalid user role');
-            localStorage.clear(); // Clear any stored data for security
+            console.error('Role tidak valid:', role);
+            showError('Role user tidak valid');
+            localStorage.clear();
+            return;
+    }
+    
+    try {
+        window.location.href = targetPath;
+    } catch (error) {
+        console.error('Redirect error:', error);
+        showError('Gagal melakukan redirect. Silakan coba lagi.');
     }
 }
 
 function showError(message) {
-    // Remove any existing error messages
-    const existingError = document.querySelector('.alert-danger');
-    if (existingError) {
-        existingError.remove();
-    }
-    
+    // Remove any existing error messages first
+    const existingErrors = document.querySelectorAll('.alert-danger');
+    existingErrors.forEach(error => error.remove());
+
     // Create and show new error message
     const errorDiv = document.createElement('div');
     errorDiv.className = 'alert alert-danger';
     errorDiv.textContent = message;
     
-    const cardBody = document.querySelector('.card-body');
-    cardBody.insertBefore(errorDiv, cardBody.firstChild);
+    const form = document.querySelector('form.user');
+    if (form) {
+        form.insertBefore(errorDiv, form.firstChild);
+        
+        // Automatically remove the error after 5 seconds
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
 }
