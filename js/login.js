@@ -1,128 +1,148 @@
-// Login functionality
+// Configuration
+const API_URL = 'http://127.0.0.1:8080';
+const FRONTEND_URL = 'http://127.0.0.1:5501/SIE-SRC_Dashboard';
+
+// Handle login functionality
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Login page loaded');
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
     
-    // Check if user is already logged in
-    const token = localStorage.getItem('token');
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    // Only check auth if we're not in a redirect loop
+    const lastRedirectTime = sessionStorage.getItem('lastRedirectTime');
+    const currentTime = new Date().getTime();
     
-    if (token && userData.role) {
-        redirectBasedOnRole(userData.role);
-        return;
+    if (!lastRedirectTime || currentTime - parseInt(lastRedirectTime) > 2000) {
+        checkAuthAndRedirect();
+    } else {
+        // Clear any stale auth data if we detect a redirect loop
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userData');
+        sessionStorage.removeItem('lastRedirectTime');
     }
 
-    const loginForm = document.querySelector('form.user');
-    if (!loginForm) {
-        console.error('Login form not found');
-        return;
-    }
-    
-    loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('inputUsername').value;
-        const password = document.getElementById('inputPassword').value;
-        
-        if (!username || !password) {
-            showError('Please enter both username and password');
-            return;
-        }
-        
-        try {
-            // Clear any existing auth data
-            localStorage.clear();
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Kirim request ke API untuk login
-            const response = await fetch('http://localhost:8080/user/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Login failed');
+            // Get form data
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Basic validation
+            if (!username || !password) {
+                showError('Please fill in all fields');
+                return;
             }
+            
+            try {
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                
+                const response = await fetch(`${API_URL}/user/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
 
-            const data = await response.json();
-            
-            // Simpan token dan data user
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userData', JSON.stringify({
-                username: data.username,
-                role: data.role
-            }));
-            
-            console.log('Login berhasil:', {
-                username: data.username,
-                role: data.role
-            });
-            
-            // Redirect berdasarkan role
-            redirectBasedOnRole(data.role);
-            
-        } catch (error) {
-            console.error('Login error:', error);
-            showError(error.message || 'Username atau password tidak valid');
-            localStorage.clear();
-        }
-    });
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    // Store user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role || 'admin');
+                    localStorage.setItem('userData', JSON.stringify({
+                        username: username,
+                        role: data.role || 'admin'
+                    }));
+                    
+                    // Set redirect time to prevent loops
+                    sessionStorage.setItem('lastRedirectTime', new Date().getTime().toString());
+                    
+                    // Small delay before redirect to ensure storage is complete
+                    setTimeout(() => {
+                        redirectBasedOnRole(data.role || 'admin');
+                    }, 100);
+                } else {
+                    showError(data.message || 'Invalid username or password');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Connection error. Please try again later.');
+            } finally {
+                // Restore button state
+                const submitBtn = loginForm.querySelector('button[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Login';
+            }
+        });
+    }
 });
 
-function redirectBasedOnRole(role) {
-    if (!role) {
-        showError('Role tidak valid');
-        localStorage.clear();
-        return;
-    }
-
-    const normalizedRole = role.toLowerCase().trim();
-    let targetPath;
-    
-    switch (normalizedRole) {
-        case 'admin':
-            targetPath = 'Admin Dashboard/index.html';
-            break;
-        case 'owner':
-            targetPath = 'Owner Dashboard/index.html';
-            break;
-        default:
-            console.error('Role tidak valid:', role);
-            showError('Role user tidak valid');
-            localStorage.clear();
-            return;
-    }
-    
+// Helper function to check authentication and redirect if necessary
+function checkAuthAndRedirect() {
     try {
-        window.location.href = targetPath;
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        
+        // Get current path
+        const currentPath = window.location.pathname;
+        
+        // If on login page and already logged in, redirect to dashboard
+        if (currentPath.endsWith('login.html') && token && role) {
+            console.log('Already logged in, redirecting to dashboard...');
+            sessionStorage.setItem('lastRedirectTime', new Date().getTime().toString());
+            redirectBasedOnRole(role);
+            return;
+        }
+        
+        // If on dashboard page and not logged in, redirect to login
+        if (currentPath.includes('Dashboard') && (!token || !role)) {
+            console.log('Not logged in, redirecting to login...');
+            sessionStorage.setItem('lastRedirectTime', new Date().getTime().toString());
+            window.location.href = `${FRONTEND_URL}/login.html`;
+        }
     } catch (error) {
-        console.error('Redirect error:', error);
-        showError('Gagal melakukan redirect. Silakan coba lagi.');
+        console.error('Auth check error:', error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userData');
+        sessionStorage.removeItem('lastRedirectTime');
     }
 }
 
+// Helper function to show error message
 function showError(message) {
-    // Remove any existing error messages first
-    const existingErrors = document.querySelectorAll('.alert-danger');
-    existingErrors.forEach(error => error.remove());
-
-    // Create and show new error message
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'alert alert-danger';
-    errorDiv.textContent = message;
-    
-    const form = document.querySelector('form.user');
-    if (form) {
-        form.insertBefore(errorDiv, form.firstChild);
+    const errorMessage = document.getElementById('errorMessage');
+    if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
         
-        // Automatically remove the error after 5 seconds
+        // Hide error after 3 seconds
         setTimeout(() => {
-            errorDiv.remove();
-        }, 5000);
+            errorMessage.style.display = 'none';
+        }, 3000);
+    }
+}
+
+// Helper function to redirect based on role
+function redirectBasedOnRole(role) {
+    try {
+        console.log('Redirecting based on role:', role);
+        const targetPath = role === 'owner' 
+            ? `${FRONTEND_URL}/Owner Dashboard/index.html`
+            : `${FRONTEND_URL}/Admin Dashboard/index.html`;
+            
+        console.log('Redirecting to:', targetPath);
+        window.location.href = targetPath;
+    } catch (error) {
+        console.error('Redirect error:', error);
+        window.location.href = `${FRONTEND_URL}/login.html`;
     }
 }

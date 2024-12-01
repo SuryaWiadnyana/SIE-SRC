@@ -15,8 +15,8 @@
 }
 
 .sidebar .nav-item .collapse-item:hover {
-    background-color: #eaecf4;
-    color: #e74a3b;
+    background-color: #fdf1f1;
+    color: #dc3545;
 }
 
 .sidebar .nav-item .collapse-item i {
@@ -49,13 +49,13 @@
 
 /* Hover effects */
 .sidebar .nav-item .nav-link:hover {
-    color: #e74a3b;
+    color: #dc3545;
 }
 
 .sidebar .nav-item .collapse-item.active {
-    color: #e74a3b;
+    color: #dc3545;
     font-weight: 700;
-    background-color: #eaecf4;
+    background-color: #fdf1f1;
 }
 
 /* Animation for collapse */
@@ -76,4 +76,81 @@
     background-color: #fff;
     border-radius: 0.35rem;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Custom color styles for Owner Dashboard */
+.bg-gradient-primary {
+    background-color: #dc3545;
+    background-image: linear-gradient(180deg, #dc3545 10%, #b02a37 100%);
+}
+
+.btn-primary {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #b02a37;
+    border-color: #b02a37;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+}
+
+.text-primary {
+    color: #dc3545 !important;
+}
+
+.border-left-primary {
+    border-left: 0.25rem solid #dc3545 !important;
+}
+
+.sidebar .nav-item .nav-link:active,
+.sidebar .nav-item .nav-link:focus,
+.sidebar .nav-item .nav-link:hover {
+    color: #dc3545;
+}
+
+a {
+    color: #dc3545;
+    transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+    color: #b02a37;
+    text-decoration: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #dc3545;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b02a37;
+}
+
+/* Add subtle animations for interactive elements */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.1);
+}
+
+/* Add a subtle red glow to focused elements */
+.form-control:focus {
+    border-color: rgba(220, 53, 69, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }

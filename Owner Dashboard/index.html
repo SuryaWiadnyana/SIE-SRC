@@ -18,36 +18,11 @@
     <!-- Custom styles for this template-->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../css/owner-sidebar.css" rel="stylesheet">
-    <style>
-        .bg-gradient-primary {
-            background-color: #e74a3b;
-            background-image: linear-gradient(180deg, #e74a3b 10%, #991f1f 100%);
-        }
-        .btn-primary {
-            background-color: #e74a3b;
-            border-color: #e74a3b;
-        }
-        .btn-primary:hover {
-            background-color: #991f1f;
-            border-color: #991f1f;
-        }
-        .text-primary {
-            color: #e74a3b !important;
-        }
-        .border-left-primary {
-            border-left: 0.25rem solid #e74a3b !important;
-        }
-        .sidebar .nav-item .nav-link:active, .sidebar .nav-item .nav-link:focus, .sidebar .nav-item .nav-link:hover {
-            color: #e74a3b;
-        }
-        a {
-            color: #e74a3b;
-        }
-        a:hover {
-            color: #991f1f;
-        }
-    </style>
 
+    <!-- Custom JavaScript modules -->
+<script type="module" src="../js/api.js"></script>
+<script type="module" src="../js/dashboard.js"></script>
+<script type="module" src="../js/sales-management.js"></script>
 </head>
 
 <body id="page-top">
@@ -156,7 +131,6 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Nama Pemilik</span>
                                 <img class="img-profile rounded-circle"
                                     src="../img/undraw_profile.svg">
                             </a>
@@ -334,7 +308,10 @@
                 </div>
                 <div class="modal-body">Pilih "Keluar" di bawah jika Anda siap untuk mengakhiri sesi Anda saat ini.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" type="button" data-dismiss="modal">Batal</button>
+                <!-- Custom JavaScript modules -->
+<script type="module" src="../js/api.js"></script>
+<script type="module" src="../js/dashboard.js"></script>
+<script type="module" src="../js/sales-management.js"></script>    <button class="btn btn-danger" type="button" data-dismiss="modal">Batal</button>
                     <a class="btn btn-success" href="#" onclick="logout()">Keluar</a>
                 </div>
             </div>
@@ -342,43 +319,44 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="../vendor/jquery/jquery.min.js"></script>
-    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <!-- Core plugin JavaScript-->
-    <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
 
     <!-- Custom scripts for all pages-->
-    <script src="../js/sb-admin-2.min.js"></script>
+    <script src="/js/sb-admin-2.min.js"></script>
 
     <!-- Page level plugins -->
-    <script src="../vendor/chart.js/Chart.min.js"></script>
+    <script src="/vendor/chart.js/Chart.min.js"></script>
 
     <!-- Page level custom scripts -->
-    <script src="../js/demo/chart-area-demo.js"></script>
-    <script src="../js/demo/chart-pie-demo.js"></script>
-    <script src="../js/dashboard.js"></script>
+    <script src="/js/demo/chart-area-demo.js"></script>
+    <script src="/js/demo/chart-pie-demo.js"></script>
+    <script src="/js/dashboard.js"></script>
 
-    <!-- Auth check script -->
-    <script>
-        // Check if user is logged in and has owner role
-        const token = localStorage.getItem('token');
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        
-        if (!token || userData.role !== 'owner') {
-            window.location.href = '../login.html';
-        }
+    <!-- Role Check Script -->
+    <script type="module">
+        // Check if user is logged in and is owner
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token || user.role !== 'owner') {
+                window.location.href = '/login.html';
+                return;
+            }
+        });
     </script>
 
-    <!-- Logout script -->
-    <script>
-        function logout() {
-            // Clear localStorage
-            localStorage.removeItem('token');
-            localStorage.removeItem('userData');
-            // Redirect to login page
-            window.location.href = '../login.html';
-        }
+    <!-- Logout handling -->
+    <script type="module">
+        import { api } from '/js/api.js';
+        
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            api.auth.logout();
+        });
     </script>
 
 </body>

@@ -1,41 +1,81 @@
-// Dashboard Initialization
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        await loadDashboardData();
-        initializeCharts();
-    } catch (error) {
-        console.error('Error initializing dashboard:', error);
-    }
-});
+import { api } from './api.js';
+import { checkAuth, handleLogout } from './auth.js';
 
-// Load Dashboard Data
+// Fungsi untuk memuat data dashboard
 async function loadDashboardData() {
     try {
-        // Simulasi data dashboard (ganti dengan API call nanti)
-        const dummyData = {
-            monthlySales: 150000000,
-            totalProducts: 250,
-            bestSellingProduct: "Produk A",
-            totalTransactions: 1500
-        };
-
-        // Update card values - dengan pengecekan elemen
-        const updateElement = (id, value) => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = value;
+        // Load product statistics
+        const productStats = await api.products.getAll();
+        const productCount = document.getElementById('totalProducts');
+        if (productCount) {
+            if (productStats.success && productStats.data) {
+                const products = Array.isArray(productStats.data) ? productStats.data :
+                               Array.isArray(productStats.data.data) ? productStats.data.data : [];
+                productCount.textContent = products.length.toString();
+            } else {
+                productCount.textContent = '0';
             }
-        };
+        }
 
-        updateElement('monthlySales', formatCurrency(dummyData.monthlySales));
-        updateElement('totalProducts', dummyData.totalProducts);
-        updateElement('bestSellingProduct', dummyData.bestSellingProduct);
-        updateElement('totalTransactions', dummyData.totalTransactions);
-
+        // Load user statistics
+        const userStats = await api.users.getAll();
+        const userCount = document.getElementById('activeUsers');
+        if (userCount) {
+            if (userStats.success && userStats.data) {
+                const users = Array.isArray(userStats.data) ? userStats.data :
+                            Array.isArray(userStats.data.data) ? userStats.data.data : [];
+                userCount.textContent = users.length.toString();
+            } else {
+                userCount.textContent = '0';
+            }
+        }
     } catch (error) {
         console.error('Error loading dashboard data:', error);
-        throw new Error('Failed to load dashboard data');
+        const elements = ['totalProducts', 'activeUsers'];
+        elements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = '0';
+        });
     }
+}
+
+// Set username di navbar
+function setUserInfo() {
+    try {
+        const userDataStr = localStorage.getItem('userData');
+        if (!userDataStr) return;
+        
+        const userData = JSON.parse(userDataStr);
+        console.log('Setting user info:', userData);
+        
+        const userDropdown = document.getElementById('userDropdown');
+        if (userDropdown) {
+            const usernameSpan = userDropdown.querySelector('span');
+            if (usernameSpan && userData.username) {
+                usernameSpan.textContent = userData.username;
+            }
+        }
+    } catch (error) {
+        console.error('Error setting user info:', error);
+    }
+}
+
+// Format currency to Indonesian Rupiah
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+    }).format(amount);
+}
+
+// Format date to Indonesian format
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
 }
 
 // Initialize Charts
@@ -50,13 +90,13 @@ function initializeCharts() {
 
 // Initialize Sales Chart
 function initializeSalesChart() {
-    const ctx = document.getElementById('salesChart');
+    const ctx = document.getElementById('myAreaChart');
     if (!ctx) {
-        console.log('Sales chart element not found');
+        console.warn('Sales chart element not found');
         return;
     }
 
-    // Dummy data untuk grafik penjualan
+    // Sample data for sales chart
     const salesData = {
         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         datasets: [{
@@ -72,7 +112,8 @@ function initializeSalesChart() {
             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: [0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000, 25000, 40000],
+            data: [10000000, 15000000, 12000000, 18000000, 15000000, 20000000, 
+                   17000000, 25000000, 22000000, 30000000, 27000000, 35000000],
         }],
     };
 
@@ -104,7 +145,7 @@ function initializeSalesChart() {
                         maxTicksLimit: 5,
                         padding: 10,
                         callback: function(value) {
-                            return 'Rp' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                            return formatCurrency(value);
                         }
                     },
                     gridLines: {
@@ -135,8 +176,7 @@ function initializeSalesChart() {
                 caretPadding: 10,
                 callbacks: {
                     label: function(tooltipItem, chart) {
-                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                        return datasetLabel + ': Rp' + tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                        return 'Penjualan: ' + formatCurrency(tooltipItem.yLabel);
                     }
                 }
             }
@@ -146,19 +186,19 @@ function initializeSalesChart() {
 
 // Initialize Product Chart
 function initializeProductChart() {
-    const ctx = document.getElementById('productChart');
+    const ctx = document.getElementById('myPieChart');
     if (!ctx) {
-        console.log('Product chart element not found');
+        console.warn('Product chart element not found');
         return;
     }
 
-    // Dummy data untuk grafik produk
+    // Sample data for product categories
     const productData = {
-        labels: ["Produk A", "Produk B", "Produk C", "Produk D", "Produk E"],
+        labels: ["Makanan", "Minuman", "Snack"],
         datasets: [{
-            data: [55, 30, 15, 10, 5],
-            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617'],
+            data: [45, 30, 25],
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
             hoverBorderColor: "rgba(234, 236, 244, 1)",
         }],
     };
@@ -179,19 +219,43 @@ function initializeProductChart() {
                 caretPadding: 10,
             },
             legend: {
-                display: false
+                display: true,
+                position: 'bottom'
             },
             cutoutPercentage: 80,
         },
     });
 }
 
-// Format Currency
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount);
-}
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Initializing dashboard...');
+    
+    // Check authentication first
+    if (!checkAuth()) {
+        console.log('Authentication check failed');
+        window.location.href = '../login.html';
+        return;
+    }
+
+    try {
+        // Initialize logout button
+        const logoutBtn = document.getElementById('logoutButton');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+
+        // Load dashboard data
+        await loadDashboardData();
+        
+        // Set user info in navbar
+        setUserInfo();
+        
+        // Initialize charts if they exist
+        if (typeof initializeCharts === 'function') {
+            initializeCharts();
+        }
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+    }
+});
