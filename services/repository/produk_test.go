@@ -143,7 +143,7 @@ func TestDeleteProduk(t *testing.T) {
 	assert.NoError(t, err, "expected no error when creating a new product data")
 
 	// Menghapus berdasarkan ID
-	err = repo.DeleteProduk(context.Background(), "123", "")
+	err = repo.DeleteProduk(context.Background(), "123")
 	assert.NoError(t, err)
 
 	_, err = repo.GetProdukById(context.Background(), "123")
@@ -152,7 +152,7 @@ func TestDeleteProduk(t *testing.T) {
 	// Menghapus berdasarkan Nama
 	_, err = repo.CreateProduk(context.Background(), &produk) // Recreate for the second deletion test
 	assert.NoError(t, err, "expected no error when creating a new product again")
-	err = repo.DeleteProduk(context.Background(), "", "ProdukTest")
+	err = repo.DeleteProduk(context.Background(), "",)
 	assert.NoError(t, err, "expected no error when deleting product by name")
 
 	_, err = repo.GetProdukByName(context.Background(), "ProdukTest")

@@ -29,10 +29,9 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	group.Get("/getallproduk", handler.GetAllProduk)
 	group.Get("/by-id/:id_produk", handler.GetProdukById)
 	group.Get("/by-name/:nama_produk", handler.GetProdukByName)
-	group.Put("/update/{id_produk}?nama_produk={nama_produk}", handler.UpdateProduk)
-	group.Delete("/delete/{id_produk}?nama_produk={nama_produk}", handler.DeleteProduk)
+	group.Put("/update/:id_produk", handler.UpdateProduk)
+	group.Delete("/delete/:id_produk", handler.DeleteProduk)
 	group.Post("/importdata", handler.ImportProduk)
-
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
@@ -118,11 +117,10 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 
 func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 	id := c.Params("id_produk")
-	nama := c.Params("nama_produk")
 
-	if id == "" && nama == "" {
+	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID atau nama produk diperlukan",
+			"error": "ID produk diperlukan",
 		})
 	}
 
@@ -140,12 +138,7 @@ func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	if id != "" {
-		body.IDProduk = id
-	}
-	if nama != "" {
-		body.NamaProduk = nama
-	}
+	body.IDProduk = id
 
 	err := d.HTTP.UpdateProduk(context.Background(), body)
 	if err != nil {
@@ -161,24 +154,23 @@ func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 
 func (d *HttpDeliveryProduk) DeleteProduk(c *fiber.Ctx) error {
 	id := c.Params("id_produk")
-	nama := c.Params("nama_produk")
+    
+    if id == "" {
+        return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+            "error": "ID produk diperlukan",
+        })
+    }
 
-	if id == "" && nama == "" {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID atau nama produk diperlukan",
-		})
-	}
+    err := d.HTTP.DeleteProduk(context.Background(), id)
+    if err != nil {
+        return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+            "error": "Gagal untuk menghapus data: " + err.Error(),
+        })
+    }
 
-	err := d.HTTP.DeleteProduk(context.Background(), id, nama)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal untuk menghapus data" + err.Error(),
-		})
-	}
-
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Data berhasil dihapus",
-	})
+    return c.Status(http.StatusOK).JSON(fiber.Map{
+        "message": "Data berhasil dihapus",
+    })
 }
 
 func (d *HttpDeliveryProduk) ImportFromCSV(file *multipart.FileHeader) error {

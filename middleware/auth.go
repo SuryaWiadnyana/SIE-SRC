@@ -39,6 +39,9 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 			})
 		}
 
+		// Simpan token ke locals untuk digunakan di handler
+		c.Locals("user", token)
+
 		// Cek apakah role yang diminta sesuai
 		userRole := claims["role"].(string)
 		for _, role := range roles {

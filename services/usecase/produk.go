@@ -66,11 +66,11 @@ func (uc *ProdukUseCase) UpdateProduk(Ctx context.Context, bd *domain.Produk) er
 	return uc.ProdukRepository.UpdateProduk(ctx, bd)
 }
 
-func (uc *ProdukUseCase) DeleteProduk(Ctx context.Context, id, nama string) error {
+func (uc *ProdukUseCase) DeleteProduk(Ctx context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 
-	return uc.ProdukRepository.DeleteProduk(ctx, id, nama)
+	return uc.ProdukRepository.DeleteProduk(ctx, id)
 }
 
 func (uc *ProdukUseCase) ImportData(ctx context.Context, produkList []domain.Produk) error {

@@ -4,11 +4,12 @@ import (
 	"SIE-SRC/domain"
 	"context"
 	"fmt"
-	"log"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type mongoRepoProduk struct {
@@ -23,63 +24,87 @@ func NewMongoRepoProduk(client *mongo.Database) domain.ProdukRepository {
 
 var _Produk = "produk"
 
+// GenerateNextID generates the next available ID
+func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
+	DataProduk := rp.DB.Collection(_Produk)
+
+	// Find the last document sorted by _id in descending order
+	opts := options.FindOne().SetSort(bson.M{"_id": -1})
+	var lastProduct domain.Produk
+
+	err := DataProduk.FindOne(ctx, bson.M{}, opts).Decode(&lastProduct)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// If no documents exist, start with "001"
+			return "001", nil
+		}
+		return "", fmt.Errorf("error finding last product: %v", err)
+	}
+
+	// Parse the last ID and increment
+	lastID, err := strconv.Atoi(lastProduct.IDProduk)
+	if err != nil {
+		return "", fmt.Errorf("error parsing last ID: %v", err)
+	}
+
+	// Format new ID with leading zeros
+	newID := fmt.Sprintf("%03d", lastID+1)
+	return newID, nil
+}
+
 // Membuat Data Produk
-func (rp *mongoRepoProduk) CreateProduk(Ctx context.Context, bd *domain.Produk) (domain.Produk, error) {
+func (rp *mongoRepoProduk) CreateProduk(ctx context.Context, bd *domain.Produk) (domain.Produk, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	if bd.IDProduk == "" {
-		return domain.Produk{}, fmt.Errorf("ID Produk cannot be")
+		// Generate ID if not provided
+		nextID, err := rp.GenerateNextID(ctx)
+		if err != nil {
+			return domain.Produk{}, fmt.Errorf("error generating ID: %v", err)
+		}
+		bd.IDProduk = nextID
 	}
 
-	CheckingProductByID, err := rp.GetProdukById(Ctx, bd.IDProduk)
-	if err == nil {
-		return domain.Produk{}, fmt.Errorf("ID produk sudah digunakan oleh produk: %s", fmt.Sprintf("%s %s", bd.IDProduk, CheckingProductByID.IDProduk))
-	} else if err.Error() != fmt.Sprintf("produk dengan ID %s tidak ditemukan", bd.IDProduk) {
-		return domain.Produk{}, fmt.Errorf("gagal untuk mengecek apakah produk dengan ID: %v sudah digunakan", bd.IDProduk)
-	}
+	// Set current time for UpdatedAt
+	bd.UpdatedAt = time.Now()
 
-	_, err = DataProduk.InsertOne(Ctx, bd)
+	// Insert document
+	_, err := DataProduk.InsertOne(ctx, bd)
 	if err != nil {
-		return domain.Produk{}, err
+		return domain.Produk{}, fmt.Errorf("error inserting product: %v", err)
 	}
 
 	return *bd, nil
 }
 
 // Memunculkan Semua Data Produk
-func (rp *mongoRepoProduk) GetAllProduk(Ctx context.Context) ([]domain.Produk, error) {
+func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
-	var ListProduk []domain.Produk
+	filter := bson.M{
+		"is_deleted": nil, // Only get non-deleted products
+	}
 
-	data, err := DataProduk.Find(Ctx, bson.M{"is_deleted": nil})
+	cursor, err := DataProduk.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	defer data.Close(Ctx)
+	defer cursor.Close(ctx)
 
-	for data.Next(Ctx) {
-		var Produk domain.Produk
-		if err := data.Decode(&Produk); err != nil {
-			log.Println("Error decoding Product:", err)
-			continue
-		}
-		ListProduk = append(ListProduk, Produk)
-	}
-
-	if err := data.Err(); err != nil {
+	var products []domain.Produk
+	if err = cursor.All(ctx, &products); err != nil {
 		return nil, err
 	}
 
-	return ListProduk, err
+	return products, nil
 }
 
 // Mencari Data Produk Berdasarkan ID Produk
-func (rp *mongoRepoProduk) GetProdukById(Ctx context.Context, id string) (*domain.Produk, error) {
+func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domain.Produk, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
-	var ListProduk domain.Produk
-	err := DataProduk.FindOne(Ctx, bson.M{"id_produk": id, "is_deleted": nil}).Decode(&ListProduk)
+	var product domain.Produk
+	err := DataProduk.FindOne(ctx, bson.M{"_id": id, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -87,15 +112,15 @@ func (rp *mongoRepoProduk) GetProdukById(Ctx context.Context, id string) (*domai
 		return nil, fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
 
-	return &ListProduk, nil
+	return &product, nil
 }
 
 // Mencari Data Produk Berdasarkan Nama Produk
-func (rp *mongoRepoProduk) GetProdukByName(Ctx context.Context, nama string) (*domain.Produk, error) {
+func (rp *mongoRepoProduk) GetProdukByName(ctx context.Context, nama string) (*domain.Produk, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
-	var ListProduk domain.Produk
-	err := DataProduk.FindOne(Ctx, bson.M{"nama_produk": nama, "is deleted": nil}).Decode(&ListProduk)
+	var product domain.Produk
+	err := DataProduk.FindOne(ctx, bson.M{"nama_produk": nama, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("produk dengan Nama %s tidak ditemukan", nama)
@@ -103,151 +128,128 @@ func (rp *mongoRepoProduk) GetProdukByName(Ctx context.Context, nama string) (*d
 		return nil, fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
 
-	return &ListProduk, nil
+	return &product, nil
 }
 
 // Memperbarui Data Produk
-func (rp *mongoRepoProduk) UpdateProduk(Ctx context.Context, bd *domain.Produk) error {
+func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	bd.UpdatedAt = time.Now()
 
-	filter := bson.M{
-		"$or": []bson.M{
-			{"id_produk": bd.IDProduk},
-			{"nama_produk": bd.NamaProduk},
-		},
-	}
-
-	var existingProduct domain.Produk
-	err := DataProduk.FindOne(Ctx, filter).Decode(&existingProduct)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return fmt.Errorf("produk dengan id %s atau dengan nama %s tidak ditemukan", bd.IDProduk, bd.NamaProduk)
-		}
-		return fmt.Errorf("gagal untuk mengecek produk: %v", err)
-	}
-
+	filter := bson.M{"_id": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
-			"id_produk":      bd.IDProduk,
 			"nama_produk":    bd.NamaProduk,
 			"kategori":       bd.Kategori,
 			"sub_kategori":   bd.SubKategori,
 			"barcode_produk": bd.KodeProduk,
+			"harga":          bd.Harga,
 			"stok_barang":    bd.Stok,
 			"updated_at":     bd.UpdatedAt,
 		},
 	}
 
-	_, err = DataProduk.UpdateOne(Ctx, filter, update)
+	result, err := DataProduk.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return err
+		return fmt.Errorf("error updating product: %v", err)
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("produk dengan ID %s tidak ditemukan", bd.IDProduk)
 	}
 
 	return nil
 }
 
-// Menghapus Data Produk Dengan ID atau Nama Produk
-func (rp *mongoRepoProduk) DeleteProduk(Ctx context.Context, id, nama string) error {
+// Menghapus Data Produk
+func (rp *mongoRepoProduk) DeleteProduk(ctx context.Context, id string) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
-	// Menentukan filter berdasarkan ID atau nama produk
-	filter := bson.M{}
-	if id != "" {
-		filter["id_produk"] = id
-	}
-	if nama != "" {
-		filter["nama_produk"] = nama
-	}
-
-	// Memastikan filter tidak kosong
-	if len(filter) == 0 {
-		return fmt.Errorf("ID atau nama produk diperlukan untuk menghapus data")
-	}
-
-	// Mengecek apakah produk yang akan dihapus ada
-	var CheckingProduct domain.Produk
-	err := DataProduk.FindOne(Ctx, filter).Decode(&CheckingProduct)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return fmt.Errorf("produk dengan ID %s atau nama %s tidak ditemukan", id, nama)
-		}
-		return fmt.Errorf("gagal untuk mengecek produk: %v", err)
-	}
-
+	now := time.Now()
+	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
-			"is_deleted": true,
-			"updated_at": time.Now(),
-		},
-	}
-
-	// Menghapus data produk
-	_, err = DataProduk.UpdateOne(Ctx, filter, update)
-	if err != nil {
-		return fmt.Errorf("gagal untuk menghapus produk: %v", err)
-	}
-
-	return nil
-}
-
-func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, quantity int) error {
-	DataProduk := rp.DB.Collection(_Produk)
-
-	filter := bson.M{"id_produk": id, "is_deleted": nil}
-
-	update := bson.M{
-		"$inc": bson.M{
-			"stok_barang": -quantity,
-		},
-		"$set": bson.M{
-			"updated_at": time.Now(),
+			"is_deleted": now,
 		},
 	}
 
 	result, err := DataProduk.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return fmt.Errorf("gagal mengurangi stok produk: %v", err)
+		return fmt.Errorf("error soft deleting product: %v", err)
 	}
 
 	if result.MatchedCount == 0 {
-		return fmt.Errorf("produk dengan ID %s tidak ditemukan atau sudah dihapus", id)
+		return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
 	}
 
 	return nil
-
 }
 
-func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.Produk) error {
-	for _, produk := range produkList {
-		_, err := rp.DB.Collection("produk").InsertOne(ctx, produk) // Sesuaikan dengan koleksi Anda
-		if err != nil {
-			return err
+// DecreaseProdukStock mengurangi stok produk
+func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, quantity int) error {
+	DataProduk := rp.DB.Collection(_Produk)
+
+	// Cek produk ada dan stoknya cukup
+	var product domain.Produk
+	err := DataProduk.FindOne(ctx, bson.M{"_id": id, "is_deleted": nil}).Decode(&product)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
 		}
+		return fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
+
+	if product.Stok < quantity {
+		return fmt.Errorf("stok tidak mencukupi, stok tersedia: %d, permintaan: %d", product.Stok, quantity)
+	}
+
+	// Update stok
+	update := bson.M{
+		"$inc": bson.M{"stok_barang": -quantity},
+		"$set": bson.M{"updated_at": time.Now()},
+	}
+
+	result, err := DataProduk.UpdateOne(ctx, bson.M{"_id": id}, update)
+	if err != nil {
+		return fmt.Errorf("gagal mengupdate stok: %v", err)
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
+	}
+
 	return nil
 }
 
-// Menghapus Data Produk Dengan Nama Produk
-// func (rp *mongoRepoProduk) DeleteProdukByName(Ctx context.Context, nama string) error {
-// 	DataProduk := rp.DB.Collection(_Produk)
+// ImportData mengimpor data produk secara batch
+func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.Produk) error {
+	if len(produkList) == 0 {
+		return nil
+	}
 
-// 	//Mengecek ID Produk yang akan dihapus
-// 	var CheckingProductByName domain.Produk
-// 	err := DataProduk.FindOne(Ctx, bson.M{"nama_produk": nama}).Decode(&CheckingProductByName)
-// 	if err != nil {
-// 		if err == mongo.ErrNoDocuments {
-// 			return fmt.Errorf("produk dengan ID %s tidak ditemukan", err)
-// 		}
-// 		return fmt.Errorf("gagal untuk mengecek produk: %v", err)
-// 	}
+	DataProduk := rp.DB.Collection(_Produk)
 
-// 	//Menghapus Data Produk
-// 	_, err = DataProduk.DeleteOne(Ctx, bson.M{"id_produk": nama})
-// 	if err != nil {
-// 		return err
-// 	}
+	// Convert slice of Produk to slice of interface{}
+	docs := make([]interface{}, len(produkList))
+	for i, produk := range produkList {
+		// Generate ID jika belum ada
+		if produk.IDProduk == "" {
+			nextID, err := rp.GenerateNextID(ctx)
+			if err != nil {
+				return fmt.Errorf("error generating ID for product %d: %v", i, err)
+			}
+			produk.IDProduk = nextID
+		}
+		produk.UpdatedAt = time.Now()
+		docs[i] = produk
+	}
 
-// 	return nil
-// }
+	// Insert many
+	_, err := DataProduk.InsertMany(ctx, docs)
+	if err != nil {
+		return fmt.Errorf("gagal mengimpor data: %v", err)
+	}
+
+	return nil
+}

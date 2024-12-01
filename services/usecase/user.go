@@ -57,6 +57,30 @@ func (uc *UserUseCase) GetUserByUsername(ctx context.Context, username string) (
 	return uc.UserRepository.GetUserByUsername(ctx, username)
 }
 
+func (uc *UserUseCase) GetAll(ctx context.Context) ([]domain.User, error) {
+	return uc.UserRepository.GetAll(ctx)
+}
+
 func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
 	return uc.UserRepository.DeleteUser(ctx, id)
+}
+
+// UpdateUser updates user data
+func (uc *UserUseCase) UpdateUser(ctx context.Context, username string, updateData *domain.User) error {
+	// Validasi username
+	if username == "" {
+		return fmt.Errorf("username is required")
+	}
+
+	// Cek apakah user ada
+	existingUser, err := uc.UserRepository.GetUserByUsername(ctx, username)
+	if err != nil {
+		return err
+	}
+	if existingUser == nil {
+		return fmt.Errorf("user not found")
+	}
+
+	// Update user
+	return uc.UserRepository.UpdateUser(ctx, username, updateData)
 }

@@ -15,16 +15,19 @@ type User struct {
 
 type UserRepository interface {
 	RegisterUser(ctx context.Context, user *User) (User, error)
-	GetUserById(ctx context.Context, id string) (*User, error)
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
-	AuthenticateUser(ctx context.Context, username, password string) (*User, error)
+	GetUserById(ctx context.Context, id string) (*User, error)
 	DeleteUser(ctx context.Context, id string) error
+	UpdateUser(ctx context.Context, username string, user *User) error
+	GetAll(ctx context.Context) ([]User, error)
 }
 
 type UserUseCase interface {
 	RegisterUser(ctx context.Context, user *User) (User, error)
-	GetUserById(ctx context.Context, id string) (*User, error)
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
-	AuthenticateUser(ctx context.Context, username, password string) (*User, error)
+	GetUserById(ctx context.Context, id string) (*User, error)
 	DeleteUser(ctx context.Context, id string) error
+	UpdateUser(ctx context.Context, username string, user *User) error
+	AuthenticateUser(ctx context.Context, username, password string) (*User, error)
+	GetAll(ctx context.Context) ([]User, error)
 }

@@ -137,12 +137,76 @@ func (rp *mongoRepoUser) AuthenticateUser(ctx context.Context, username, passwor
 	return &user, nil
 }
 
+func (rp *mongoRepoUser) GetAll(ctx context.Context) ([]domain.User, error) {
+	collection := rp.DB.Collection(_UserCollection)
+	
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("error getting users: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	var users []domain.User
+	if err := cursor.All(ctx, &users); err != nil {
+		return nil, fmt.Errorf("error decoding users: %v", err)
+	}
+
+	return users, nil
+}
+
 func (rp *mongoRepoUser) DeleteUser(ctx context.Context, id string) error {
 	collection := rp.DB.Collection(_UserCollection)
 
-	_, err := collection.DeleteOne(ctx, bson.M{"id": id})
+	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return fmt.Errorf("gagal untuk menghapus ")
+		return fmt.Errorf("invalid id format: %v", err)
+	}
+
+	result, err := collection.DeleteOne(ctx, bson.M{"_id": objectID})
+	if err != nil {
+		return fmt.Errorf("error deleting user: %v", err)
+	}
+
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("user with id %s not found", id)
+	}
+
+	return nil
+}
+
+func (rp *mongoRepoUser) UpdateUser(ctx context.Context, username string, updateData *domain.User) error {
+	collection := rp.DB.Collection(_UserCollection)
+
+	// Buat update document
+	update := bson.M{}
+	if updateData.Password != "" {
+		// Hash password baru jika ada
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateData.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("error hashing password: %v", err)
+		}
+		update["password"] = string(hashedPassword)
+	}
+	if updateData.Role != "" {
+		update["role"] = updateData.Role
+	}
+
+	// Jika tidak ada yang diupdate
+	if len(update) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	result, err := collection.UpdateOne(
+		ctx,
+		bson.M{"username": username},
+		bson.M{"$set": update},
+	)
+	if err != nil {
+		return fmt.Errorf("error updating user: %v", err)
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("user not found")
 	}
 
 	return nil
