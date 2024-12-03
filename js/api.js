@@ -218,10 +218,34 @@ const products = {
                     'Content-Type': 'application/json'
                 }
             });
+
+            const data = await handleResponse(response);
+            console.log('Product data from API:', data); // Debug log
+            return { success: true, data: data };
+        } catch (error) {
+            console.error('Get product by ID error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    getByName: async (name) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Tidak terautentikasi');
+            }
+
+            const response = await fetch(`${BASE_URL}/produk/by-name/${encodeURIComponent(name)}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const data = await handleResponse(response);
             return { success: true, data };
         } catch (error) {
-            console.error('Get product by ID error:', error);
+            console.error('Get product by name error:', error);
             return { success: false, error: error.message };
         }
     },
@@ -323,7 +347,7 @@ const products = {
             console.error('Search products error:', error);
             return { success: false, error: error.message };
         }
-    }
+    },
 };
 
 // Sales API
