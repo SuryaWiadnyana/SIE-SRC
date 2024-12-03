@@ -288,15 +288,29 @@ const products = {
                 throw new Error('Tidak terautentikasi');
             }
 
-            const response = await fetch(`${BASE_URL}/produk/update/${id}?nama_produk=${encodeURIComponent(productData.nama_produk)}`, {
+            // Remove id_produk from body since it's in the URL
+            const { id_produk, ...dataToSend } = productData;
+            
+            console.log('Sending update request:', {
+                url: `${BASE_URL}/produk/update/${id}`,
+                data: dataToSend
+            });
+
+            const response = await fetch(`${BASE_URL}/produk/update/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(productData)
+                body: JSON.stringify(dataToSend)
             });
-            const data = await handleResponse(response);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Gagal untuk memperbarui data');
+            }
+
+            const data = await response.json();
             return { success: true, data };
         } catch (error) {
             console.error('Update product error:', error);

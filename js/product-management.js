@@ -345,32 +345,66 @@ async function handleAddProduct(e) {
 
 async function handleUpdateProduct(e) {
     e.preventDefault();
-    
     try {
-        const formData = new FormData(e.target);
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        // Debug: Log all form values
+        console.log('Form values:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ': ' + value);
+        }
+        
         const productData = {
-            id_produk: formData.get('id_produk'),
-            nama_produk: formData.get('nama_produk'),
-            kategori: formData.get('kategori'),
-            sub_kategori: formData.get('sub_kategori'),
-            barcode_produk: formData.get('barcode_produk'),
-            harga: parseInt(formData.get('harga')),
-            stok_barang: parseInt(formData.get('stok_barang'))
+            id_produk: document.getElementById('update_id_produk').value,
+            nama_produk: document.getElementById('update_nama_produk').value,
+            kategori: document.getElementById('update_kategori').value,
+            sub_kategori: document.getElementById('update_sub_kategori').value,
+            barcode_produk: document.getElementById('update_barcode_produk').value,
+            harga: parseInt(document.getElementById('update_harga').value) || 0,
+            stok_barang: parseInt(document.getElementById('update_stok_barang').value) || 0
         };
         
-        console.log('Updating product with data:', productData); // Debug log
+        // Debug: Log processed data
+        console.log('Product data to send:', productData);
         
-        const result = await api.products.update(productData);
+        // Validate data
+        const requiredFields = ['nama_produk', 'kategori', 'barcode_produk'];
+        const emptyFields = requiredFields.filter(field => !productData[field] || productData[field].trim() === '');
+        
+        if (emptyFields.length > 0) {
+            const fieldNames = {
+                nama_produk: 'Nama Produk',
+                kategori: 'Kategori',
+                barcode_produk: 'Barcode'
+            };
+            const missingFields = emptyFields.map(field => fieldNames[field]).join(', ');
+            showAlert(`Field berikut harus diisi: ${missingFields}`, 'danger');
+            return;
+        }
+        
+        const result = await api.products.update(productData.id_produk, productData);
         if (result.success) {
             showAlert('Produk berhasil diperbarui', 'success');
             await loadProducts();
+            // Menggunakan jQuery untuk menutup modal
             $('#updateProductModal').modal('hide');
+            // Reset form setelah sukses
+            form.reset();
         } else {
-            showAlert('Gagal memperbarui produk: ' + result.error, 'danger');
+            showAlert('Gagal memperbarui produk: ' + (result.error || 'Unknown error'), 'danger');
         }
     } catch (error) {
         console.error('Error updating product:', error);
-        showAlert('Terjadi kesalahan saat memperbarui produk', 'danger');
+        // Jika produk berhasil diupdate tapi ada error saat menutup modal
+        // Tetap tampilkan pesan sukses
+        if (error.message && error.message.includes('bootstrap.Modal.getInstance')) {
+            showAlert('Produk berhasil diperbarui', 'success');
+            // Coba tutup modal dengan jQuery
+            $('#updateProductModal').modal('hide');
+        } else {
+            showAlert('Terjadi kesalahan saat memperbarui produk', 'danger');
+        }
     }
 }
 
@@ -379,170 +413,119 @@ async function handleEditClick(event) {
     const button = event.target.closest('.edit-product');
     if (!button) return;
 
-    const productId = button.getAttribute('data-id');
-    console.log('Editing product with ID:', productId);
-
     try {
-        const result = await api.products.getById(productId);
-        console.log('API Response:', result);
-
-        if (result.success && result.data) {
-            const product = result.data;
-            console.log('Product data to fill form:', product);
-            
-            // Pastikan semua field yang diperlukan ada
-            const processedProduct = {
-                id_produk: product.id_produk,
-                nama_produk: product.nama_produk,
-                kategori: product.kategori,
-                sub_kategori: product.sub_kategori,
-                barcode_produk: product.barcode_produk,
-                harga: parseInt(product.harga),
-                stok_barang: parseInt(product.stok_barang)
-            };
-            
-            console.log('Processed product data:', processedProduct);
-
-            // Reset form sebelum mengisi data baru
-            const form = document.getElementById('updateProductForm');
-            if (form) {
-                form.reset();
-            }
-
-            // Fill form with data
-            fillUpdateForm(processedProduct);
-
-            // Show the modal
-            const modal = new bootstrap.Modal(document.getElementById('updateProductModal'));
-            modal.show();
-        } else {
-            showAlert('Gagal mendapatkan detail produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
+        // Get product data from the table row
+        const row = button.closest('tr');
+        if (!row) {
+            console.error('Could not find parent row');
+            return;
         }
-    } catch (error) {
-        console.error('Error getting product details:', error);
-        showAlert('Terjadi kesalahan saat mengambil detail produk', 'danger');
-    }
-}
 
-// Fill update form with product data
-function fillUpdateForm(product) {
-    console.log('Filling form with data:', product);
+        const cells = row.cells;
+        const productId = button.getAttribute('data-id');
+        console.log('Editing product with ID:', productId);
 
-    // Format currency
-    const formatCurrency = (number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'decimal',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(number);
-    };
+        // Get data from table cells
+        const product = {
+            id_produk: productId,
+            nama_produk: cells[1].textContent,
+            kategori: cells[2].textContent,
+            sub_kategori: cells[3].textContent,
+            barcode_produk: cells[4].textContent,
+            harga: parseInt(cells[5].textContent.replace(/[^\d]/g, '')),
+            stok_barang: parseInt(cells[6].textContent)
+        };
 
-    // Set form values
-    const fields = {
-        'id_produk': { value: product.id_produk },
-        'nama_produk': { value: product.nama_produk },
-        'barcode_produk': { value: product.barcode_produk },
-        'harga': { value: product.harga, formatter: formatCurrency },
-        'stok_barang': { value: product.stok_barang }
-    };
+        console.log('Product data from table:', product);
 
-    // Update each field
-    Object.entries(fields).forEach(([fieldName, config]) => {
-        const input = document.getElementById(`update_${fieldName}`);
-        if (input) {
-            const value = config.value ?? '';
-            input.value = value;
-            
-            if (config.formatter) {
-                input.placeholder = `Saat ini: ${config.formatter(value)}`;
-            } else {
-                input.placeholder = `Saat ini: ${value}`;
-            }
+        // Reset form
+        const form = document.getElementById('updateProductForm');
+        if (form) {
+            form.reset();
         }
-    });
 
-    // Handle kategori
-    const kategoriSelect = document.getElementById('update_kategori');
-    if (kategoriSelect) {
-        // Reset and populate kategori options
-        kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-        Object.keys(PRODUCT_CATEGORIES).forEach(kategori => {
-            const option = document.createElement('option');
-            option.value = kategori;
-            option.textContent = kategori;
-            if (kategori === product.kategori) {
-                option.selected = true;
-            }
-            kategoriSelect.appendChild(option);
-        });
+        // Set form values
+        document.getElementById('update_id_produk').value = product.id_produk;
+        document.getElementById('update_nama_produk').value = product.nama_produk;
+        document.getElementById('update_barcode_produk').value = product.barcode_produk;
+        document.getElementById('update_harga').value = product.harga;
+        document.getElementById('update_stok_barang').value = product.stok_barang;
 
-        // Trigger change to populate sub-kategori
-        kategoriSelect.dispatchEvent(new Event('change'));
-
-        // After a short delay, set sub-kategori
-        setTimeout(() => {
-            const subKategoriSelect = document.getElementById('update_sub_kategori');
-            if (subKategoriSelect && product.sub_kategori) {
-                // Find and select the matching sub-kategori option
-                const options = Array.from(subKategoriSelect.options);
-                const targetOption = options.find(opt => opt.value === product.sub_kategori);
-                if (targetOption) {
-                    targetOption.selected = true;
+        // Handle kategori
+        const kategoriSelect = document.getElementById('update_kategori');
+        if (kategoriSelect) {
+            // Reset and populate kategori options
+            kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+            Object.keys(PRODUCT_CATEGORIES).forEach(kategori => {
+                const option = document.createElement('option');
+                option.value = kategori;
+                option.textContent = kategori;
+                if (kategori === product.kategori) {
+                    option.selected = true;
                 }
-            }
-        }, 100);
-    }
+                kategoriSelect.appendChild(option);
+            });
 
-    // Add change tracking
-    const form = document.getElementById('updateProductForm');
-    if (form) {
-        const originalData = { ...product };
-        
-        form.addEventListener('input', function(e) {
-            const input = e.target;
-            const fieldName = input.id.replace('update_', '');
-            const originalValue = originalData[fieldName];
-            
-            if (String(originalValue) !== String(input.value)) {
-                input.classList.add('border-warning');
-            } else {
-                input.classList.remove('border-warning');
-            }
-        });
+            // Trigger change to populate sub-kategori
+            kategoriSelect.dispatchEvent(new Event('change'));
+
+            // Set sub-kategori after categories are populated
+            setTimeout(() => {
+                const subKategoriSelect = document.getElementById('update_sub_kategori');
+                if (subKategoriSelect) {
+                    const subCategories = PRODUCT_CATEGORIES[product.kategori] || [];
+                    
+                    // Reset and populate sub-kategori options
+                    subKategoriSelect.innerHTML = '<option value="">Pilih Sub-Kategori</option>';
+                    subCategories.forEach(subKategori => {
+                        const option = document.createElement('option');
+                        option.value = subKategori;
+                        option.textContent = subKategori;
+                        if (subKategori === product.sub_kategori) {
+                            option.selected = true;
+                        }
+                        subKategoriSelect.appendChild(option);
+                    });
+                    
+                    subKategoriSelect.disabled = subCategories.length === 0;
+                }
+            }, 100);
+        }
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('updateProductModal'));
+        modal.show();
+
+    } catch (error) {
+        console.error('Error preparing edit form:', error);
+        showAlert('Terjadi kesalahan saat menyiapkan form edit', 'danger');
     }
 }
 
 // Initialize update form
 function initializeUpdateForm() {
     const updateKategoriSelect = document.getElementById('update_kategori');
-    
-    // Populate categories
-    updateKategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-    Object.keys(PRODUCT_CATEGORIES).forEach(kategori => {
-        const option = document.createElement('option');
-        option.value = kategori;
-        option.textContent = kategori;
-        updateKategoriSelect.appendChild(option);
-    });
-    
-    // Add change listener
-    updateKategoriSelect.addEventListener('change', (e) => {
-        const subCategorySelect = document.getElementById('update_sub_kategori');
-        const subCategories = PRODUCT_CATEGORIES[e.target.value] || [];
-        
-        // Clear current options
-        subCategorySelect.innerHTML = '<option value="">Pilih Sub Kategori</option>';
-        
-        // Add new options
-        subCategories.forEach(subCat => {
+    if (!updateKategoriSelect) return;
+
+    // Add change listener for kategori
+    updateKategoriSelect.addEventListener('change', function() {
+        const subKategoriSelect = document.getElementById('update_sub_kategori');
+        if (!subKategoriSelect) return;
+
+        const selectedKategori = this.value;
+        const subCategories = PRODUCT_CATEGORIES[selectedKategori] || [];
+
+        // Reset and populate sub-kategori options
+        subKategoriSelect.innerHTML = '<option value="">Pilih Sub-Kategori</option>';
+        subCategories.forEach(subKategori => {
             const option = document.createElement('option');
-            option.value = subCat;
-            option.textContent = subCat;
-            subCategorySelect.appendChild(option);
+            option.value = subKategori;
+            option.textContent = subKategori;
+            subKategoriSelect.appendChild(option);
         });
-        
+
         // Enable/disable based on whether there are sub-categories
-        subCategorySelect.disabled = subCategories.length === 0;
+        subKategoriSelect.disabled = subCategories.length === 0;
     });
 }
 
