@@ -4,8 +4,8 @@ import (
 	"SIE-SRC/domain"
 	"context"
 	"encoding/csv"
+	"fmt"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -154,129 +154,176 @@ func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 
 func (d *HttpDeliveryProduk) DeleteProduk(c *fiber.Ctx) error {
 	id := c.Params("id_produk")
-    
-    if id == "" {
-        return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-            "error": "ID produk diperlukan",
-        })
-    }
 
-    err := d.HTTP.DeleteProduk(context.Background(), id)
-    if err != nil {
-        return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-            "error": "Gagal untuk menghapus data: " + err.Error(),
-        })
-    }
+	if id == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID produk diperlukan",
+		})
+	}
 
-    return c.Status(http.StatusOK).JSON(fiber.Map{
-        "message": "Data berhasil dihapus",
-    })
-}
-
-func (d *HttpDeliveryProduk) ImportFromCSV(file *multipart.FileHeader) error {
-	f, err := file.Open()
+	err := d.HTTP.DeleteProduk(context.Background(), id)
 	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	reader := csv.NewReader(f)
-	records, err := reader.ReadAll()
-	if err != nil {
-		return err
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal untuk menghapus data: " + err.Error(),
+		})
 	}
 
-	for _, record := range records {
-		stok, err := strconv.Atoi(record[5])
-		if err != nil {
-			// Tangani error parsing, misalnya dengan log atau abaikan produk ini
-			continue
-		}
-
-		produk := domain.Produk{
-			IDProduk:    record[0],
-			NamaProduk:  record[1],
-			Kategori:    record[2],
-			SubKategori: record[3],
-			KodeProduk:  record[4],
-			Stok:        stok,
-		}
-
-		// Memanggil use case untuk menyimpan produk
-		_, err = d.HTTP.CreateProduk(context.Background(), &produk)
-		if err != nil {
-			log.Println("Gagal menambah produk:", err)
-		}
-	}
-	return nil
-}
-
-func (d *HttpDeliveryProduk) ImportFromExcel(file multipart.File) error {
-	f, err := excelize.OpenReader(file)
-	if err != nil {
-		return err
-	}
-
-	rows, err := f.GetRows("Sheet1") // Ganti dengan nama sheet yang sesuai
-	if err != nil {
-		return err
-	}
-
-	for _, row := range rows[1:] { // Mulai dari baris kedua untuk lewati header
-		stok, _ := strconv.Atoi(row[5]) // Ubah sesuai indeks stok dalam Excel
-		produk := domain.Produk{
-			IDProduk:    row[0],
-			NamaProduk:  row[1],
-			Kategori:    row[2],
-			SubKategori: row[3],
-			KodeProduk:  row[4],
-			Stok:        stok,
-		}
-
-		// Memanggil use case untuk menyimpan produk
-		_, err = d.HTTP.CreateProduk(context.Background(), &produk)
-		if err != nil {
-			log.Println("Gagal menambah produk:", err)
-		}
-	}
-
-	return nil
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Data berhasil dihapus",
+	})
 }
 
 func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
+	// Ambil file dari request
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "File tidak ditemukan",
 		})
 	}
 
+	// Buka file
 	file, err := fileHeader.Open()
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Gagal membuka file",
 		})
 	}
 	defer file.Close()
 
-	// Tentukan apakah file CSV atau Excel
-	if strings.HasSuffix(fileHeader.Filename, ".csv") {
-		err = d.ImportFromCSV(fileHeader)
-	} else if strings.HasSuffix(fileHeader.Filename, ".xlsx") {
-		err = d.ImportFromExcel(file)
-	} else {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Format file tidak didukung",
+	var produkList []domain.Produk
+	filename := strings.ToLower(fileHeader.Filename)
+
+	// Proses file berdasarkan ekstensi
+	switch {
+	case strings.HasSuffix(filename, ".csv"):
+		// Baca file CSV
+		reader := csv.NewReader(file)
+		reader.FieldsPerRecord = -1 // Izinkan jumlah kolom fleksibel
+
+		records, err := reader.ReadAll()
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Gagal membaca file CSV",
+			})
+		}
+
+		// Skip header row
+		if len(records) > 1 {
+			records = records[1:]
+		}
+
+		produkList = make([]domain.Produk, 0, len(records))
+		for i, record := range records {
+			if len(record) < 6 { // Minimal harus ada 6 kolom
+				log.Printf("Baris %d: jumlah kolom tidak valid", i+1)
+				continue
+			}
+
+			// Bersihkan dan konversi harga ke int
+			hargaStr := strings.TrimSpace(strings.ReplaceAll(record[4], ",", ""))
+			hargaFloat, err := strconv.ParseFloat(hargaStr, 64)
+			if err != nil {
+				log.Printf("Baris %d: harga tidak valid", i+1)
+				continue
+			}
+			harga := int(hargaFloat)
+
+			stok, err := strconv.Atoi(strings.TrimSpace(record[5]))
+			if err != nil {
+				log.Printf("Baris %d: stok tidak valid", i+1)
+				continue
+			}
+
+			produk := domain.Produk{
+				NamaProduk:  strings.TrimSpace(record[0]),
+				Kategori:    strings.TrimSpace(record[1]),
+				SubKategori: strings.TrimSpace(record[2]),
+				KodeProduk:  strings.TrimSpace(record[3]),
+				Harga:       harga,
+				Stok:        stok,
+			}
+			produkList = append(produkList, produk)
+		}
+
+	case strings.HasSuffix(filename, ".xlsx"):
+		// Baca file Excel
+		xlsx, err := excelize.OpenReader(file)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Gagal membaca file Excel",
+			})
+		}
+
+		// Ambil sheet pertama
+		sheetName := xlsx.GetSheetName(0)
+		rows, err := xlsx.GetRows(sheetName)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Gagal membaca sheet Excel",
+			})
+		}
+
+		// Skip header row
+		if len(rows) > 1 {
+			rows = rows[1:]
+		}
+
+		produkList = make([]domain.Produk, 0, len(rows))
+		for i, row := range rows {
+			if len(row) < 6 { // Minimal harus ada 6 kolom
+				log.Printf("Baris %d: jumlah kolom tidak valid", i+1)
+				continue
+			}
+
+			// Bersihkan dan konversi harga ke int
+			hargaStr := strings.TrimSpace(strings.ReplaceAll(row[4], ",", ""))
+			hargaFloat, err := strconv.ParseFloat(hargaStr, 64)
+			if err != nil {
+				log.Printf("Baris %d: harga tidak valid", i+1)
+				continue
+			}
+			harga := int(hargaFloat)
+
+			stok, err := strconv.Atoi(strings.TrimSpace(row[5]))
+			if err != nil {
+				log.Printf("Baris %d: stok tidak valid", i+1)
+				continue
+			}
+
+			produk := domain.Produk{
+				NamaProduk:  strings.TrimSpace(row[0]),
+				Kategori:    strings.TrimSpace(row[1]),
+				SubKategori: strings.TrimSpace(row[2]),
+				KodeProduk:  strings.TrimSpace(row[3]),
+				Harga:       harga,
+				Stok:        stok,
+			}
+			produkList = append(produkList, produk)
+		}
+
+	default:
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format file tidak didukung. Gunakan CSV atau XLSX",
 		})
 	}
 
+	// Validasi jumlah data
+	if len(produkList) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Tidak ada data valid untuk diimpor",
+		})
+	}
+
+	// Import data ke database
+	err = d.HTTP.ImportData(c.Context(), produkList)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal mengimpor produk",
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal mengimpor data: %v", err),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Produk berhasil diimpor",
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": fmt.Sprintf("Berhasil mengimpor %d produk", len(produkList)),
 	})
 }

@@ -37,28 +37,64 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 	defer sesi.EndSession(ctx)
 
 	err = mongo.WithSession(ctx, sesi, func(sc mongo.SessionContext) error {
-		for _, penjualan := range bd {
-			if penjualan.IDPenjualan == "" {
-				return fmt.Errorf("ID penjualan tidak boleh kosong")
-			}
-
-			PenjualanDocs = append(PenjualanDocs, penjualan)
-
-			for _, item := range penjualan.Produk {
-				err := rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.Quantity)
-				if err != nil {
-					log.Printf("gagal untuk mengurangu stok untuk produk %s: %v", item.IDProduk, err)
-					sesi.AbortTransaction(sc)
-					return fmt.Errorf("gagal untuk mengurangi stok untuk produk %s: %v", item.IDProduk, err)
-				}
-			}
+		if err := sesi.StartTransaction(); err != nil {
+			return fmt.Errorf("gagal memulai transaksi: %v", err)
 		}
+
+		for _, penjualan := range bd {
+			// Validasi data penjualan
+			if penjualan.NamaPenjual == "" {
+				return fmt.Errorf("nama penjual tidak boleh kosong")
+			}
+
+			if len(penjualan.Produk) == 0 {
+				return fmt.Errorf("minimal harus ada satu produk")
+			}
+
+			// Set waktu dan ID
+			penjualan.UpdatedAt = time.Now()
+			if penjualan.Tanggal.IsZero() {
+				penjualan.Tanggal = time.Now()
+			}
+
+			// Hitung total dan validasi stok
+			total := 0
+			for _, item := range penjualan.Produk {
+				if item.Quantity <= 0 {
+					return fmt.Errorf("quantity produk harus lebih dari 0")
+				}
+
+				// Cek stok dan harga produk
+				produk, err := rp.RepoProduk.GetProdukById(sc, item.IDProduk)
+				if err != nil {
+					return fmt.Errorf("gagal mendapatkan info produk %s: %v", item.IDProduk, err)
+				}
+
+				if produk.Stok < item.Quantity {
+					return fmt.Errorf("stok produk %s tidak mencukupi (tersedia: %d, diminta: %d)", 
+						produk.NamaProduk, produk.Stok, item.Quantity)
+				}
+
+				// Kurangi stok
+				err = rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.Quantity)
+				if err != nil {
+					return fmt.Errorf("gagal mengurangi stok produk %s: %v", item.IDProduk, err)
+				}
+
+				total += produk.Harga * item.Quantity
+			}
+
+			penjualan.Total = total
+			PenjualanDocs = append(PenjualanDocs, penjualan)
+		}
+
+		// Insert semua dokumen
 		result, err := ListPenjualan.InsertMany(sc, PenjualanDocs)
 		if err != nil {
-			sesi.AbortTransaction(sc)
-			return fmt.Errorf("failed to insert data: %v", err)
+			return fmt.Errorf("gagal menyimpan data penjualan: %v", err)
 		}
 
+		// Set ID yang digenerate MongoDB
 		for i, id := range result.InsertedIDs {
 			bd[i].IDPenjualan = id.(primitive.ObjectID).Hex()
 		}
@@ -105,12 +141,12 @@ func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.P
 	penjualanProduk := rp.DB.Collection(_Penjualan)
 
 	var Penjualan domain.Penjualan
-	err := penjualanProduk.FindOne(ctx, bson.M{"idpenjualan": id}).Decode(&Penjualan)
+	err := penjualanProduk.FindOne(ctx, bson.M{"id_penjualan": id}).Decode(&Penjualan)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("product with ID %s not found", id)
+			return nil, fmt.Errorf("penjualan dengan ID %s tidak ditemukan", id)
 		}
-		return nil, fmt.Errorf("failed to retrieve product: %v", err)
+		return nil, fmt.Errorf("gagal mengambil data penjualan: %v", err)
 	}
 
 	return &Penjualan, nil
@@ -120,57 +156,126 @@ func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.P
 func (rp *mongoRepoPenjualan) Update(ctx context.Context, bd *domain.Penjualan) error {
 	penjualanProduk := rp.DB.Collection(_Penjualan)
 
-	bd.UpdatedAt = time.Now()
-
-	filter := bson.M{"idpenjualan": bd.IDPenjualan}
-
-	var existingProduct domain.Penjualan
-	err := penjualanProduk.FindOne(ctx, filter).Decode(&existingProduct)
+	sesi, err := rp.DB.Client().StartSession()
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return fmt.Errorf("product with ID %s not found", bd.IDPenjualan)
+		return fmt.Errorf("gagal memulai sesi: %v", err)
+	}
+	defer sesi.EndSession(ctx)
+
+	err = mongo.WithSession(ctx, sesi, func(sc mongo.SessionContext) error {
+		if err := sesi.StartTransaction(); err != nil {
+			return fmt.Errorf("gagal memulai transaksi: %v", err)
 		}
-		return fmt.Errorf("failed to check existing product: %v", err)
-	}
 
-	update := bson.M{
-		"$set": bson.M{
-			"nama_penjual":  bd.NamaPenjual,
-			"tanggal":       bd.Tanggal,
-			"nama_produk":   bd.NamaProduk,
-			"jumlah_produk": bd.JumlahProduk,
-			"total":         bd.Total,
-			"updated_at":    bd.UpdatedAt,
-		},
-	}
+		// Ambil data penjualan lama
+		var existingSales domain.Penjualan
+		err := penjualanProduk.FindOne(sc, bson.M{"id_penjualan": bd.IDPenjualan}).Decode(&existingSales)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				return fmt.Errorf("penjualan dengan ID %s tidak ditemukan", bd.IDPenjualan)
+			}
+			return fmt.Errorf("gagal mengambil data penjualan: %v", err)
+		}
 
-	_, err = penjualanProduk.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
+		// Kembalikan stok produk lama
+		for _, item := range existingSales.Produk {
+			err := rp.RepoProduk.IncreaseProdukStock(sc, item.IDProduk, item.Quantity)
+			if err != nil {
+				return fmt.Errorf("gagal mengembalikan stok produk %s: %v", item.IDProduk, err)
+			}
+		}
 
-	return nil
+		// Validasi dan update stok baru
+		total := 0
+		for _, item := range bd.Produk {
+			if item.Quantity <= 0 {
+				return fmt.Errorf("quantity produk harus lebih dari 0")
+			}
+
+			produk, err := rp.RepoProduk.GetProdukById(sc, item.IDProduk)
+			if err != nil {
+				return fmt.Errorf("gagal mendapatkan info produk %s: %v", item.IDProduk, err)
+			}
+
+			if produk.Stok < item.Quantity {
+				return fmt.Errorf("stok produk %s tidak mencukupi (tersedia: %d, diminta: %d)", 
+					produk.NamaProduk, produk.Stok, item.Quantity)
+			}
+
+			err = rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.Quantity)
+			if err != nil {
+				return fmt.Errorf("gagal mengurangi stok produk %s: %v", item.IDProduk, err)
+			}
+
+			total += produk.Harga * item.Quantity
+		}
+
+		// Update penjualan
+		bd.UpdatedAt = time.Now()
+		bd.Total = total
+
+		update := bson.M{
+			"$set": bson.M{
+				"nama_penjual":  bd.NamaPenjual,
+				"tanggal":       bd.Tanggal,
+				"produk":        bd.Produk,
+				"total":         bd.Total,
+				"updated_at":    bd.UpdatedAt,
+			},
+		}
+
+		_, err = penjualanProduk.UpdateOne(sc, bson.M{"id_penjualan": bd.IDPenjualan}, update)
+		if err != nil {
+			return fmt.Errorf("gagal update penjualan: %v", err)
+		}
+
+		return sesi.CommitTransaction(sc)
+	})
+
+	return err
 }
 
 // Delete data penjualan berdasarkan ID.
 func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 	penjualanProduk := rp.DB.Collection(_Penjualan)
 
-	// Pastikan ID produk yang ingin dihapus ada
-	var existingSales domain.Penjualan
-	err := penjualanProduk.FindOne(ctx, bson.M{"idpenjualan": id}).Decode(&existingSales)
+	sesi, err := rp.DB.Client().StartSession()
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return fmt.Errorf("sales with ID %s not found", id)
+		return fmt.Errorf("gagal memulai sesi: %v", err)
+	}
+	defer sesi.EndSession(ctx)
+
+	err = mongo.WithSession(ctx, sesi, func(sc mongo.SessionContext) error {
+		if err := sesi.StartTransaction(); err != nil {
+			return fmt.Errorf("gagal memulai transaksi: %v", err)
 		}
-		return fmt.Errorf("failed to check existing sales: %v", err)
-	}
 
-	// Menghapus produk berdasarkan ID
-	_, err = penjualanProduk.DeleteOne(ctx, bson.M{"idpenjualan": id})
-	if err != nil {
-		return err
-	}
+		// Ambil data penjualan yang akan dihapus
+		var existingSales domain.Penjualan
+		err := penjualanProduk.FindOne(sc, bson.M{"id_penjualan": id}).Decode(&existingSales)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				return fmt.Errorf("penjualan dengan ID %s tidak ditemukan", id)
+			}
+			return fmt.Errorf("gagal mengambil data penjualan: %v", err)
+		}
 
-	return nil
+		// Kembalikan stok produk
+		for _, item := range existingSales.Produk {
+			err := rp.RepoProduk.IncreaseProdukStock(sc, item.IDProduk, item.Quantity)
+			if err != nil {
+				return fmt.Errorf("gagal mengembalikan stok produk %s: %v", item.IDProduk, err)
+			}
+		}
+
+		// Hapus penjualan
+		_, err = penjualanProduk.DeleteOne(sc, bson.M{"id_penjualan": id})
+		if err != nil {
+			return fmt.Errorf("gagal menghapus penjualan: %v", err)
+		}
+
+		return sesi.CommitTransaction(sc)
+	})
+
+	return err
 }

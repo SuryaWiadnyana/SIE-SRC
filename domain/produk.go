@@ -25,6 +25,7 @@ type ProdukRepository interface {
 	UpdateProduk(ctx context.Context, bd *Produk) error
 	DeleteProduk(ctx context.Context, id string) error
 	DecreaseProdukStock(ctx context.Context, id string, quantity int) error
+	IncreaseProdukStock(ctx context.Context, id string, quantity int) error
 	ImportData(ctx context.Context, produkList []Produk) error
 	GenerateNextID(ctx context.Context) (string, error)  // Tambah fungsi baru
 }
