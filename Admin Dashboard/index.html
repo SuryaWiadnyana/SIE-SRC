@@ -1,233 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <title>SIE-SRC - Admin Dashboard</title>
-    <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="../css/dashboard-style.css" rel="stylesheet">
-</head>
+    <link
+      href="../vendor/fontawesome-free/css/all.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+      rel="stylesheet"
+    />
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet" />
+    <link href="../css/dashboard-style.css" rel="stylesheet" />
+    <style>
+      .sidebar-logo {
+        width: 50px;
+        height: auto;
+        object-fit: contain;
+      }
+    </style>
+  </head>
 
-<body id="page-top">
+  <body id="page-top">
     <div id="wrapper">
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon">
-                    <i class="fas fa-store"></i>
-                </div>
-                <div class="sidebar-brand-text mx-3">SIE-SRC</div>
-            </a>
+      <!-- Sidebar -->
+      <ul
+        class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+        id="accordionSidebar"
+      >
+        <!-- Sidebar - Brand -->
+        <a
+          class="sidebar-brand d-flex align-items-center justify-content-center"
+          href="index.html"
+        >
+          <div class="sidebar-brand-icon">
+            <img
+              src="../img/Logo_SRC-removebg-preview.png"
+              alt="SRC Logo"
+              class="sidebar-logo"
+            />
+          </div>
+          <div class="sidebar-brand-text mx-3">SIE-SRC</div>
+        </a>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0" />
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" href="index.html">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item active">
+          <a class="nav-link" href="index.html">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+        <!-- Divider -->
+        <hr class="sidebar-divider" />
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Data Management
-            </div>
+        <!-- Heading -->
+        <div class="sidebar-heading">Data Management</div>
 
-            <!-- Nav Item - Products -->
-            <li class="nav-item">
-                <a class="nav-link" href="produk.html">
-                    <i class="fas fa-fw fa-box"></i>
-                    <span>Manajemen Produk</span>
-                </a>
-            </li>
+        <!-- Nav Item - Products -->
+        <li class="nav-item">
+          <a class="nav-link" href="produk.html">
+            <i class="fas fa-fw fa-box"></i>
+            <span>Manajemen Produk</span>
+          </a>
+        </li>
 
-            <!-- Nav Item - Categories -->
-            <li class="nav-item">
-                <a class="nav-link" href="pengguna.html">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Manajemen Pengguna</span>
-                </a>
-            </li>
+        <!-- Nav Item - Categories -->
+        <li class="nav-item">
+          <a class="nav-link" href="pengguna.html">
+            <i class="fas fa-fw fa-users"></i>
+            <span>Manajemen Pengguna</span>
+          </a>
+        </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+        <!-- Nav Item - Sales -->
+        <li class="nav-item">
+          <a class="nav-link" href="penjualan.html">
+            <i class="fas fa-fw fa-box"></i>
+            <span>Manajemen Penjualan</span>
+          </a>
+        </li>
 
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
-        </ul>
-        <!-- End of Sidebar -->
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block" />
 
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Main Content -->
-            <div id="content">
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                    <!-- Sidebar Toggle (Topbar) -->
-                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
-                    </button>
-
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Admin</span>
-                                <img class="img-profile rounded-circle" src="../img/undraw_profile.svg">
-                            </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="profile.html">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </nav>
-                <!-- End of Topbar -->
-
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                    </div>
-
-                    <!-- Content Row -->
-                    <div class="row">
-                        <!-- Total Products Card -->
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Total Produk</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalProducts">0</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-box fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Active Users Card -->
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-success shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Pengguna Aktif</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeUsers">0</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Content Row -->
-                    <div class="row">
-                        <!-- Area Chart -->
-                        <div class="col-xl-8 col-lg-7">
-                            <div class="card shadow mb-4">
-                                <!-- Card Header -->
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Grafik Penjualan</h6>
-                                </div>
-                                <!-- Card Body -->
-                                <div class="card-body">
-                                    <div class="chart-area">
-                                        <canvas id="myAreaChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pie Chart -->
-                        <div class="col-xl-4 col-lg-5">
-                            <div class="card shadow mb-4">
-                                <!-- Card Header -->
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Kategori Produk</h6>
-                                </div>
-                                <!-- Card Body -->
-                                <div class="card-body">
-                                    <div class="chart-pie pt-4 pb-2">
-                                        <canvas id="myPieChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- /.container-fluid -->
-            </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; SIE-SRC 2024</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+          <button class="rounded-circle border-0" id="sidebarToggle"></button>
         </div>
-        <!-- End of Content Wrapper -->
+      </ul>
+      <!-- End of Sidebar -->
+
+      <!-- Content Wrapper -->
+      <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content -->
+        <div id="content">
+          <!-- Topbar -->
+          <nav
+            class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"
+          >
+            <!-- Sidebar Toggle (Topbar) -->
+            <button
+              id="sidebarToggleTop"
+              class="btn btn-link d-md-none rounded-circle mr-3"
+            >
+              <i class="fa fa-bars"></i>
+            </button>
+
+            <!-- Topbar Navbar -->
+            <ul class="navbar-nav ml-auto">
+              <!-- Nav Item - User Information -->
+              <li class="nav-item dropdown no-arrow">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  id="userDropdown"
+                  role="button"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <span
+                    class="mr-2 d-none d-lg-inline text-gray-600 small"
+                    id="username"
+                    >Admin</span
+                  >
+                  <img
+                    class="img-profile rounded-circle"
+                    src="../img/undraw_profile.svg"
+                  />
+                </a>
+                <!-- Dropdown - User Information -->
+                <div
+                  class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                  aria-labelledby="userDropdown"
+                >
+                  <a class="dropdown-item" href="profile.html">
+                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Profile
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a
+                    class="dropdown-item"
+                    href="#"
+                    data-toggle="modal"
+                    data-target="#logoutModal"
+                  >
+                    <i
+                      class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"
+                    ></i>
+                    Logout
+                  </a>
+                </div>
+              </li>
+            </ul>
+          </nav>
+          <!-- End of Topbar -->
+
+          <!-- Begin Page Content -->
+          <div class="container-fluid">
+            <!-- Page Heading -->
+            <div
+              class="d-sm-flex align-items-center justify-content-between mb-4"
+            >
+              <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+            </div>
+
+            <!-- Content Row -->
+            <div class="row">
+              <!-- Total Products Card -->
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div
+                          class="text-xs font-weight-bold text-primary text-uppercase mb-1"
+                        >
+                          Total Produk
+                        </div>
+                        <div
+                          class="h5 mb-0 font-weight-bold text-gray-800"
+                          id="totalProducts"
+                        >
+                          0
+                        </div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="fas fa-box fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Active Users Card -->
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div
+                          class="text-xs font-weight-bold text-success text-uppercase mb-1"
+                        >
+                          Pengguna Aktif
+                        </div>
+                        <div
+                          class="h5 mb-0 font-weight-bold text-gray-800"
+                          id="activeUsers"
+                        >
+                          0
+                        </div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content Row -->
+            <div class="row">
+              <!-- Area Chart -->
+              <div class="col-xl-8 col-lg-7">
+                <div class="card shadow mb-4">
+                  <!-- Card Header -->
+                  <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                      Grafik Penjualan
+                    </h6>
+                  </div>
+                  <!-- Card Body -->
+                  <div class="card-body">
+                    <div class="chart-area">
+                      <canvas id="myAreaChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pie Chart -->
+              <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                  <!-- Card Header -->
+                  <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                      Kategori Produk
+                    </h6>
+                  </div>
+                  <!-- Card Body -->
+                  <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                      <canvas id="myPieChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.container-fluid -->
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+          <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+              <span>Copyright &copy; SIE-SRC 2024</span>
+            </div>
+          </div>
+        </footer>
+        <!-- End of Footer -->
+      </div>
+      <!-- End of Content Wrapper -->
     </div>
     <!-- End of Page Wrapper -->
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
+      <i class="fas fa-angle-up"></i>
     </a>
 
     <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Siap untuk Keluar?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Pilih "Keluar" di bawah ini jika Anda siap untuk mengakhiri sesi Anda saat ini.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary" type="button" id="logoutButton">Keluar</button>
-                </div>
-            </div>
+    <div
+      class="modal fade"
+      id="logoutModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              Siap untuk Keluar?
+            </h5>
+            <button
+              class="close"
+              type="button"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Pilih "Keluar" di bawah ini jika Anda siap untuk mengakhiri sesi
+            Anda saat ini.
+          </div>
+          <div class="modal-footer">
+            <button
+              class="btn btn-secondary"
+              type="button"
+              data-dismiss="modal"
+            >
+              Batal
+            </button>
+            <button class="btn btn-primary" type="button" id="logoutButton">
+              Keluar
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Bootstrap core JavaScript-->
@@ -245,241 +352,269 @@
 
     <!-- Logout handling -->
     <script>
-        document.getElementById("logoutButton").addEventListener("click", function () {
-            localStorage.clear();
-            window.location.href = "../login.html";
+      document
+        .getElementById("logoutButton")
+        .addEventListener("click", function () {
+          localStorage.clear();
+          window.location.href = "../login.html";
         });
     </script>
 
     <!-- Initialize dashboard data -->
     <script type="module">
-        import { api } from '../js/api.js';
+      import { api } from "../js/api.js";
 
-        // Chart initialization
-        let areaChart = null;
-        let pieChart = null;
+      // Chart initialization
+      let areaChart = null;
+      let pieChart = null;
 
-        // Check authentication
-        function checkAuth() {
-            const token = localStorage.getItem('token');
-            const role = localStorage.getItem('role');
-            
-            if (!token || !role || role !== 'admin') {
-                window.location.href = '../login.html';
-                return false;
-            }
-            return true;
+      // Check authentication
+      function checkAuth() {
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (!token || !role || role !== "admin") {
+          window.location.href = "../login.html";
+          return false;
         }
+        return true;
+      }
 
-        // Initialize area chart
-        function initAreaChart(data) {
-            const ctx = document.getElementById('myAreaChart').getContext('2d');
-            if (areaChart) {
-                areaChart.destroy();
-            }
-            areaChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Penjualan',
-                        lineTension: 0.3,
-                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                        borderColor: 'rgba(78, 115, 223, 1)',
-                        pointRadius: 3,
-                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                        pointBorderColor: 'rgba(78, 115, 223, 1)',
-                        pointHoverRadius: 3,
-                        pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
-                        pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                        pointHitRadius: 10,
-                        pointBorderWidth: 2,
-                        data: data.values
-                    }]
+      // Initialize area chart
+      function initAreaChart(data) {
+        const ctx = document.getElementById("myAreaChart").getContext("2d");
+        if (areaChart) {
+          areaChart.destroy();
+        }
+        areaChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: "Penjualan",
+                lineTension: 0.3,
+                backgroundColor: "rgba(78, 115, 223, 0.05)",
+                borderColor: "rgba(78, 115, 223, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointBorderColor: "rgba(78, 115, 223, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: data.values,
+              },
+            ],
+          },
+          options: {
+            maintainAspectRatio: false,
+            scales: {
+              xAxes: [
+                {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false,
+                  },
+                  ticks: {
+                    maxTicksLimit: 7,
+                  },
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        xAxes: [{
-                            gridLines: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                maxTicksLimit: 7
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                maxTicksLimit: 5,
-                                padding: 10,
-                                callback: function(value) {
-                                    return 'Rp ' + value.toLocaleString('id-ID');
-                                }
-                            },
-                            gridLines: {
-                                color: 'rgb(234, 236, 244)',
-                                zeroLineColor: 'rgb(234, 236, 244)',
-                                drawBorder: false,
-                                borderDash: [2],
-                                zeroLineBorderDash: [2]
-                            }
-                        }]
+              ],
+              yAxes: [
+                {
+                  ticks: {
+                    maxTicksLimit: 5,
+                    padding: 10,
+                    callback: function (value) {
+                      return "Rp " + value.toLocaleString("id-ID");
                     },
-                    legend: {
-                        display: false
-                    },
-                    tooltips: {
-                        backgroundColor: 'rgb(255,255,255)',
-                        bodyFontColor: '#858796',
-                        titleMarginBottom: 10,
-                        titleFontColor: '#6e707e',
-                        titleFontSize: 14,
-                        borderColor: '#dddfeb',
-                        borderWidth: 1,
-                        xPadding: 15,
-                        yPadding: 15,
-                        displayColors: false,
-                        intersect: false,
-                        mode: 'index',
-                        caretPadding: 10,
-                        callbacks: {
-                            label: function(tooltipItem, chart) {
-                                return 'Penjualan: Rp ' + tooltipItem.yLabel.toLocaleString('id-ID');
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Initialize pie chart
-        function initPieChart(data) {
-            const ctx = document.getElementById('myPieChart').getContext('2d');
-            if (pieChart) {
-                pieChart.destroy();
-            }
-            pieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        data: data.values,
-                        backgroundColor: [
-                            '#4e73df', '#1cc88a', '#36b9cc',
-                            '#f6c23e', '#e74a3b', '#858796'
-                        ],
-                        hoverBackgroundColor: [
-                            '#2e59d9', '#17a673', '#2c9faf',
-                            '#dda20a', '#be2617', '#60616f'
-                        ],
-                        hoverBorderColor: 'rgba(234, 236, 244, 1)',
-                    }],
+                  },
+                  gridLines: {
+                    color: "rgb(234, 236, 244)",
+                    zeroLineColor: "rgb(234, 236, 244)",
+                    drawBorder: false,
+                    borderDash: [2],
+                    zeroLineBorderDash: [2],
+                  },
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    tooltips: {
-                        backgroundColor: 'rgb(255,255,255)',
-                        bodyFontColor: '#858796',
-                        borderColor: '#dddfeb',
-                        borderWidth: 1,
-                        xPadding: 15,
-                        yPadding: 15,
-                        displayColors: false,
-                        caretPadding: 10,
-                    },
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    },
-                    cutoutPercentage: 80,
+              ],
+            },
+            legend: {
+              display: false,
+            },
+            tooltips: {
+              backgroundColor: "rgb(255,255,255)",
+              bodyFontColor: "#858796",
+              titleMarginBottom: 10,
+              titleFontColor: "#6e707e",
+              titleFontSize: 14,
+              borderColor: "#dddfeb",
+              borderWidth: 1,
+              xPadding: 15,
+              yPadding: 15,
+              displayColors: false,
+              intersect: false,
+              mode: "index",
+              caretPadding: 10,
+              callbacks: {
+                label: function (tooltipItem, chart) {
+                  return (
+                    "Penjualan: Rp " +
+                    tooltipItem.yLabel.toLocaleString("id-ID")
+                  );
                 },
-            });
-        }
+              },
+            },
+          },
+        });
+      }
 
-        // Show loading state
-        function showLoading(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>';
+      // Initialize pie chart
+      function initPieChart(data) {
+        const ctx = document.getElementById("myPieChart").getContext("2d");
+        if (pieChart) {
+          pieChart.destroy();
+        }
+        pieChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                data: data.values,
+                backgroundColor: [
+                  "#4e73df",
+                  "#1cc88a",
+                  "#36b9cc",
+                  "#f6c23e",
+                  "#e74a3b",
+                  "#858796",
+                ],
+                hoverBackgroundColor: [
+                  "#2e59d9",
+                  "#17a673",
+                  "#2c9faf",
+                  "#dda20a",
+                  "#be2617",
+                  "#60616f",
+                ],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+              },
+            ],
+          },
+          options: {
+            maintainAspectRatio: false,
+            tooltips: {
+              backgroundColor: "rgb(255,255,255)",
+              bodyFontColor: "#858796",
+              borderColor: "#dddfeb",
+              borderWidth: 1,
+              xPadding: 15,
+              yPadding: 15,
+              displayColors: false,
+              caretPadding: 10,
+            },
+            legend: {
+              display: true,
+              position: "bottom",
+            },
+            cutoutPercentage: 80,
+          },
+        });
+      }
+
+      // Show loading state
+      function showLoading(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.innerHTML =
+            '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>';
+        }
+      }
+
+      // Load initial data
+      async function loadDashboardData() {
+        if (!checkAuth()) return;
+
+        try {
+          // Show loading states
+          showLoading("totalProducts");
+          showLoading("activeUsers");
+
+          // Load product statistics
+          const productStats = await api.products.getAll();
+          const productCount = document.getElementById("totalProducts");
+          if (productCount) {
+            if (productStats.success && productStats.data) {
+              const products = Array.isArray(productStats.data)
+                ? productStats.data
+                : Array.isArray(productStats.data.data)
+                ? productStats.data.data
+                : [];
+              productCount.textContent = products.length.toString();
+
+              // Initialize pie chart with product categories
+              const categories = {};
+              products.forEach((product) => {
+                if (product.category) {
+                  categories[product.category] =
+                    (categories[product.category] || 0) + 1;
+                }
+              });
+              initPieChart({
+                labels: Object.keys(categories),
+                values: Object.values(categories),
+              });
+            } else {
+              productCount.textContent = "0";
             }
-        }
+          }
 
-        // Load initial data
-        async function loadDashboardData() {
-            if (!checkAuth()) return;
-
-            try {
-                // Show loading states
-                showLoading('totalProducts');
-                showLoading('activeUsers');
-
-                // Load product statistics
-                const productStats = await api.products.getAll();
-                const productCount = document.getElementById('totalProducts');
-                if (productCount) {
-                    if (productStats.success && productStats.data) {
-                        const products = Array.isArray(productStats.data) ? productStats.data :
-                                       Array.isArray(productStats.data.data) ? productStats.data.data : [];
-                        productCount.textContent = products.length.toString();
-
-                        // Initialize pie chart with product categories
-                        const categories = {};
-                        products.forEach(product => {
-                            if (product.category) {
-                                categories[product.category] = (categories[product.category] || 0) + 1;
-                            }
-                        });
-                        initPieChart({
-                            labels: Object.keys(categories),
-                            values: Object.values(categories)
-                        });
-                    } else {
-                        productCount.textContent = '0';
-                    }
-                }
-
-                // Load user statistics
-                const userStats = await api.users.getAll();
-                const userCount = document.getElementById('activeUsers');
-                if (userCount) {
-                    if (userStats.success && userStats.data) {
-                        const users = Array.isArray(userStats.data) ? userStats.data :
-                                    Array.isArray(userStats.data.data) ? userStats.data.data : [];
-                        userCount.textContent = users.length.toString();
-                    } else {
-                        userCount.textContent = '0';
-                    }
-                }
-
-                // Load sales data for area chart (last 7 days)
-                const today = new Date();
-                const labels = [];
-                const values = [];
-                for (let i = 6; i >= 0; i--) {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() - i);
-                    labels.push(date.toLocaleDateString('id-ID', { weekday: 'short' }));
-                    values.push(Math.floor(Math.random() * 1000000)); // Dummy data for now
-                }
-                initAreaChart({ labels, values });
-
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
-                const elements = ['totalProducts', 'activeUsers'];
-                elements.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) element.textContent = '0';
-                });
+          // Load user statistics
+          const userStats = await api.users.getAll();
+          const userCount = document.getElementById("activeUsers");
+          if (userCount) {
+            if (userStats.success && userStats.data) {
+              const users = Array.isArray(userStats.data)
+                ? userStats.data
+                : Array.isArray(userStats.data.data)
+                ? userStats.data.data
+                : [];
+              userCount.textContent = users.length.toString();
+            } else {
+              userCount.textContent = "0";
             }
-        }
+          }
 
-        // Initialize on page load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadDashboardData);
-        } else {
-            loadDashboardData();
+          // Load sales data for area chart (last 7 days)
+          const today = new Date();
+          const labels = [];
+          const values = [];
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            labels.push(date.toLocaleDateString("id-ID", { weekday: "short" }));
+            values.push(Math.floor(Math.random() * 1000000)); // Dummy data for now
+          }
+          initAreaChart({ labels, values });
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          const elements = ["totalProducts", "activeUsers"];
+          elements.forEach((id) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = "0";
+          });
         }
+      }
+
+      // Initialize on page load
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", loadDashboardData);
+      } else {
+        loadDashboardData();
+      }
     </script>
-</body>
+  </body>
 </html>

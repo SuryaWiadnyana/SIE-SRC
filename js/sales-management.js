@@ -42,6 +42,8 @@ function displaySales(sales) {
         salesTable.appendChild(row);
     });
 
+
+
     // Add event listeners to buttons
     document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', () => openUpdateModal(btn.dataset.id));

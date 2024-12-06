@@ -362,6 +362,53 @@ const products = {
             return { success: false, error: error.message };
         }
     },
+
+    importData: async (formData) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Tidak terautentikasi');
+            }
+
+            const response = await fetch(`${BASE_URL}/produk/importdata`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errorMsg = data.error || data.message || 'Gagal mengimpor data';
+                throw new Error(errorMsg);
+            }
+
+            if (data.skipped && data.skipped.length > 0) {
+                return {
+                    success: true,
+                    message: `Berhasil mengimpor ${data.count || 0} produk. ${data.skipped.length} produk dilewati.`,
+                    count: data.count || 0,
+                    skipped: data.skipped,
+                    warnings: data.warnings || []
+                };
+            }
+
+            return {
+                success: true,
+                message: data.message || `Berhasil mengimpor ${data.count || 0} produk`,
+                count: data.count || 0
+            };
+        } catch (error) {
+            console.error('Import data error:', error);
+            return {
+                success: false,
+                message: error.message,
+                error: error.message
+            };
+        }
+    }
 };
 
 // Sales API

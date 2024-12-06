@@ -119,6 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize update form
     initializeUpdateForm();
+
+    // Initialize import form
+    initializeImportForm();
 });
 
 // Load all products
@@ -555,6 +558,78 @@ async function handleDeleteClick(event) {
             console.error('Error deleting product:', error);
             showAlert('Gagal menghapus produk: ' + error.message, 'danger');
         }
+    }
+}
+
+// Handle import data
+async function handleImportData(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('fileInput');
+    
+    if (!fileInput.files.length) {
+        showAlert('Pilih file terlebih dahulu', 'warning');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    
+    // Validasi format file
+    const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.csv')) {
+        showAlert('Format file tidak didukung. Gunakan file Excel (.xlsx) atau CSV', 'warning');
+        return;
+    }
+
+    // Validasi ukuran file (maksimal 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showAlert('Ukuran file terlalu besar. Maksimal 5MB', 'warning');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Tampilkan loading state
+    const importButton = document.getElementById('importDataBtn');
+    const originalText = importButton.textContent;
+    importButton.disabled = true;
+    importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengimpor...';
+
+    try {
+        const result = await api.products.importData(formData);
+        if (result.success) {
+            showAlert(`Berhasil mengimpor ${result.count || 0} produk`, 'success');
+            await loadProducts();
+            $('#importDataModal').modal('hide');
+            document.getElementById('importDataForm').reset();
+        } else {
+            showAlert(result.error || 'Gagal mengimpor data', 'danger');
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        let errorMessage = 'Terjadi kesalahan saat mengimpor data';
+        
+        if (error.message.includes('duplicate')) {
+            errorMessage = 'Beberapa produk memiliki kode yang sudah ada dalam sistem';
+        } else if (error.message.includes('validation')) {
+            errorMessage = 'Data dalam file tidak valid. Pastikan semua kolom terisi dengan benar';
+        }
+        
+        showAlert(errorMessage, 'danger');
+    } finally {
+        // Kembalikan tombol ke kondisi awal
+        importButton.disabled = false;
+        importButton.innerHTML = originalText;
+    }
+}
+
+// Initialize import form
+function initializeImportForm() {
+    const importBtn = document.getElementById('importDataBtn');
+    if (importBtn) {
+        importBtn.addEventListener('click', handleImportData);
     }
 }
 

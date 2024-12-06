@@ -1,1 +1,3 @@
-sudah update login dan register, sisanya belum
+login dan register sudah berhasil
+manajemen produk dan user sudah berhasil
+Memperbaiki manajemen penjualan
