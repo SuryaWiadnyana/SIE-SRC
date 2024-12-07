@@ -188,7 +188,7 @@ func (rp *mongoRepoProduk) DeleteProduk(ctx context.Context, id string) error {
 }
 
 // DecreaseProdukStock mengurangi stok produk
-func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, quantity int) error {
+func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var product domain.Produk
@@ -200,12 +200,12 @@ func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, q
 		return fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
 
-	if product.Stok < quantity {
-		return fmt.Errorf("stok tidak mencukupi, stok tersedia: %d, permintaan: %d", product.Stok, quantity)
+	if product.Stok < kuantitas {
+		return fmt.Errorf("stok tidak mencukupi, stok tersedia: %d, permintaan: %d", product.Stok, kuantitas)
 	}
 
 	update := bson.M{
-		"$inc": bson.M{"stok_barang": -quantity},
+		"$inc": bson.M{"stok_barang": -kuantitas},
 		"$set": bson.M{"updated_at": time.Now()},
 	}
 
@@ -222,7 +222,7 @@ func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, q
 }
 
 // IncreaseProdukStock menambah stok produk
-func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, quantity int) error {
+func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var existingProduct domain.Produk
@@ -234,13 +234,13 @@ func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, q
 		return fmt.Errorf("gagal mendapatkan data produk: %v", err)
 	}
 
-	if quantity <= 0 {
-		return fmt.Errorf("quantity harus lebih dari 0")
+	if kuantitas <= 0 {
+		return fmt.Errorf("kuantitas harus lebih dari 0")
 	}
 
 	update := bson.M{
 		"$inc": bson.M{
-			"stok_barang": quantity,
+			"stok_barang": kuantitas,
 		},
 		"$set": bson.M{
 			"updated_at": time.Now(),
@@ -252,7 +252,7 @@ func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, q
 		return fmt.Errorf("gagal menambah stok produk: %v", err)
 	}
 
-	log.Printf("Berhasil menambah stok produk %s sebanyak %d", id, quantity)
+	log.Printf("Berhasil menambah stok produk %s sebanyak %d", id, kuantitas)
 	return nil
 }
 

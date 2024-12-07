@@ -49,11 +49,11 @@ func TestMongoRepoPenjualan_CreateBulk(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	repo := repository.NewMongoRepoPenjualan(db)
+	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	sales := []domain.Penjualan{
-		{IDPenjualan: "12345", NamaProduk: "Produk Test 1", JumlahProduk: 10, Total: 100000, UpdatedAt: time.Now()},
-		{IDPenjualan: "67890", NamaProduk: "Produk Test 2", JumlahProduk: 20, Total: 200000, UpdatedAt: time.Now()},
+		{IDPenjualan: "12345", Total: 100000, UpdatedAt: time.Now()},
+		{IDPenjualan: "67890", Total: 200000, UpdatedAt: time.Now()},
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -70,20 +70,16 @@ func TestMongoRepoPenjualan_GetAll(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	repo := repository.NewMongoRepoPenjualan(db)
+	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk1 := domain.Penjualan{
-		IDPenjualan: "12345",
-		NamaProduk:  "Produk Test 1",
-		JumlahProduk:      10,
-		Total:       100000,
+		IDPenjualan:  "12345",
+		Total:        100000,
 	}
 
 	produk2 := domain.Penjualan{
-		IDPenjualan: "67890",
-		NamaProduk:  "Produk Test 2",
-		JumlahProduk:      20,
-		Total:       200000,
+		IDPenjualan:  "67890",
+		Total:        200000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -101,13 +97,11 @@ func TestMongoRepoPenjualan_GetByID(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	repo := repository.NewMongoRepoPenjualan(db)
+	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk := domain.Penjualan{
-		IDPenjualan: "12345",
-		NamaProduk:  "Produk Test",
-		JumlahProduk:      10,
-		Total:       100000,
+		IDPenjualan:  "12345",
+		Total:        100000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -119,8 +113,6 @@ func TestMongoRepoPenjualan_GetByID(t *testing.T) {
 	fetchedProduk, err := repo.GetByID(ctx, produk.IDPenjualan)
 	assert.NoError(t, err)
 	assert.Equal(t, "12345", fetchedProduk.IDPenjualan)
-	assert.Equal(t, "Produk Test", fetchedProduk.NamaProduk)
-	assert.Equal(t, 10, fetchedProduk.JumlahProduk)
 	assert.Equal(t, 100000, fetchedProduk.Total)
 }
 
@@ -131,13 +123,11 @@ func TestMongoRepoPenjualan_Update(t *testing.T) {
 	ctx := context.Background()
 	cleanupCollection(ctx, db, "penjualan")
 
-	repo := repository.NewMongoRepoPenjualan(db)
+	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk := domain.Penjualan{
-		IDPenjualan: "12345",
-		NamaProduk:  "Produk Test",
-		JumlahProduk:      10,
-		Total:       100000,
+		IDPenjualan:  "12345",
+		Total:        100000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -146,8 +136,6 @@ func TestMongoRepoPenjualan_Update(t *testing.T) {
 	_, err := repo.CreateBulk(ctx, []domain.Penjualan{produk})
 	assert.NoError(t, err)
 
-	produk.NamaProduk = "Produk Test Updated"
-	produk.JumlahProduk = 20
 	produk.Total = 200000
 
 	err = repo.Update(ctx, &produk)
@@ -155,8 +143,6 @@ func TestMongoRepoPenjualan_Update(t *testing.T) {
 
 	fetchedProduk, err := repo.GetByID(ctx, produk.IDPenjualan)
 	assert.NoError(t, err)
-	assert.Equal(t, "Produk Test Updated", fetchedProduk.NamaProduk)
-	assert.Equal(t, 20, fetchedProduk.JumlahProduk)
 	assert.Equal(t, 200000, fetchedProduk.Total)
 
 	cleanupCollection(ctx, db, "penjualan")
@@ -166,13 +152,11 @@ func TestMongoRepoPenjualan_Delete(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	repo := repository.NewMongoRepoPenjualan(db)
+	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk := domain.Penjualan{
-		IDPenjualan: "12345",
-		NamaProduk:  "Produk Test",
-		JumlahProduk:      10,
-		Total:       100000,
+		IDPenjualan:  "12345",
+		Total:        100000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

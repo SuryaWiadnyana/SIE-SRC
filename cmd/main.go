@@ -96,7 +96,7 @@ func startHTTPServer() {
 	delivery.NewHttpDeliveryProduk(app, produkUseCase)
 
 	// Penjualan Repository dan Use Case route
-	penjualanRepo := repository.NewMongoRepoPenjualan(db)
+	penjualanRepo := repository.NewMongoRepoPenjualan(db, produkRepo)
 	penjualanUseCase := usecase.NewUseCasePenjualan(penjualanRepo, 10*time.Second)
 	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase)
 

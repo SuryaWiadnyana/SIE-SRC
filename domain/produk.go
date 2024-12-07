@@ -24,10 +24,10 @@ type ProdukRepository interface {
 	GetProdukByName(ctx context.Context, nama string) (*Produk, error)
 	UpdateProduk(ctx context.Context, bd *Produk) error
 	DeleteProduk(ctx context.Context, id string) error
-	DecreaseProdukStock(ctx context.Context, id string, quantity int) error
-	IncreaseProdukStock(ctx context.Context, id string, quantity int) error
+	DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error
+	IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	ImportData(ctx context.Context, produkList []Produk) error
-	GenerateNextID(ctx context.Context) (string, error)  // Tambah fungsi baru
+	GenerateNextID(ctx context.Context) (string, error)
 }
 
 type ProdukUseCase interface {

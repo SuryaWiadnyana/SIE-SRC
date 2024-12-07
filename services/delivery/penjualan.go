@@ -3,8 +3,10 @@ package delivery
 import (
 	"SIE-SRC/domain"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -42,64 +44,74 @@ func (d *HttpDeliveryPenjualan) GetAll(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
-	var sales []domain.Penjualan
+	var penjualanList []domain.Penjualan
 
-	if err := c.BodyParser(&sales); err != nil {
-		log.Printf("Error parsing request body: %v", err)
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Format data tidak valid",
+	if err := c.BodyParser(&penjualanList); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request format",
+			"error":   err.Error(),
 		})
 	}
 
-	// Validasi data penjualan
-	for i, sale := range sales {
-		if sale.NamaPenjual == "" {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error": "Nama penjual tidak boleh kosong",
-				"index": i,
-			})
-		}
-
-		if len(sale.Produk) == 0 {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error": "Minimal harus ada satu produk",
-				"index": i,
-			})
-		}
-
-		for j, item := range sale.Produk {
-			if item.IDProduk == "" {
-				return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-					"error":     "ID produk tidak boleh kosong",
-					"saleIndex": i,
-					"itemIndex": j,
-				})
-			}
-
-			if item.Quantity <= 0 {
-				return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-					"error":     "Quantity produk harus lebih dari 0",
-					"saleIndex": i,
-					"itemIndex": j,
-				})
-			}
-		}
+	// Basic validation
+	if len(penjualanList) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "No sales data provided",
+		})
 	}
 
-	// Logging untuk debugging
-	log.Printf("Processing %d sales records", len(sales))
+	// Set default values and validate each penjualan
+	for i := range penjualanList {
+		// Set creation time if not provided
+		if penjualanList[i].Tanggal.IsZero() {
+			penjualanList[i].Tanggal = time.Now()
+		}
 
-	createdSales, err := d.HTTP.CreateBulk(context.Background(), sales)
+		// Basic validation for each sale
+		if penjualanList[i].NamaPenjual == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": fmt.Sprintf("Sale at index %d is missing seller name", i),
+			})
+		}
+
+		if len(penjualanList[i].Produk) == 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": fmt.Sprintf("Sale at index %d has no products", i),
+			})
+		}
+
+		// Validate each product in the sale
+		total := 0
+		for j, prod := range penjualanList[i].Produk {
+			if prod.IDProduk == "" {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Product at index %d in sale %d is missing product ID", j, i),
+				})
+			}
+			if prod.JumlahProduk <= 0 {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"message": fmt.Sprintf("Product at index %d in sale %d has invalid quantity", j, i),
+				})
+			}
+			total += prod.Harga * prod.JumlahProduk
+		}
+
+		// Set the total
+		penjualanList[i].Total = total
+	}
+
+	// Create the sales records
+	result, err := d.HTTP.CreateBulk(c.Context(), penjualanList)
 	if err != nil {
-		log.Printf("Error creating sales: %v", err)
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to create sales records",
+			"error":   err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusCreated).JSON(fiber.Map{
-		"message": "Data penjualan berhasil disimpan",
-		"data":    createdSales,
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Sales records created successfully",
+		"data":    result,
 	})
 }
 
@@ -162,9 +174,9 @@ func (d *HttpDeliveryPenjualan) Update(c *fiber.Ctx) error {
 			})
 		}
 
-		if item.Quantity <= 0 {
+		if item.JumlahProduk <= 0 {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error":     "Quantity produk harus lebih dari 0",
+				"error":     "Kuantitas produk harus lebih dari 0",
 				"itemIndex": i,
 			})
 		}
