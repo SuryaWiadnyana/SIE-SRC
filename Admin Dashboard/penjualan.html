@@ -14,19 +14,7 @@
     <!-- Custom styles -->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../css/sie-src-theme.css" rel="stylesheet">
-    <!-- DataTables -->
-    <link href="../vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-    <!-- Select2 -->
-    <link href="../vendor/select2/css/select2.min.css" rel="stylesheet">
-    <link href="../vendor/select2-bootstrap4-theme/select2-bootstrap4.min.css" rel="stylesheet">
 
-    <style>
-        .sidebar-logo {
-            width: 50px;
-            height: auto;
-            object-fit: contain;
-        }
-    </style>
 </head>
 
 <body id="page-top">
@@ -120,26 +108,25 @@
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Manajemen Penjualan</h1>
-                    <p class="mb-4">Kelola data penjualan SRC</p>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Manajemen Penjualan</h1>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-tambah-penjualan">
+                            <i class="fas fa-plus fa-sm"></i> Tambah Penjualan
+                        </button>
+                    </div>
 
-                    <!-- DataTales Example -->
+                    <!-- Content Row -->
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <button type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target="#modal-tambah-penjualan">
-                                <i class="fas fa-plus"></i> Tambah Penjualan
-                            </button>
-                        </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="tabelPenjualan" width="100%" cellspacing="0">
+                                <table id="tabelPenjualan" class="table table-bordered" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
+                                            <th>No</th>
                                             <th>ID Penjualan</th>
                                             <th>Nama Penjual</th>
-                                            <th>Tanggal</th>
                                             <th>Total</th>
+                                            <th>Tanggal</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -173,21 +160,21 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
+    <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Siap untuk Keluar?</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">Pilih "Keluar" di bawah ini jika Anda siap untuk mengakhiri sesi Anda saat ini.</div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary" type="button" id="logoutButton">Keluar</button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="../login.html" id="logoutButton">Logout</a>
                 </div>
             </div>
         </div>
@@ -316,8 +303,14 @@
     <script src="../vendor/moment/moment.min.js"></script>
 
     <!-- Page specific script -->
-    <script src="js/auth.js"></script>
-    <script src="js/penjualan.js"></script>
+    <script src="../js/login.js"></script>
+    <script src="../js/penjualan.js"></script>
+
+    <script>
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.clear();
+        });
+    </script>
 </body>
 
 </html>

@@ -1,5 +1,4 @@
 import { api } from './api.js';
-import { checkAuth, handleLogout } from './auth.js';
 
 // Fungsi untuk memuat data dashboard
 async function loadDashboardData() {

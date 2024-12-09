@@ -1,6 +1,13 @@
 /* Custom SIE-SRC Theme Styles */
 
 /* Login page customization */
+
+.sidebar-logo {
+    width: 50px;
+    height: auto;
+    object-fit: contain;
+}
+
 .bg-login-image {
     background-color: #e23c3c !important;
     display: flex;
