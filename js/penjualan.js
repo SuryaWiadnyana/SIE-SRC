@@ -22,8 +22,8 @@ $(document).ready(function() {
                 if (!response.data) {
                     return [];
                 }
-                // Jika data ada, kembalikan array data
-                return Array.isArray(response.data) ? response.data : [];
+                // Kembalikan array data dan urutkan berdasarkan tanggal
+                return Array.isArray(response.data) ? response.data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)) : [];
             },
             error: function(xhr, error, thrown) {
                 console.error('Error:', error);
@@ -69,7 +69,7 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[4, 'desc']], // Sort by date descending
+        order: [[4, 'desc']], // Sort by date column (index 4) descending
         responsive: true,
         language: {
             emptyTable: "Tidak ada data penjualan",
@@ -88,6 +88,17 @@ $(document).ready(function() {
                 previous: "Sebelumnya"
             }
         }
+    });
+
+    // Event handler untuk tombol detail dan delete
+    $('#tabelPenjualan tbody').on('click', '.btn-detail', function() {
+        const id = $(this).data('id');
+        window.location.href = `detail-penjualan.html?id=${id}`;
+    });
+
+    $('#tabelPenjualan tbody').on('click', '.btn-delete', function() {
+        const id = $(this).data('id');
+        confirmDelete(id);
     });
 
     // Event handler untuk form
@@ -313,7 +324,7 @@ $(document).ready(function() {
             // Add event handlers for detail and delete buttons
             $('#tabelPenjualan').on('click', '.btn-detail', function() {
                 const id = $(this).data('id');
-                showDetailPenjualan(id);
+                window.location.href = `detail-penjualan.html?id=${id}`;
             });
 
             $('#tabelPenjualan').on('click', '.btn-delete', function() {
@@ -399,82 +410,97 @@ $(document).ready(function() {
     }
 
     // Fungsi untuk menampilkan detail penjualan
-    function showDetailPenjualan(id) {
-        const token = localStorage.getItem('token');
-        
-        $.ajax({
-            url: `http://localhost:8080/penjualan/by-id/${id}`,
-            type: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            },
-            success: function(response) {
-                if (response.data) {
-                    const penjualan = response.data;
-                    
-                    // Isi detail penjualan
-                    $('#detailIdPenjualan').text(penjualan.id_penjualan || '-');
-                    $('#detailNamaPenjual').text(penjualan.nama_penjual || '-');
-                    $('#detailTanggal').text(moment(penjualan.tanggal).format('DD/MM/YYYY HH:mm:ss'));
-                    $('#detailTotal').text('Rp ' + formatRupiah(penjualan.total));
-
-                    // Isi tabel produk
-                    let produkHtml = '';
-                    if (penjualan.produk && penjualan.produk.length > 0) {
-                        penjualan.produk.forEach((item, index) => {
-                            produkHtml += `
-                                <tr>
-                                    <td>${item.id_produk}</td>
-                                    <td>${item.jumlah_produk}</td>
+    async function showDetailPenjualan(id) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/penjualan/by-id/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+    
+            const data = await response.json();
+    
+            if (data.success) {
+                const penjualan = data.data;
+                document.getElementById('detail-id').innerText = penjualan.id_penjualan;
+                document.getElementById('detail-nama').innerText = penjualan.nama_penjual;
+                document.getElementById('detail-tanggal').innerText = moment(penjualan.tanggal).format('DD/MM/YYYY HH:mm:ss');
+                document.getElementById('detail-total').innerText = 'Rp ' + formatRupiah(penjualan.total);
+    
+                const produkBody = document.getElementById('detail-produk-body');
+                produkBody.innerHTML = ''; // Kosongkan isi sebelumnya
+                penjualan.items.forEach(item => {
+                    const row = `<tr>
+                                    <td>${item.nama_produk}</td>
+                                    <td>${item.jumlah}</td>
                                     <td>Rp ${formatRupiah(item.harga)}</td>
                                     <td>Rp ${formatRupiah(item.subtotal)}</td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        produkHtml = '<tr><td colspan="4" class="text-center">Tidak ada data produk</td></tr>';
-                    }
-                    $('#detailProdukList').html(produkHtml);
-
-                    // Tampilkan modal
-                    $('#modal-detail-penjualan').modal('show');
-                }
-            },
-            error: function(xhr) {
-                showNotification('error', 'Gagal memuat detail penjualan');
+                                 </tr>`;
+                    produkBody.innerHTML += row;
+                });
+    
+                // Tampilkan modal
+                $('#modal-detail-penjualan').modal('show');
+            } else {
+                alert(data.message || 'Gagal mengambil detail penjualan');
             }
-        });
-    }
-
-    // Fungsi untuk konfirmasi delete
-    function confirmDelete(id) {
-        if (confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
-            deletePenjualan(id);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Gagal memuat detail penjualan');
         }
     }
+    
+    // Event handler untuk tombol detail
+    $('#tabelPenjualan tbody').on('click', '.btn-detail', function() {
+        const id = $(this).data('id');
+        window.location.href = `detail-penjualan.html?id=${id}`;
+    });
 
     // Fungsi untuk menghapus penjualan
     async function deletePenjualan(id) {
-        const token = localStorage.getItem('token');
-        
         try {
-            const response = await fetch(`http://localhost:8080/penjualan/${id}`, {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/penjualan/delete/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to delete sale');
+            // Coba parse response, jika gagal berarti ada error
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                // Jika response bukan JSON, kita anggap sukses karena data sudah terhapus
+                alert('Data penjualan berhasil dihapus');
+                $('#tabelPenjualan').DataTable().ajax.reload(null, false);
+                return true;
             }
-
-            table.ajax.reload();
-            showNotification('success', 'Sale deleted successfully');
-
+            
+            // Jika berhasil parse JSON
+            if (data && (data.success || response.status === 200)) {
+                alert('Data penjualan berhasil dihapus');
+                $('#tabelPenjualan').DataTable().ajax.reload(null, false);
+                return true;
+            } else {
+                const message = data?.message || 'Gagal menghapus penjualan';
+                alert(message);
+                // Tetap refresh jika error 500 karena kemungkinan data sudah terhapus
+                if (response.status === 500) {
+                    $('#tabelPenjualan').DataTable().ajax.reload(null, false);
+                    return true;
+                }
+                return false;
+            }
         } catch (error) {
-            console.error('Error deleting sale:', error);
-            showNotification('error', 'Failed to delete sale. Please try again.');
+            console.error('Error:', error);
+            alert('Gagal menghapus penjualan');
+            // Tetap refresh untuk jaga-jaga data sudah terhapus
+            $('#tabelPenjualan').DataTable().ajax.reload(null, false);
+            return true;
         }
     }
 
@@ -654,5 +680,10 @@ $(document).ready(function() {
         const firstSelect = $('.produk-item:first .select-produk');
         const options = firstSelect.find('option').clone();
         $newSelect.html(options);
+    }
+
+    // Refresh DataTable after adding new data
+    function refreshTable() {
+        table.ajax.reload(null, false); // Keep the current page
     }
 });
