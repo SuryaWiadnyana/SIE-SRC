@@ -42,7 +42,7 @@ func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error
 		return "", fmt.Errorf("error finding last penjualan: %v", err)
 	}
 
-	numStr := lastPenjualan.IDPenjualan[2:] 
+	numStr := lastPenjualan.IDPenjualan[2:]
 	num, err := strconv.Atoi(numStr)
 	if err != nil {
 		return "", fmt.Errorf("error parsing last ID number: %v", err)
@@ -54,97 +54,97 @@ func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error
 
 // Create menambahkan Penjualan baru ke dalam koleksi.
 func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjualan) ([]domain.Penjualan, error) {
-    ListPenjualan := rp.DB.Collection(_Penjualan)
-    var PenjualanDocs []interface{}
+	ListPenjualan := rp.DB.Collection(_Penjualan)
+	var PenjualanDocs []interface{}
 
-    sesi, err := rp.DB.Client().StartSession()
-    if err != nil {
-        return nil, fmt.Errorf("gagal memulai sesi: %v", err)
-    }
-    defer sesi.EndSession(ctx)
+	sesi, err := rp.DB.Client().StartSession()
+	if err != nil {
+		return nil, fmt.Errorf("gagal memulai sesi: %v", err)
+	}
+	defer sesi.EndSession(ctx)
 
-    err = mongo.WithSession(ctx, sesi, func(sc mongo.SessionContext) error {
-        if err := sesi.StartTransaction(); err != nil {
-            return fmt.Errorf("gagal memulai transaksi: %v", err)
-        }
+	err = mongo.WithSession(ctx, sesi, func(sc mongo.SessionContext) error {
+		if err := sesi.StartTransaction(); err != nil {
+			return fmt.Errorf("gagal memulai transaksi: %v", err)
+		}
 
-        for i := range bd {
-            if bd[i].IDPenjualan == "" {
-                nextID, err := rp.GenerateNextID(ctx)
-                if err != nil {
-                    return fmt.Errorf("gagal generate ID: %v", err)
-                }
-                bd[i].IDPenjualan = nextID
-            }
+		for i := range bd {
+			if bd[i].IDPenjualan == "" {
+				nextID, err := rp.GenerateNextID(ctx)
+				if err != nil {
+					return fmt.Errorf("gagal generate ID: %v", err)
+				}
+				bd[i].IDPenjualan = nextID
+			}
 
-            if bd[i].NamaPenjual == "" {
-                return fmt.Errorf("nama penjual tidak boleh kosong pada data ke-%d", i+1)
-            }
+			if bd[i].NamaPenjual == "" {
+				return fmt.Errorf("nama penjual tidak boleh kosong pada data ke-%d", i+1)
+			}
 
-            if len(bd[i].Produk) == 0 {
-                return fmt.Errorf("minimal harus ada satu produk pada data ke-%d", i+1)
-            }
+			if len(bd[i].Produk) == 0 {
+				return fmt.Errorf("minimal harus ada satu produk pada data ke-%d", i+1)
+			}
 
-            total := 0
-            for j, item := range bd[i].Produk {
-                if item.IDProduk == "" {
-                    return fmt.Errorf("id produk tidak boleh kosong pada produk ke-%d, data ke-%d", j+1, i+1)
-                }
+			total := 0
+			for j, item := range bd[i].Produk {
+				if item.IDProduk == "" {
+					return fmt.Errorf("id produk tidak boleh kosong pada produk ke-%d, data ke-%d", j+1, i+1)
+				}
 
-                if item.JumlahProduk <= 0 {
-                    return fmt.Errorf("jumlah produk harus lebih dari 0 pada produk ke-%d, data ke-%d", j+1, i+1)
-                }
+				if item.JumlahProduk <= 0 {
+					return fmt.Errorf("jumlah produk harus lebih dari 0 pada produk ke-%d, data ke-%d", j+1, i+1)
+				}
 
-                produk, err := rp.RepoProduk.GetProdukById(sc, item.IDProduk)
-                if err != nil {
-                    return fmt.Errorf("gagal mendapatkan info produk: %v", err)
-                }
+				produk, err := rp.RepoProduk.GetProdukById(sc, item.IDProduk)
+				if err != nil {
+					return fmt.Errorf("gagal mendapatkan info produk: %v", err)
+				}
 
-                if produk.Stok < item.JumlahProduk {
-                    return fmt.Errorf("stok tidak mencukupi untuk produk %s (tersedia: %d, diminta: %d)", 
-                        produk.NamaProduk, produk.Stok, item.JumlahProduk)
-                }
+				if produk.Stok < item.JumlahProduk {
+					return fmt.Errorf("stok tidak mencukupi untuk produk %s (tersedia: %d, diminta: %d)",
+						produk.NamaProduk, produk.Stok, item.JumlahProduk)
+				}
 
-                err = rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.JumlahProduk)
-                if err != nil {
-                    return fmt.Errorf("gagal mengurangi stok: %v", err)
-                }
+				err = rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.JumlahProduk)
+				if err != nil {
+					return fmt.Errorf("gagal mengurangi stok: %v", err)
+				}
 
-                bd[i].Produk[j].Harga = produk.Harga
-                bd[i].Produk[j].Subtotal = produk.Harga * item.JumlahProduk
-                total += bd[i].Produk[j].Subtotal
-            }
+				bd[i].Produk[j].Harga = produk.Harga
+				bd[i].Produk[j].Subtotal = produk.Harga * item.JumlahProduk
+				total += bd[i].Produk[j].Subtotal
+			}
 
-            bd[i].Total = total
-            bd[i].UpdatedAt = time.Now()
-            if bd[i].Tanggal.IsZero() {
-                bd[i].Tanggal = time.Now()
-            }
+			bd[i].Total = total
+			bd[i].UpdatedAt = time.Now()
+			if bd[i].Tanggal.IsZero() {
+				bd[i].Tanggal = time.Now()
+			}
 
-            PenjualanDocs = append(PenjualanDocs, bd[i])
-        }
+			PenjualanDocs = append(PenjualanDocs, bd[i])
+		}
 
-        _, err := ListPenjualan.InsertMany(sc, PenjualanDocs)
-        if err != nil {
-            return fmt.Errorf("gagal menyimpan data penjualan: %v", err)
-        }
+		_, err := ListPenjualan.InsertMany(sc, PenjualanDocs)
+		if err != nil {
+			return fmt.Errorf("gagal menyimpan data penjualan: %v", err)
+		}
 
-        if err := sesi.CommitTransaction(sc); err != nil {
-            return fmt.Errorf("gagal commit transaksi: %v", err)
-        }
+		if err := sesi.CommitTransaction(sc); err != nil {
+			return fmt.Errorf("gagal commit transaksi: %v", err)
+		}
 
-        return nil
-    })
+		return nil
+	})
 
-    if err != nil {
-        abortErr := sesi.AbortTransaction(ctx)
-        if abortErr != nil {
-            log.Printf("Error saat abort transaksi: %v", abortErr)
-        }
-        return nil, err
-    }
+	if err != nil {
+		abortErr := sesi.AbortTransaction(ctx)
+		if abortErr != nil {
+			log.Printf("Error saat abort transaksi: %v", abortErr)
+		}
+		return nil, err
+	}
 
-    return bd, nil
+	return bd, nil
 }
 
 // GetAll mendapatkan semua produk dari koleksi.
@@ -178,8 +178,8 @@ func (rp *mongoRepoPenjualan) GetAll(ctx context.Context) ([]domain.Penjualan, e
 func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.Penjualan, error) {
 	penjualanProduk := rp.DB.Collection(_Penjualan)
 
-	var Penjualan domain.Penjualan
-	err := penjualanProduk.FindOne(ctx, bson.M{"id_penjualan": id}).Decode(&Penjualan)
+	var penjualan domain.Penjualan
+	err := penjualanProduk.FindOne(ctx, bson.M{"id_penjualan": id}).Decode(&penjualan)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("penjualan dengan ID %s tidak ditemukan", id)
@@ -187,7 +187,10 @@ func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.P
 		return nil, fmt.Errorf("gagal mengambil data penjualan: %v", err)
 	}
 
-	return &Penjualan, nil
+	// Log jumlah produk yang diambil
+	log.Printf("Jumlah produk yang diambil: %d", len(penjualan.Produk))
+
+	return &penjualan, nil
 }
 
 // Update memperbarui produk yang ada.
