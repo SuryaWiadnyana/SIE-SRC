@@ -1,3 +1,4 @@
 login dan register sudah berhasil
 manajemen produk dan user sudah berhasil
-Memperbaiki manajemen penjualan
+Manajemen penjualan sudah berhasil
+Detail Penjualan berhasil

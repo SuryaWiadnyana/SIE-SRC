@@ -9,7 +9,9 @@
     <title>SIE-SRC | Manajemen Penjualan</title>
 
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
 
     <!-- Custom styles -->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
@@ -93,8 +95,8 @@
                                 <a class="dropdown-item" href="profile.html">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Profile
-                                  </a>
-                                  <div class="dropdown-divider"></div>
+                                </a>
+                                <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
@@ -110,7 +112,8 @@
                     <!-- Page Heading -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Manajemen Penjualan</h1>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-tambah-penjualan">
+                        <button type="button" class="btn btn-primary" data-toggle="modal"
+                            data-target="#modal-tambah-penjualan">
                             <i class="fas fa-plus fa-sm"></i> Tambah Penjualan
                         </button>
                     </div>
@@ -137,6 +140,66 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal Tambah Penjualan -->
+                <div class="modal fade" id="modal-tambah-penjualan">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Tambah Penjualan</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="formTambahPenjualan">
+                                    <div class="form-group">
+                                        <label for="namaPenjual">Nama Penjual</label>
+                                        <input type="text" class="form-control" id="namaPenjual" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Produk</label>
+                                        <div id="produkContainer">
+                                            <div class="row mb-3 produk-item">
+                                                <div class="col-md-5">
+                                                    <select class="form-control select2 select-produk"
+                                                        style="width: 100%;" required>
+                                                        <option value="">Pilih Produk</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="number" class="form-control quantity"
+                                                        placeholder="Jumlah" min="1" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" class="form-control subtotal"
+                                                        placeholder="Subtotal" readonly>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger btn-remove-produk">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-success" id="btnTambahProduk">
+                                            <i class="fas fa-plus"></i> Tambah Produk
+                                        </button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Total</label>
+                                        <input type="text" class="form-control" id="totalPenjualan" readonly>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                                <button type="button" class="btn btn-primary" id="btnSimpanPenjualan">Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->
@@ -180,62 +243,6 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Penjualan -->
-    <div class="modal fade" id="modal-tambah-penjualan">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Tambah Penjualan</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="formTambahPenjualan">
-                        <div class="form-group">
-                            <label for="namaPenjual">Nama Penjual</label>
-                            <input type="text" class="form-control" id="namaPenjual" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Produk</label>
-                            <div id="produkContainer">
-                                <div class="row mb-3 produk-item">
-                                    <div class="col-md-5">
-                                        <select class="form-control select2 select-produk" style="width: 100%;" required>
-                                            <option value="">Pilih Produk</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="number" class="form-control quantity" placeholder="Jumlah" min="1" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="text" class="form-control subtotal" placeholder="Subtotal" readonly>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <button type="button" class="btn btn-danger btn-remove-produk">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-success" id="btnTambahProduk">
-                                <i class="fas fa-plus"></i> Tambah Produk
-                            </button>
-                        </div>
-                        <div class="form-group">
-                            <label>Total</label>
-                            <input type="text" class="form-control" id="totalPenjualan" readonly>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-primary" id="btnSimpanPenjualan">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Bootstrap core JavaScript-->
     <script src="../vendor/jquery/jquery.min.js"></script>
@@ -250,7 +257,7 @@
     <!-- Page level plugins -->
     <script src="../vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
-    
+
     <!-- Select2 -->
     <script src="../vendor/select2/js/select2.full.min.js"></script>
 
@@ -265,7 +272,7 @@
     <script src="../js/penjualan.js"></script>
 
     <script>
-        document.getElementById('logoutButton').addEventListener('click', function() {
+        document.getElementById('logoutButton').addEventListener('click', function () {
             localStorage.clear();
         });
     </script>

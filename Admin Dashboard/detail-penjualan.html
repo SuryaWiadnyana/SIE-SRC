@@ -167,7 +167,6 @@
                       <tr>
                         <th>ID Produk</th>
                         <th>Nama Produk</th>
-                        <th>Kode Produk</th>
                         <th>Jumlah</th>
                         <th>Harga</th>
                         <th>Subtotal</th>
@@ -281,7 +280,6 @@
                             const row = `<tr>
                                 <td>${item.id_produk || '-'}</td>
                                 <td>${item.nama_produk || '-'}</td>
-                                 <td>${item.barcode_produk || '-'}</td>
                                 <td>${item.jumlah_produk || '0'}</td>
                                 <td>Rp ${formatRupiah(item.harga || 0)}</td>
                                 <td>Rp ${formatRupiah(item.subtotal || 0)}</td>

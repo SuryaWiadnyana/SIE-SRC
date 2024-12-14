@@ -364,7 +364,6 @@ $(document).ready(function() {
             produk: products.map(p => ({
                 id_produk: p.id_produk,
                 nama_produk: $(`select option[value='${p.id_produk}']`).text(),
-                barcode_produk: $(`select option[value='${p.id_produk}']`).data('barcode'),
                 jumlah_produk: p.jumlah_produk,
                 harga: p.harga,
                 subtotal: p.subtotal
