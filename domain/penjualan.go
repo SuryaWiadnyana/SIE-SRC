@@ -13,7 +13,6 @@ type Penjual struct {
 type ProdukJual struct {
 	IDProduk     string `json:"id_produk" bson:"id_produk"`
 	NamaProduk   string `json:"nama_produk" bson:"nama_produk"`
-	KodeProduk   int    `json:"barcode_produk" bson:"barcode_produk"`
 	JumlahProduk int    `json:"jumlah_produk" bson:"jumlah_produk"`
 	Harga        int    `json:"harga" bson:"harga"`
 	Subtotal     int    `json:"subtotal" bson:"subtotal"`
