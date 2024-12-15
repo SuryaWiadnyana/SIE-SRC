@@ -681,8 +681,81 @@ $(document).ready(function() {
         $newSelect.html(options);
     }
 
-    // Refresh DataTable after adding new data
-    function refreshTable() {
-        table.ajax.reload(null, false); // Keep the current page
-    }
 });
+
+function generatePDF(products, sales, reportType, startDate, endDate) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Filter data berdasarkan tanggal hanya untuk penjualan dan pendapatan
+    const filteredSales = sales.filter(sale => {
+        if (!startDate || !endDate) return true;
+        const saleDate = new Date(sale.tanggal);
+        return saleDate >= new Date(startDate) && saleDate <= new Date(endDate);
+    });
+
+    // Tentukan judul dan konten berdasarkan jenis laporan
+    switch (reportType) {
+        case 'produk':
+            doc.text(`Laporan Produk`, 10, 10);
+            doc.autoTable({
+                head: [['ID Produk', 'Nama Produk', 'Harga', 'Stok']],
+                body: products.map(product => [
+                    product.id_produk,
+                    product.nama_produk,
+                    `Rp ${formatRupiah(product.harga)}`,
+                    product.stok_barang
+                ]),
+                startY: 20
+            });
+            doc.save('laporan_produk.pdf');
+            break;
+
+        case 'penjualan':
+            doc.text(`Laporan Penjualan (${startDate} - ${endDate})`, 10, 10);
+            doc.autoTable({
+                head: [['ID Penjualan', 'Nama Penjual', 'Total', 'Tanggal']],
+                body: filteredSales.map(sale => [
+                    sale.id_penjualan,
+                    sale.nama_penjual,
+                    new Date(sale.tanggal).toLocaleDateString('id-ID')
+                    `Rp ${formatRupiah(sale.total)}`,
+                ]),
+                startY: 20
+            });
+            doc.save('laporan_penjualan.pdf');
+            break;
+
+        case 'pendapatan':
+            const totalPendapatan = filteredSales.reduce((total, sale) => total + sale.total, 0);
+            
+            doc.text(`Laporan Pendapatan (${startDate} - ${endDate})`, 10, 10);
+            
+            doc.autoTable({
+                head: [['Total Pendapatan', 'Jumlah Transaksi']],
+                body: [
+                    [`Rp ${formatRupiah(totalPendapatan)}`, filteredSales.length]
+                ],
+                startY: 20
+            });
+
+            doc.text('Detail Penjualan', 10, doc.lastAutoTable.finalY + 10);
+            doc.autoTable({
+                head: [['ID Penjualan', 'Nama Penjual', 'Total', 'Tanggal']],
+                body: filteredSales.map(sale => [
+                    sale.id_penjualan,
+                    sale.nama_penjual,
+                    `Rp ${formatRupiah(sale.total)}`,
+                    new Date(sale.tanggal).toLocaleDateString('id-ID')
+                ]),
+                startY: doc.lastAutoTable.finalY + 20
+            });
+            
+            doc.save('laporan_pendapatan.pdf');
+            break;
+    }
+}
+// Fungsi format Rupiah
+function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID').format(angka);
+}
