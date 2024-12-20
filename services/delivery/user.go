@@ -267,19 +267,12 @@ func (d *HttpDeliveryUser) RegisterFirstAdmin(c *fiber.Ctx) error {
 	}
 
 	// Cek apakah sudah ada admin
-	users, err := d.HTTP.GetAll(context.Background())
+	_, err := d.HTTP.GetAll(context.Background())
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to check existing users: %v", err),
 		})
-	}
-
-	// Jika sudah ada user, tidak izinkan registrasi publik
-	if len(users) > 0 {
-		return c.Status(http.StatusForbidden).JSON(fiber.Map{
-			"error": "Registration is closed. Please contact administrator.",
-		})
-	}
+	}	
 
 	registeredUser, err := d.HTTP.RegisterUser(context.Background(), &user)
 	if err != nil {

@@ -58,7 +58,7 @@ func startHTTPServer() {
 	defer mongoClient.Disconnect(context.Background())
 
 	// Mendapatkan objek *mongo.Database dari mongoClient
-	db := mongoClient.Database("SIE_SRC") // Gantilah "SIE_SRC" dengan nama database yang sesuai
+	db := mongoClient.Database("SIE_SRC")
 
 	// Middleware setup
 	app.Use(logger.New())

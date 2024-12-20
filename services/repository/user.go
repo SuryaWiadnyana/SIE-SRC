@@ -133,13 +133,14 @@ func (rp *mongoRepoUser) AuthenticateUser(ctx context.Context, username, passwor
 	if err != nil {
 		return nil, fmt.Errorf("username atau password tidak valid")
 	}
+	log.Printf("User role retrieved for %s: %s", user.Username, user.Role)
 
 	return &user, nil
 }
 
 func (rp *mongoRepoUser) GetAll(ctx context.Context) ([]domain.User, error) {
 	collection := rp.DB.Collection(_UserCollection)
-	
+
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("error getting users: %v", err)
