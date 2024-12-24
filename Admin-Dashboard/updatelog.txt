@@ -1,0 +1,4 @@
+login dan register sudah berhasil
+manajemen produk dan user sudah berhasil
+Manajemen penjualan sudah berhasil
+Detail Penjualan berhasil

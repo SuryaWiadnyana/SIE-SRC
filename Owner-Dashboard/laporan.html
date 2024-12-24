@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.15/jspdf.plugin.autotable.min.js"></script>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>SIE-SRC | Manajemen Laporan</title>
+
+    <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="../css/owner-sidebar.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index-owner.html">
+                <div class="sidebar-brand-icon">
+                    <img src="../img/Logo_SRC-removebg-preview.png" alt="SRC Logo" class="sidebar-logo">
+                </div>
+                <div class="sidebar-brand-text mx-3">SIE-SRC Sarin Jagir</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" href="index-owner.html">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Beranda</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Data Management
+            </div>
+
+            <!-- Nav Item - Sales -->
+            <li class="nav-item active">
+                <a class="nav-link" href="penjualan.html">
+                    <i class="fas fa-fw fa-shopping-cart"></i>
+                    <span>Manajemen Penjualan</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Owner</span>
+                                <img class="img-profile rounded-circle" src="../img/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <!-- Page Heading -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Manajemen Laporan</h1>
+                        </button>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Filter Laporan</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="reportFilterForm">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label>Jenis Laporan</label>
+                                        <select class="form-control" id="reportType">
+                                            <option value="penjualan">Laporan Penjualan</option>
+                                            <option value="produk">Laporan Produk</option>
+                                            <option value="pendapatan">Laporan Pendapatan</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Tanggal Mulai</label>
+                                        <input type="date" class="form-control" id="startDate">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Tanggal Selesai</label>
+                                        <input type="date" class="form-control" id="endDate">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary mt-3" id="generatePdf">
+                                    Download Laporan
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                <!-- Footer -->
+                <footer class="sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Copyright &copy; SIE-SRC 2024</span>
+                        </div>
+                    </div>
+                </footer>
+                <!-- End of Footer -->
+            </div>
+            <!-- End of Content Wrapper -->
+        </div>
+        <!-- End of Page Wrapper -->
+
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+
+        <!-- Logout Modal -->
+        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-primary" href="../login.html" id="logoutButton">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="../js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="../vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Select2 -->
+    <script src="../vendor/select2/js/select2.full.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="../vendor/sweetalert2/sweetalert2.min.js"></script>
+
+    <!-- Moment.js -->
+    <script src="../vendor/moment/moment.min.js"></script>
+
+    <!-- Page specific script -->
+    <script src="../js/login.js"></script>
+    <script src="../js/penjualan.js"></script>
+
+    <script>
+        document.getElementById('logoutButton').addEventListener('click', function () {
+            localStorage.clear();
+        });
+    </script>
+
+<script type="module">
+    document.addEventListener('DOMContentLoaded', () => {
+        const generatePdfButton = document.getElementById('generatePdf');
+        if (generatePdfButton) {
+            generatePdfButton.addEventListener('click', async () => {
+                try {
+                    // Fetch product and sales data
+                    const products = await fetchProducts();
+                    const sales = await fetchSales();
+
+                    // Ambil jenis laporan dari dropdown
+                    const reportType = document.getElementById('reportType').value;
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
+
+                    // Generate PDF with the fetched data
+                    generatePDF(products, sales, reportType, startDate, endDate);
+                } catch (error) {
+                    showAlert('Error fetching data: ' + error.message, 'danger');
+                }
+            });
+        } else {
+            console.error('Button with ID "generatePdf" not found.');
+        }
+    });
+
+    async function fetchProducts() {
+        const response = await fetch('http://localhost:8080/produk/getallproduk', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        return data.data;
+    }
+
+    async function fetchSales() {
+        const response = await fetch('http://localhost:8080/penjualan/getall', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch sales');
+        }
+        const data = await response.json();
+        return data.data;
+    }
+
+    function generatePDF(products, sales, reportType, startDate, endDate) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Filter data berdasarkan tanggal
+        const filteredProducts = products.filter(product => {
+            if (!startDate || !endDate) return true;
+            const productDate = new Date(product.created_at || product.tanggal);
+            return productDate >= new Date(startDate) && productDate <= new Date(endDate);
+        });
+
+        const filteredSales = sales.filter(sale => {
+            if (!startDate || !endDate) return true;
+            const saleDate = new Date(sale.tanggal);
+            return saleDate >= new Date(startDate) && saleDate <= new Date(endDate);
+        });
+
+        // Tentukan judul dan konten berdasarkan jenis laporan
+        switch (reportType) {
+            case 'produk':
+                doc.text(`Laporan Produk (${startDate} - ${endDate})`, 10, 10);
+                doc.autoTable({
+                    head: [['ID Produk', 'Nama Produk', 'Harga', 'Stok']],
+                    body: filteredProducts.map(product => [
+                        product.id_produk,
+                        product.nama_produk,
+                        `Rp ${formatRupiah(product.harga)}`,
+                        product.stok_barang
+                    ]),
+                    startY: 20
+                });
+                doc.save('laporan_produk.pdf');
+                break;
+
+            case 'penjualan':
+                doc.text(`Laporan Penjualan (${startDate} - ${endDate})`, 10, 10);
+                doc.autoTable({
+                    head: [['ID Penjualan', 'Nama Penjual', 'Tanggal', 'Total']],
+                    body: filteredSales.map(sale => [
+                        sale.id_penjualan,
+                        sale.nama_penjual,
+                        new Date(sale.tanggal).toLocaleDateString('id-ID'),
+                        `Rp ${formatRupiah(sale.total)}`
+                    ]),
+                    startY: 20
+                });
+                doc.save('laporan_penjualan.pdf');
+                break;
+
+            case 'pendapatan':
+                const totalPendapatan = filteredSales.reduce((total, sale) => total + sale.total, 0);
+                
+                doc.text(`Laporan Pendapatan (${startDate} - ${endDate})`, 10, 10);
+                
+                doc.autoTable({
+                    head: [['Total Pendapatan', 'Jumlah Transaksi']],
+                    body: [
+                        [`Rp ${formatRupiah(totalPendapatan)}`, filteredSales.length]
+                    ],
+                    startY: 20
+                });
+
+                doc.text('Detail Penjualan', 10, doc.lastAutoTable.finalY + 10);
+                doc.autoTable({
+                    head: [['ID Penjualan', 'Nama Penjual', 'Total', 'Tanggal']],
+                    body: filteredSales.map(sale => [
+                        sale.id_penjualan,
+                        sale.nama_penjual,
+                        `Rp ${formatRupiah(sale.total)}`,
+                        new Date(sale.tanggal).toLocaleDateString('id-ID')
+                    ]),
+                    startY: doc.lastAutoTable.finalY + 20
+                });
+                
+                doc.save('laporan_pendapatan.pdf');
+                break;
+        }
+    }
+
+    function formatRupiah(angka) {
+        return new Intl.NumberFormat('id-ID').format(angka);
+    }
+
+    function showAlert(message, type) {
+        const alertPlaceholder = document.getElementById('alertPlaceholder');
+        if (alertPlaceholder) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            alertPlaceholder.appendChild(wrapper);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = wrapper.querySelector('. alert');
+                if (alert) {
+                    alert.classList.remove('show');
+                    alert.classList.add('fade');
+                    setTimeout(() => {
+                        alertPlaceholder.removeChild(wrapper);
+                    }, 150);
+                }
+            }, 5000);
+        }
+    }
+</script>
+
+    <!-- Include other necessary scripts -->
+</body>
+
+</html>

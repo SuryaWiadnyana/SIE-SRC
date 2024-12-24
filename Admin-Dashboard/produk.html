@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SIE-SRC Product Management">
+    <meta name="author" content="">
+
+    <title>SIE-SRC - Manajemen Produk</title>
+
+    <!-- Custom fonts -->
+    <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="../css/sie-src-theme.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index-admin.html">
+                <div class="sidebar-brand-icon">
+                    <img
+                        src="../img/Logo_SRC-removebg-preview.png"
+                        alt="SRC Logo"
+                        class="sidebar-logo"
+                    />
+                </div>
+                <div class="sidebar-brand-text mx-3">SIE-SRC Sarin Jagir</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" href="index-admin.html">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Data Management
+            </div>
+
+            <!-- Nav Item - Products -->
+            <li class="nav-item active">
+                <a class="nav-link" href="produk.html">
+                    <i class="fas fa-fw fa-box"></i>
+                    <span>Manajemen Produk</span>
+                </a>
+            </li>
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Admin</span>
+                                <img class="img-profile rounded-circle" src="../img/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <!-- Alert Placeholder -->
+                    <div id="alertPlaceholder"></div>
+
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Manajemen Produk</h1>
+                        <div>
+                            <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#importDataModal">
+                                <i class="fas fa-file-import"></i> Import Data
+                            </button>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">
+                                <i class="fas fa-plus fa-sm"></i> Tambah Produk
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchProduct" 
+                                    placeholder="Cari produk...">
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h4 class="m-0 font-weight-bold text-primary">Daftar Produk</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="productTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>ID Produk</th>
+                                            <th>Nama Produk</th>
+                                            <th>Kategori</th>
+                                            <th>Sub Kategori</th>
+                                            <th>Kode Produk</th>
+                                            <th>Harga</th>
+                                            <th>Stok</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Product data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of Page Content -->
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; SIE-SRC 2023</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+        </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Tambah Produk Baru</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="addProductForm">
+                    <div class="modal-body">
+                        <!-- ID Produk field dihapus karena akan di-generate otomatis -->
+                        
+                        <div class="form-group">
+                            <label for="nama_produk">Nama Produk</label>
+                            <input type="text" class="form-control" id="nama_produk" name="nama_produk" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="kategori">Kategori</label>
+                            <select class="form-control" id="kategori" name="kategori" required>
+                                <option value="">Pilih Kategori</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sub_kategori">Sub Kategori</label>
+                            <select class="form-control" id="sub_kategori" name="sub_kategori" required>
+                                <option value="">Pilih Sub Kategori</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="barcode_produk">Barcode</label>
+                            <input type="text" class="form-control" id="barcode_produk" name="barcode_produk" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="harga">Harga</label>
+                            <input type="number" class="form-control" id="harga" name="harga" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="stok_barang">Stok</label>
+                            <input type="number" class="form-control" id="stok_barang" name="stok_barang" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Product Modal -->
+    <div class="modal fade" id="updateProductModal" tabindex="-1" role="dialog" aria-labelledby="updateProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateProductModalLabel">Edit Produk</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="updateProductForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id_produk" name="id_produk">
+                        <div class="form-group">
+                            <label for="update_nama_produk">Nama Produk</label>
+                            <input type="text" class="form-control" id="update_nama_produk" name="nama_produk" required placeholder="Nama Produk Saat Ini">
+                        </div>
+                        <div class="form-group">
+                            <label for="update_kategori">Kategori</label>
+                            <select class="form-control" id="update_kategori" name="kategori" required>
+                                <option value="">Pilih Kategori</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="update_sub_kategori">Sub Kategori</label>
+                            <select class="form-control" id="update_sub_kategori" name="sub_kategori" required>
+                                <option value="">Pilih Sub Kategori</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="update_barcode_produk">Barcode</label>
+                            <input type="text" class="form-control" id="update_barcode_produk" name="barcode_produk" required placeholder="Barcode Saat Ini">
+                        </div>
+                        <div class="form-group">
+                            <label for="update_harga">Harga</label>
+                            <input type="number" class="form-control" id="update_harga" name="harga" required placeholder="Harga Saat Ini">
+                        </div>
+                        <div class="form-group">
+                            <label for="update_stok_barang">Stok</label>
+                            <input type="number" class="form-control" id="update_stok_barang" name="stok_barang" required placeholder="Stok Saat Ini">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Data Modal -->
+    <div class="modal fade" id="importDataModal" tabindex="-1" role="dialog" aria-labelledby="importDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importDataModalLabel">Import Data Produk</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="importDataForm">
+                        <div class="form-group">
+                            <label for="fileInput">Pilih File Excel/CSV</label>
+                            <input type="file" class="form-control-file" id="fileInput" accept=".xlsx,.xls,.csv" required>
+                            <small class="form-text text-muted">Format yang didukung: Excel (.xlsx, .xls) atau CSV</small>
+                        </div>
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="headerRow" checked>
+                                <label class="custom-control-label" for="headerRow">File memiliki baris header</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="importDataBtn">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="../login.html" id="logoutButton">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts -->
+    <script src="../js/sb-admin-2.min.js"></script>
+    <script type="module" src="../js/produk.js"></script>
+
+    <!-- Logout handler -->
+    <script>
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.clear();
+        });
+    </script>
+
+    <!-- XLSX library for Excel file handling -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+
+</html>

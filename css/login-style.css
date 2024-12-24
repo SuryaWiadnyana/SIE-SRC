@@ -1,0 +1,51 @@
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e23c3c 0%, #c31432 100%) fixed;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+        }
+        .bg-login-image {
+            background: url('../img/Logo_SRC-removebg-preview.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #e23c3c;
+            min-height: 400px;
+        }
+        #errorMessage {
+            display: none;
+            margin-bottom: 1rem;
+        }
+        .btn-primary {
+            background-color: #e23c3c;
+            border-color: #e23c3c;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #c31432;
+            border-color: #c31432;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .card-body {
+            padding: 0;
+        }
+        .form-control-user {
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .form-control-user:focus {
+            border-color: #e23c3c;
+            box-shadow: 0 0 0 0.2rem rgba(226, 60, 60, 0.25);
+        }
+        .container {
+            margin-top: -3rem;
+        }

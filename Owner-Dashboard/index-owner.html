@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>SIE-SRC - Owner Dashboard</title>
+    <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+      rel="stylesheet" />
+  
+    <!-- Custom styles for this template-->
+    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="../css/owner-sidebar.css" rel="stylesheet">
+    
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index-owner.html">
+                <div class="sidebar-brand-icon">
+                  <img src="../img/Logo_SRC-removebg-preview.png" alt="SRC Logo" class="sidebar-logo" />
+                </div>
+                <div class="sidebar-brand-text mx-3">SIE-SRC Sarin Jagir</div>
+              </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="index-owner.html">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Beranda</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Menu Utama
+            </div>
+
+                   <!-- Nav Item - Cari Produk -->
+            <li class="nav-item">
+                <a class="nav-link" href="cari-produk.html">
+                    <i class="fas fa-fw fa-search"></i>
+                    <span>Cari Produk</span>
+                </a>
+            </li>
+    
+            <!-- Nav Item - Laporan Penjualan -->
+            <li class="nav-item">
+                <a class="nav-link" href="laporan.html">
+                    <i class="fas fa-fw fa-chart-line"></i>
+                    <span>Laporan Penjualan</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Produk Terlaris -->
+            <li class="nav-item">
+                <a class="nav-link" href="cari-penjualan.html">
+                    <i class="fas fa-fw fa-trophy"></i>
+                    <span>Penjualan SRC Sarin Jagir</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content -->
+        <div id="content">
+          <!-- Topbar -->
+          <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+            <!-- Sidebar Toggle (Topbar) -->
+            <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+              <i class="fa fa-bars"></i>
+            </button>
+
+                              <!-- Topbar Navbar -->
+          <ul class="navbar-nav ml-auto">
+            <!-- Nav Item - User Information -->
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Owner</span>
+                <img class="img-profile rounded-circle" src="../img/undraw_profile.svg" />
+              </a>
+              <!-- Dropdown - User Information -->
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Keluar
+                </a>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+              
+                    <!-- Content Row -->
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                Total Penjualan</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalSales">Rp. 0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                Total Produk</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalProducts">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                Produk Terjual</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalProductsSales">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                Sisa Stok</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="sisaStok">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-warehouse fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-danger">Grafik Penjualan</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-area">
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-danger">Produk Terlaris</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                                        <canvas id="topProductsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Hak Cipta &copy; SIE-SRC 2024</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+  <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">
+            Siap untuk Keluar?
+          </h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Pilih "Keluar" di bawah ini jika Anda siap untuk mengakhiri sesi
+          Anda saat ini.
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">
+            Batal
+          </button>
+          <button class="btn btn-primary" type="button" id="logoutButton">
+            Keluar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api } from "../js/api.js";
+
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      if (!token || !role || role !== "owner") {
+        window.location.href = "../login.html";
+        return false;
+      }
+      return true;
+    }
+
+    // Format currency in Indonesian Rupiah
+    function formatRupiah(number) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(number);
+    }
+
+    // Fungsi untuk mengambil data pengguna aktif, total produk, dan total penjualan
+    async function fetchDashboardData() {
+      if (!checkAuth()) return;
+
+      try {
+        // Fetch products
+        const productsResponse = await api.products.getAll();
+        const productCountElement = document.getElementById('totalProducts');
+
+        if (productsResponse.success && productsResponse.data) {
+          const products = Array.isArray(productsResponse.data)
+            ? productsResponse.data
+            : (Array.isArray(productsResponse.data.data)
+              ? productsResponse.data.data
+              : []);
+
+          if (productCountElement) {
+            productCountElement.textContent = products.length.toString();
+          }
+        } else {
+          if (productCountElement) {
+            productCountElement.textContent = "0";
+          }
+          console.error("Failed to fetch products:", productsResponse.error);
+        }
+
+        /// Fetch sales
+        const salesResponse = await api.sales.getAll();
+        console.log('Sales Response:', salesResponse); // Log respon
+
+        const salesElement = document.getElementById('totalSales');
+
+        if (salesResponse.success && salesResponse.data) {
+          const sales = Array.isArray(salesResponse.data)
+            ? salesResponse.data
+            : (Array.isArray(salesResponse.data.data)
+              ? salesResponse.data.data
+              : []);
+
+          console.log('Sales Data:', sales); // Log data penjualan
+
+          // Calculate total sales
+          const totalSales = sales.reduce((total, sale) => {
+            console.log('Current Sale:', sale); // Log setiap penjualan
+            return total + (sale.total || 0); // Pastikan menggunakan field yang benar
+          }, 0);
+
+          if (salesElement) {
+            salesElement.textContent = formatRupiah(totalSales);
+          }
+        } else {
+          if (salesElement) {
+            salesElement.textContent = formatRupiah(0);
+          }
+          console.error("Failed to fetch sales:", salesResponse.error);
+        }
+
+        console.log('Fetching products sales...');
+        const productsSalesResponse = await api.products.getAll();
+        console.log('Products Sales Response:', productsSalesResponse);
+        const productSalesCountElement = document.getElementById('totalProductsSales');
+
+        let totalProductsSold = 0;
+        if (productsSalesResponse.success && productsSalesResponse.data) {
+          const products = Array.isArray(productsSalesResponse.data)
+            ? productsSalesResponse.data
+            : (Array.isArray(productsSalesResponse.data.data)
+              ? productsSalesResponse.data.data
+              : []);
+
+          products.forEach(product => {
+            totalProductsSold += product.sold || 0;
+          });
+
+          if (productSalesCountElement) {
+            productSalesCountElement.textContent = totalProductsSold.toString();
+          }
+        } else {
+          if (productSalesCountElement) {
+            productSalesCountElement.textContent = "0";
+          }
+          console.error("Failed to fetch products sales:", productsSalesResponse.error);
+        }
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+
+        // Update elements to show 0 if there's an error
+        const productCountElement = document.getElementById('totalProducts');
+        const productSalesCountElement = document.getElementById('totalProductsSales');
+        const salesElement = document.getElementById('totalSales');
+
+        if (productCountElement) productCountElement.textContent = "0";
+        if (productSalesCountElement) productSalesCountElement.textContent = "0"; 
+        if (salesElement) salesElement.textContent = formatRupiah(0);
+     }
+    }
+
+    // Panggil fungsi saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', fetchDashboardData);
+  </script>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  
+    <!-- Custom scripts for all pages-->
+    <script src="../js/sb-admin-2.min.js"></script>
+  
+    <!-- Page level plugins -->
+    <script src="../vendor/chart.js/Chart.min.js"></script>
+  
+    <!-- Logout handling -->
+    <script>
+      document
+        .getElementById("logoutButton")
+        .addEventListener("click", function () {
+          localStorage.clear();
+          window.location.href = "../login.html";
+        });
+    </script>  
+
+</body>
+
+</html>
+
+
+

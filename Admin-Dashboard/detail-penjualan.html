@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <meta name="description" content="SIE-SRC Product Management">
+      <meta name="author" content="">
+      
+        <title>SIE-SRC | Detail Penjualan</title>
+    
+        <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    
+        <!-- Custom styles -->
+        <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+        <link href="../css/sie-src-theme.css" rel="stylesheet">
+    
+    </head>
+
+  <body id="page-top">
+    <div id="wrapper">
+      <!-- Sidebar -->
+      <ul
+        class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+        id="accordionSidebar"
+      >
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index-admin.html">
+          <div class="sidebar-brand-icon">
+              <img
+                  src="../img/Logo_SRC-removebg-preview.png"
+                  alt="SRC Logo"
+                  class="sidebar-logo"
+              />
+          </div>
+          <div class="sidebar-brand-text mx-3">SIE-SRC Sarin Jagir</div>
+      </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0" />
+
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item">
+          <a class="nav-link" href="index-admin.html">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider" />
+
+        <!-- Heading -->
+        <div class="sidebar-heading">Data Management</div>
+
+        <!-- Nav Item - Penjualan -->
+        <li class="nav-item active">
+          <a class="nav-link" href="penjualan.html">
+            <i class="fas fa-fw fa-shopping-cart"></i>
+            <span>Manajemen Penjualan</span>
+          </a>
+        </li>
+      </ul>
+      <!-- End of Sidebar -->
+
+      <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+          <!-- Topbar -->
+          <nav
+            class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"
+          >
+            <!-- Sidebar Toggle (Topbar) -->
+            <button
+              id="sidebarToggleTop"
+              class="btn btn-link d-md-none rounded-circle mr-3"
+            >
+              <i class="fa fa-bars"></i>
+            </button>
+
+            <!-- Topbar Navbar -->
+            <ul class="navbar-nav ml-auto">
+              <div class="topbar-divider d-none d-sm-block"></div>
+
+              <!-- Nav Item - User Information -->
+              <li class="nav-item dropdown no-arrow">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  id="userDropdown"
+                  role="button"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <span
+                    class="mr-2 d-none d-lg-inline text-gray-600 small"
+                    id="username"
+                    >Admin</span
+                  >
+                  <img
+                    class="img-profile rounded-circle"
+                    src="../img/undraw_profile.svg"
+                  />
+                </a>
+                <!-- Dropdown - User Information -->
+                <div
+                  class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                  aria-labelledby="userDropdown"
+                >
+                  <a class="dropdown-item" href="#" id="logoutButton">
+                    <i
+                      class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"
+                    ></i>
+                    Logout
+                  </a>
+                </div>
+              </li>
+            </ul>
+          </nav>
+          <!-- End of Topbar -->
+
+          <div class="container-fluid">
+            <!-- Page Heading -->
+            <h1 class="h3 mb-2 text-gray-800">Detail Penjualan</h1>
+            <p class="mb-4">Informasi lengkap mengenai transaksi penjualan</p>
+
+            <!-- Detail Penjualan Card -->
+            <div class="card shadow mb-4">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                  Informasi Penjualan
+                </h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-4">
+                  <div class="col-md-6">
+                    <p>
+                      <strong>ID Penjualan:</strong>
+                      <span id="detail-id"></span>
+                    </p>
+                    <p>
+                      <strong>Nama Penjual:</strong>
+                      <span id="detail-nama"></span>
+                    </p>
+                    <p>
+                      <strong>Tanggal:</strong>
+                      <span id="detail-tanggal"></span>
+                    </p>
+                  </div>
+                  <div class="col-md-6 text-right">
+                    <p>
+                      <strong>Total Penjualan:</strong>
+                      <span id="detail-total"></span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Detail Produk Table -->
+                <div class="table-responsive">
+                  <table
+                    class="table table-bordered"
+                    width="100%"
+                    cellspacing="0"
+                  >
+                    <thead>
+                      <tr>
+                        <th>ID Produk</th>
+                        <th>Nama Produk</th>
+                        <th>Jumlah</th>
+                        <th>Harga</th>
+                        <th>Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detail-produk-body">
+                      <!-- Data produk akan diisi melalui JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tombol Kembali -->
+            <div class="text-center mb-4">
+              <a href="penjualan.html" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Kembali ke Daftar Penjualan
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+          <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+              <span>Copyright &copy; SIE-SRC 2024</span>
+            </div>
+          </div>
+        </footer>
+        <!-- End of Footer -->
+      </div>
+    </div>
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="../js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="../vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Custom scripts for detail penjualan -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            // Set username from localStorage
+            const username = localStorage.getItem('username');
+            if (username) {
+                document.getElementById('username').textContent = username;
+            }
+
+            // Ambil ID penjualan dari URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                window.location.href = 'penjualan.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8080/penjualan/by-id/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Response data:', data); // Debug log
+
+                if (data && data.data) {
+                    const penjualan = data.data;
+                    document.getElementById('detail-id').textContent = penjualan.id_penjualan || '-';
+                    document.getElementById('detail-nama').textContent = penjualan.nama_penjual || '-';
+                    document.getElementById('detail-tanggal').textContent = penjualan.tanggal ? 
+                        moment(penjualan.tanggal).format('DD/MM/YYYY HH:mm:ss') : '-';
+                    document.getElementById('detail-total').textContent = penjualan.total ? 
+                        'Rp ' + formatRupiah(penjualan.total) : '-';
+
+                    const produkBody = document.getElementById('detail-produk-body');
+                    produkBody.innerHTML = '';
+                    
+                    if (penjualan.produk && penjualan.produk.length > 0) {
+                        penjualan.produk.forEach(item => {
+                            const row = `<tr>
+                                <td>${item.id_produk || '-'}</td>
+                                <td>${item.nama_produk || '-'}</td>
+                                <td>${item.jumlah_produk || '0'}</td>
+                                <td>Rp ${formatRupiah(item.harga || 0)}</td>
+                                <td>Rp ${formatRupiah(item.subtotal || 0)}</td>
+                            </tr>`;
+                            produkBody.innerHTML += row;
+                        });
+                    } else {
+                        produkBody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data produk</td></tr>';
+                    }
+                } else {
+                    console.error('Invalid data format:', data);
+                    document.getElementById('detail-produk-body').innerHTML = 
+                        '<tr><td colspan="4" class="text-center">Data tidak tersedia</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('detail-produk-body').innerHTML = 
+                    '<tr><td colspan="4" class="text-center">Terjadi kesalahan saat memuat data</td></tr>';
+            }
+        });
+
+        // Fungsi untuk format rupiah
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID').format(angka);
+        }
+
+        // Event handler untuk logout
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            window.location.href = '../index-admin.html';
+        });
+    </script>
+  </body>
+</html>

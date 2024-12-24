@@ -1,0 +1,186 @@
+/* Custom styles for the dashboard */
+
+/* Sidebar logo */
+.sidebar-logo {
+  width: 50px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Card hover effects */
+.card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Chart containers */
+.chart-area {
+  height: 20rem;
+  position: relative;
+}
+
+.chart-pie {
+  height: 15rem;
+  position: relative;
+}
+
+/* Table styles */
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4e73df;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #224abe;
+}
+
+/* Card animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-area {
+    height: 15rem;
+  }
+
+  .chart-pie {
+    height: 12rem;
+  }
+}
+
+/* Status indicators */
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.status-success {
+  background-color: #1cc88a;
+}
+
+.status-warning {
+  background-color: #f6c23e;
+}
+
+.status-danger {
+  background-color: #e74a3b;
+}
+
+/* Card header improvements */
+.card-header {
+  background-color: #f8f9fc;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+/* Table header styling */
+.table thead th {
+  background-color: #f8f9fc;
+  border-bottom: 2px solid #e3e6f0;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+/* Improved button styles */
+.btn-primary {
+  box-shadow: 0 2px 4px rgba(78, 115, 223, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(78, 115, 223, 0.4);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4e73df;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #858796;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #dddfeb;
+}
+
+/* Card value emphasis */
+.card .h5 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Improved dropdown styling */
+.dropdown-menu {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: none;
+  border-radius: 0.35rem;
+}
+
+.dropdown-item:hover {
+  background-color: #4e73df;
+  color: white;
+}
+
+/* Chart tooltips */
+.chartjs-tooltip {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  border: 1px solid #e3e6f0;
+}
