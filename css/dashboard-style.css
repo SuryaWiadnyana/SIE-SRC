@@ -7,24 +7,13 @@
   object-fit: contain;
 }
 
-/* Card hover effects */
+Card hover effects
 .card {
   transition: transform 0.2s ease-in-out;
 }
 
 .card:hover {
   transform: translateY(-5px);
-}
-
-/* Chart containers */
-.chart-area {
-  height: 20rem;
-  position: relative;
-}
-
-.chart-pie {
-  height: 15rem;
-  position: relative;
 }
 
 /* Table styles */
@@ -183,4 +172,31 @@
   padding: 8px 12px;
   font-size: 0.875rem;
   border: 1px solid #e3e6f0;
+}
+
+/* Recommendation section styles */
+.recommendation-row {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.recommendation-section {
+    padding: 10px 15px;
+    margin: 5px 0;
+}
+
+.recommendation-section h6 {
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.recommendation-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.recommendation-list li {
+    padding: 3px 0;
+    color: #495057;
 }

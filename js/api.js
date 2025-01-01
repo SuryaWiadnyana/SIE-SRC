@@ -511,5 +511,34 @@ export const api = {
     products,
     sales,
     users,
+    algoritma: {
+        getRekomendasiProduk: async (transactions, product, minSupport) => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Tidak terautentikasi');
+                }
+
+                const response = await fetch(`${BASE_URL}/algoritma/rekomendasi`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        transactions: transactions,
+                        product: product,
+                        minSupport: minSupport
+                    })
+                });
+
+                const data = await handleResponse(response);
+                return { success: true, data };
+            } catch (error) {
+                console.error('Get recommendations error:', error);
+                return { success: false, error: error.message };
+            }
+        }
+    }
 };
 

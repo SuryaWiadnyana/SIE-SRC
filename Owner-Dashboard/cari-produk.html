@@ -33,7 +33,7 @@
                         class="sidebar-logo"
                     />
                 </div>
-                <div class="sidebar-brand-text mx-3">SIE-SRC Sarin Jagir</div>
+                <div class="sidebar-brand-text mx-3">SIE SRC Sarin Jagir</div>
             </a>
 
             <!-- Divider -->
@@ -57,9 +57,9 @@
 
             <!-- Nav Item - Products -->
             <li class="nav-item active">
-                <a class="nav-link" href="produk.html">
-                    <i class="fas fa-fw fa-box"></i>
-                    <span>Manajemen Produk</span>
+                <a class="nav-link" href="cari-produk.html">
+                    <i class="fas fa-fw fa-search"></i>
+                    <span>Cari Produk</span>
                 </a>
             </li>
             <!-- Divider -->
@@ -112,7 +112,7 @@
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Manajemen Produk</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Cari Produk</h1>
                     </div>
 
                     <!-- Search Box -->
@@ -149,6 +149,29 @@
                                     </thead>
                                     <tbody>
                                         <!-- Product data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations Section -->
+                    <div class="card shadow mb-4" id="recommendationsSection" style="display: none;">
+                        <div class="card-header py-3">
+                            <h4 class="m-0 font-weight-bold text-primary">Rekomendasi Produk</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="recommendationsTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>ID Produk</th>
+                                            <th>Nama Produk</th>
+                                            <th>Support</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Recommendations data will be loaded here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -213,16 +236,19 @@
     <script src="../js/sb-admin-2.min.js"></script>
     <script type="module" src="../js/cari-produk.js"></script>
 
-    <!-- Logout handler -->
-    <script>
-        document.getElementById('logoutButton').addEventListener('click', function() {
-            localStorage.clear();
-        });
-    </script>
-
     <!-- XLSX library for Excel file handling -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Logout handler -->
+    <!-- Logout handling -->
+    <script>
+        document
+          .getElementById("logoutButton")
+          .addEventListener("click", function () {
+            localStorage.clear();
+            window.location.href = "../login.html";
+          });
+      </script>  
 </body>
 
 </html>
-
