@@ -90,15 +90,21 @@ func startHTTPServer() {
 	}
 	algoritmaRepo := repository.NewMongoAlgoritmaRepo(algoritmaData, 10*time.Second) // Tambahkan argumen sesuai definisi
 
-	// Produk Repository dan Use Case route
+	// Produk Repository
 	produkRepo := repository.NewMongoRepoProduk(db)
-	produkUseCase := usecase.NewUseCaseProduk(produkRepo, algoritmaRepo, 10*time.Second)
-	delivery.NewHttpDeliveryProduk(app, produkUseCase)
 
 	// Penjualan Repository dan Use Case route
 	penjualanRepo := repository.NewMongoRepoPenjualan(db, produkRepo)
 	penjualanUseCase := usecase.NewUseCasePenjualan(penjualanRepo, 10*time.Second)
 	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase)
+
+	// Produk Use Case route
+	produkUseCase := usecase.NewUseCaseProduk(produkRepo, algoritmaRepo, penjualanRepo, 10*time.Second)
+	delivery.NewHttpDeliveryProduk(app, produkUseCase)
+
+	// Algoritma Use Case and Handler
+	algoritmaUseCase := usecase.NewAlgoritmaUsecase(algoritmaRepo)
+	delivery.NewAlgoritmaHandler(app, algoritmaUseCase)
 
 	// Signal handling for graceful shutdown
 	quit := make(chan os.Signal, 1)

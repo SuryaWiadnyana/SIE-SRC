@@ -7,28 +7,60 @@ import (
 )
 
 type ProdukUseCase struct {
-	ProdukRepository    domain.ProdukRepository
-	AlgoritmaRepository domain.AlgoritmaRepository
-	contextTimeout      time.Duration
+	ProdukRepository     domain.ProdukRepository
+	AlgoritmaRepository  domain.AlgoritmaRepository
+	PenjualanRepository  domain.PenjualanRepository
+	contextTimeout       time.Duration
 }
 
-func NewUseCaseProduk(PR domain.ProdukRepository, AR domain.AlgoritmaRepository, T time.Duration) domain.ProdukUseCase {
+func NewUseCaseProduk(PR domain.ProdukRepository, AR domain.AlgoritmaRepository, PJR domain.PenjualanRepository, T time.Duration) domain.ProdukUseCase {
 	return &ProdukUseCase{
 		ProdukRepository:    PR,
 		AlgoritmaRepository: AR,
+		PenjualanRepository: PJR,
 		contextTimeout:      T,
 	}
 }
 
-func (uc *ProdukUseCase) GetRekomendasiProduk(Ctx context.Context, transaksi [][]string, produk string, minSupport float64) ([]domain.Algoritma, error) {
-	_, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+func (uc *ProdukUseCase) GetRekomendasiProduk(Ctx context.Context, produk string, minSupport float64) ([]domain.Algoritma, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 
-	// Memanggil AlgoritmaRepository untuk mendapatkan rekomendasi produk
-	rekomendasi := uc.AlgoritmaRepository.GetRekomendasiProduk(transaksi, produk, minSupport)
+	// Get all sales data
+	sales, err := uc.PenjualanRepository.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	// Anda tidak perlu memeriksa error di sini karena tidak ada error yang dikembalikan
-	return rekomendasi, nil
+	// Transform sales data into transaction format
+	var transactions [][]string
+	for _, sale := range sales {
+		var items []string
+		for _, product := range sale.Produk {
+			items = append(items, product.IDProduk)
+		}
+		transactions = append(transactions, items)
+	}
+
+	// Get recommendations using the algorithm
+	rules := uc.AlgoritmaRepository.GetRekomendasiProduk(transactions, produk, minSupport)
+
+	// Convert rules to product recommendations
+	var recommendations []domain.Algoritma
+	for _, rule := range rules {
+		// Skip if no recommended items
+		if len(rule.Items) == 0 {
+			continue
+		}
+		
+		// Add recommendation
+		recommendations = append(recommendations, domain.Algoritma{
+			Items:   rule.Items,
+			Support: rule.Support,
+		})
+	}
+
+	return recommendations, nil
 }
 
 func (uc *ProdukUseCase) GetAllProduk(Ctx context.Context) ([]domain.Produk, error) {
