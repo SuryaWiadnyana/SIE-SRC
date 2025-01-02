@@ -107,9 +107,41 @@ async function loadProductRecommendations(productId) {
         
         if (result.success && result.data && result.data.length > 0) {
             const recommendationList = document.getElementById(`recommendations-${productId}`);
-            recommendationList.innerHTML = result.data.map(rec => `
-                <li>${rec.Items.join(', ')} (${(rec.Support * 100).toFixed(1)}%)</li>
-            `).join('');
+            
+            // Get product details for recommendations
+            const productDetails = await Promise.all(
+                result.data.flatMap(rec => 
+                    rec.Items.map(async productId => {
+                        try {
+                            const productResult = await api.products.getById(productId);
+                            if (productResult.success) {
+                                return {
+                                    id: productId,
+                                    name: productResult.data.nama_produk,
+                                    support: rec.Support
+                                };
+                            }
+                        } catch (error) {
+                            console.error('Error fetching product details:', error);
+                        }
+                        return null;
+                    })
+                )
+            );
+
+            // Filter out null values and format recommendations
+            const validRecommendations = productDetails.filter(rec => rec !== null);
+            
+            if (validRecommendations.length > 0) {
+                recommendationList.innerHTML = validRecommendations.map(rec => `
+                    <li>
+                        ${rec.name} 
+                        <span class="text-muted">(${(rec.support * 100).toFixed(1)}%)</span>
+                    </li>
+                `).join('');
+            } else {
+                recommendationList.innerHTML = '<li>Tidak ada rekomendasi ditemukan</li>';
+            }
         } else {
             const recommendationList = document.getElementById(`recommendations-${productId}`);
             recommendationList.innerHTML = '<li>Tidak ada rekomendasi ditemukan</li>';
