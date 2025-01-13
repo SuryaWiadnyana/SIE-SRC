@@ -63,8 +63,8 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 	// Set default values and validate each penjualan
 	for i := range penjualanList {
 		// Set creation time if not provided
-		if penjualanList[i].Tanggal.IsZero() {
-			penjualanList[i].Tanggal = time.Now()
+		if penjualanList[i].Tanggal_Penjualan.IsZero() {
+			penjualanList[i].Tanggal_Penjualan = time.Now()
 		}
 
 		// Basic validation for each sale
@@ -93,7 +93,7 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 					"message": fmt.Sprintf("Product at index %d in sale %d has invalid quantity", j, i),
 				})
 			}
-			total += prod.Harga * prod.JumlahProduk
+			total += prod.HargaProduk * prod.JumlahProduk
 		}
 
 		// Set the total

@@ -6,15 +6,15 @@ import (
 )
 
 type Penjual struct {
-	NamaPenjual string    `json:"nama_penjual" bson:"nama_penjual"`
-	Tanggal     time.Time `json:"tanggal" bson:"tanggal" `
+	NamaPenjual       string    `json:"nama_penjual" bson:"nama_penjual"`
+	Tanggal_Penjualan time.Time `json:"tanggal_penjualan" bson:"tanggal_penjualan" `
 }
 
 type ProdukJual struct {
 	IDProduk     string `json:"id_produk" bson:"id_produk"`
 	NamaProduk   string `json:"nama_produk" bson:"nama_produk"`
 	JumlahProduk int    `json:"jumlah_produk" bson:"jumlah_produk"`
-	Harga        int    `json:"harga" bson:"harga"`
+	HargaProduk  int    `json:"harga_produk" bson:"harga_produk"`
 	Subtotal     int    `json:"subtotal" bson:"subtotal"`
 }
 

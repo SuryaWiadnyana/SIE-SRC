@@ -110,15 +110,15 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 					return fmt.Errorf("gagal mengurangi stok: %v", err)
 				}
 
-				bd[i].Produk[j].Harga = produk.Harga
-				bd[i].Produk[j].Subtotal = produk.Harga * item.JumlahProduk
+				bd[i].Produk[j].HargaProduk = produk.HargaProduk
+				bd[i].Produk[j].Subtotal = produk.HargaProduk * item.JumlahProduk
 				total += bd[i].Produk[j].Subtotal
 			}
 
 			bd[i].Total = total
 			bd[i].UpdatedAt = time.Now()
-			if bd[i].Tanggal.IsZero() {
-				bd[i].Tanggal = time.Now()
+			if bd[i].Tanggal_Penjualan.IsZero() {
+				bd[i].Tanggal_Penjualan = time.Now()
 			}
 
 			PenjualanDocs = append(PenjualanDocs, bd[i])
@@ -248,7 +248,7 @@ func (rp *mongoRepoPenjualan) Update(ctx context.Context, bd *domain.Penjualan) 
 				return fmt.Errorf("gagal mengurangi stok produk %s: %v", item.IDProduk, err)
 			}
 
-			total += produk.Harga * item.JumlahProduk
+			total += produk.HargaProduk * item.JumlahProduk
 		}
 
 		// Update penjualan
@@ -257,11 +257,11 @@ func (rp *mongoRepoPenjualan) Update(ctx context.Context, bd *domain.Penjualan) 
 
 		update := bson.M{
 			"$set": bson.M{
-				"nama_penjual": bd.NamaPenjual,
-				"tanggal":      bd.Tanggal,
-				"produk":       bd.Produk,
-				"total":        bd.Total,
-				"updated_at":   bd.UpdatedAt,
+				"nama_penjual":      bd.NamaPenjual,
+				"Tanggal_Penjualan": bd.Tanggal_Penjualan,
+				"produk":            bd.Produk,
+				"total":             bd.Total,
+				"updated_at":        bd.UpdatedAt,
 			},
 		}
 

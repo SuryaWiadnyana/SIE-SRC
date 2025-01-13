@@ -240,7 +240,7 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				Kategori:    strings.TrimSpace(record[1]),
 				SubKategori: strings.TrimSpace(record[2]),
 				KodeProduk:  strings.TrimSpace(record[3]),
-				Harga:       harga,
+				HargaProduk: harga,
 				Stok:        stok,
 			}
 			produkList = append(produkList, produk)
@@ -296,7 +296,7 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				Kategori:    strings.TrimSpace(row[1]),
 				SubKategori: strings.TrimSpace(row[2]),
 				KodeProduk:  strings.TrimSpace(row[3]),
-				Harga:       harga,
+				HargaProduk: harga,
 				Stok:        stok,
 			}
 			produkList = append(produkList, produk)
