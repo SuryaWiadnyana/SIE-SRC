@@ -266,7 +266,7 @@
                 if (data && data.data) {
                     const penjualan = data.data;
                     document.getElementById('detail-id').textContent = penjualan.id_penjualan || '-';
-                    document.getElementById('detail-nama').textContent = penjualan.nama_penjual || '-';
+                    document.getElementById('detail-nama').textContent = penjualan.username || '-';
                     document.getElementById('detail-tanggal').textContent = penjualan.tanggal ? 
                         moment(penjualan.tanggal).format('DD/MM/YYYY HH:mm:ss') : '-';
                     document.getElementById('detail-total').textContent = penjualan.total ? 

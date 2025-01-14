@@ -17,7 +17,7 @@ let activeFilters = {
 
 // Predefined categories and sub-categories
 const PRODUCT_CATEGORIES = {
-    'Makanan': ['Makanan Ringan', 'Makanan Instan', 'Bumbu Dapur', 'Bahan Masakan'],
+    'Makanan': ['Makanan Ringan', 'Makanan Berat', 'Makanan Instan', 'Bumbu Dapur', 'Bahan Masakan'],
     'Minuman': ['Air Mineral', 'Minuman Bersoda', 'Minuman Kemasan', 'Kopi & Teh'],
     'Kebutuhan Rumah Tangga': ['Pembersih', 'Peralatan Rumah', 'Perlengkapan Mandi', 'Deterjen'],
     'Kesehatan & Kecantikan': ['Obat-obatan', 'Perawatan Wajah', 'Perawatan Tubuh', 'Vitamin'],
@@ -258,7 +258,7 @@ function displayProducts(products = []) {
             <td>${product.kategori || '-'}</td>
             <td>${product.sub_kategori || '-'}</td>
             <td>${product.barcode_produk || '-'}</td>
-            <td>${formatCurrency(product.harga) || '-'}</td>
+            <td>${formatCurrency(product.harga_produk) || '-'}</td>
             <td>${product.stok_barang || '0'}</td>
             <td>
                 <button class="btn btn-info btn-sm edit-product" data-id="${product.id_produk}">
@@ -327,7 +327,7 @@ async function handleAddProduct(e) {
             kategori: formData.get('kategori'),
             sub_kategori: formData.get('sub_kategori'),
             barcode_produk: formData.get('barcode_produk'),
-            harga: parseInt(formData.get('harga')),
+            harga_produk: parseInt(formData.get('harga_produk')),
             stok_barang: parseInt(formData.get('stok_barang'))
         };
         
@@ -364,7 +364,7 @@ async function handleUpdateProduct(e) {
             kategori: document.getElementById('update_kategori').value,
             sub_kategori: document.getElementById('update_sub_kategori').value,
             barcode_produk: document.getElementById('update_barcode_produk').value,
-            harga: parseInt(document.getElementById('update_harga').value) || 0,
+            harga_produk: parseInt(document.getElementById('update_harga_produk').value) || 0,
             stok_barang: parseInt(document.getElementById('update_stok_barang').value) || 0
         };
         
@@ -435,7 +435,7 @@ async function handleEditClick(event) {
             kategori: cells[2].textContent,
             sub_kategori: cells[3].textContent,
             barcode_produk: cells[4].textContent,
-            harga: parseInt(cells[5].textContent.replace(/[^\d]/g, '')),
+            harga_produk: parseInt(cells[5].textContent.replace(/[^\d]/g, '')),
             stok_barang: parseInt(cells[6].textContent)
         };
 
@@ -451,7 +451,7 @@ async function handleEditClick(event) {
         document.getElementById('update_id_produk').value = product.id_produk;
         document.getElementById('update_nama_produk').value = product.nama_produk;
         document.getElementById('update_barcode_produk').value = product.barcode_produk;
-        document.getElementById('update_harga').value = product.harga;
+        document.getElementById('update_harga_produk').value = product.harga_produk;
         document.getElementById('update_stok_barang').value = product.stok_barang;
 
         // Handle kategori
@@ -600,7 +600,11 @@ async function handleImportData(e) {
     try {
         const result = await api.products.importData(formData);
         if (result.success) {
-            showAlert(`Berhasil mengimpor ${result.count || 0} produk`, 'success');
+            let message = `Berhasil mengimpor ${result.count || 0} produk`;
+            if (result.skipped && result.skipped.length > 0) {
+                message += `, ${result.skipped.length} produk dilewati karena duplikat`;
+            }
+            showAlert(message, 'success');
             await loadProducts();
             $('#importDataModal').modal('hide');
             document.getElementById('importDataForm').reset();

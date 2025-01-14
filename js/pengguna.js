@@ -36,7 +36,7 @@ function displayUsers(users) {
 
     users.forEach(user => {
         // Pastikan user.id ada
-        const userId = user.id || user._id;
+        const userId = user.id_user || user.id_user;
         if (!userId) {
             console.error('User tidak memiliki ID:', user);
             return;
@@ -54,7 +54,7 @@ function displayUsers(users) {
                 </button>
                 <button class="btn btn-danger btn-sm delete-user" 
                     data-username="${user.username}"
-                    data-id="${userId}">
+                    data-id_user="${userId}">
                     <i class="fas fa-trash"></i> Hapus
                 </button>
             </td>
@@ -158,7 +158,7 @@ if (editUserForm) {
 function handleDeleteClick(e) {
     const button = e.currentTarget;
     const username = button.dataset.username;
-    const id = button.dataset.id;
+    const id = button.dataset.id_user;
     
     if (!id) {
         showAlert('ID pengguna tidak valid', 'danger');

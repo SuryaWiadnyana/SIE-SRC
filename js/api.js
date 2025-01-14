@@ -167,14 +167,14 @@ const users = {
         }
     },
 
-    delete: async (id) => {
+    delete: async (id_user) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Tidak terautentikasi');
             }
 
-            const response = await fetch(`${BASE_URL}/user/admin/delete-user/${id}`, {
+            const response = await fetch(`${BASE_URL}/user/admin/delete-user/${id_user}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

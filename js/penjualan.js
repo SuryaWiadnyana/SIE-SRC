@@ -12,7 +12,7 @@ $(document).ready(function() {
     // Initialize DataTable
     table = $('#tabelPenjualan').DataTable({
         ajax: {
-            url: 'http://localhost:8080/penjualan/getall',
+            url: 'http://localhost:8080/penjualan',
             type: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -187,7 +187,7 @@ $(document).ready(function() {
         const subtotalInput = row.find('.subtotal');
         
         const selectedOption = select.find('option:selected');
-        const price = parseInt(selectedOption.data('harga')) || 0;
+        const price = parseInt(selectedOption.data('harga_produk')) || 0;
         const quantity = parseInt(quantityInput.val()) || 0;
         
         if (price && quantity) {
@@ -207,7 +207,7 @@ $(document).ready(function() {
             const select = row.find('.select-produk');
             const quantity = parseInt(row.find('.quantity').val()) || 0;
             const selectedOption = select.find('option:selected');
-            const price = parseInt(selectedOption.data('harga')) || 0;
+            const price = parseInt(selectedOption.data('harga_produk')) || 0;
             
             if (quantity && price) {
                 total += quantity * price;
@@ -226,13 +226,13 @@ $(document).ready(function() {
             const selectedOption = select.find('option:selected');
             const productId = select.val();
             const quantity = parseInt(row.find('.quantity').val()) || 0;
-            const price = parseInt(selectedOption.data('harga')) || 0;
+            const price = parseInt(selectedOption.data('harga_produk')) || 0;
             
             if (productId && quantity > 0 && price > 0) {
                 products.push({
                     id_produk: productId,
                     jumlah_produk: quantity,
-                    harga: price,
+                    harga_produk: price,
                     subtotal: quantity * price
                 });
             }
@@ -364,8 +364,8 @@ $(document).ready(function() {
             produk: products.map(p => ({
                 id_produk: p.id_produk,
                 nama_produk: $(`select option[value='${p.id_produk}']`).text(),
-                jumlah_produk: p.jumlah_produk,
-                harga: p.harga,
+                    jumlah_produk: p.jumlah_produk,
+                harga_produk: p.harga_produk,
                 subtotal: p.subtotal
             })),
             total: total,
@@ -434,7 +434,7 @@ $(document).ready(function() {
                     const row = `<tr>
                                     <td>${item.nama_produk}</td>
                                     <td>${item.jumlah}</td>
-                                    <td>Rp ${formatRupiah(item.harga)}</td>
+                                    <td>Rp ${formatRupiah(item.harga_produk)}</td>
                                     <td>Rp ${formatRupiah(item.subtotal)}</td>
                                  </tr>`;
                     produkBody.innerHTML += row;
@@ -544,12 +544,12 @@ $(document).ready(function() {
                 
                 // Tambahkan opsi baru
                 produkData.forEach(produk => {
-                    const harga = parseInt(produk.harga) || 0;
+                    const harga_produk = parseInt(produk.harga_produk) || 0;
                     $('.select-produk').append(`
                         <option value="${produk.id_produk}" 
-                                data-harga="${harga}" 
+                                data-harga_produk="${harga_produk}" 
                                 data-stok="${produk.stok_barang || 0}">
-                            ${produk.nama_produk} - Rp ${formatRupiah(harga)}
+                            ${produk.nama_produk} - Rp ${formatRupiah(harga_produk)}
                         </option>
                     `);
                 });
@@ -617,14 +617,14 @@ $(document).ready(function() {
         
         const option = $(data.element);
         const stok = option.data('stok');
-        const harga = option.data('harga');
+        const harga_produk = option.data('harga_produk');
         
         return $(`
             <div class="d-flex justify-content-between">
                 <span>${data.text}</span>
                 <span>
                     <small class="text-muted mr-2">Stok: ${stok}</small>
-                    <small class="text-muted">Harga: Rp${formatRupiah(harga)}</small>
+                    <small class="text-muted">Harga: Rp${formatRupiah(harga_produk)}</small>
                 </span>
             </div>
         `);
@@ -703,7 +703,7 @@ function generatePDF(products, sales, reportType, startDate, endDate) {
                 body: products.map(product => [
                     product.id_produk,
                     product.nama_produk,
-                    `Rp ${formatRupiah(product.harga)}`,
+                    `Rp ${formatRupiah(product.harga_produk)}`,
                     product.stok_barang
                 ]),
                 startY: 20

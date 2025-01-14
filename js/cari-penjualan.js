@@ -38,7 +38,7 @@ $(document).ready(function() {
                 }
             },
             { data: 'id_penjualan' },
-            { data: 'nama_penjual' },
+            { data: 'username' },
             { 
                 data: 'total',
                 render: function(data) {
@@ -114,13 +114,13 @@ $(document).ready(function() {
             const selectedOption = select.find('option:selected');
             const productId = select.val();
             const quantity = parseInt(row.find('.quantity').val()) || 0;
-            const price = parseInt(selectedOption.data('harga')) || 0;
+            const price = parseInt(selectedOption.data('harga_produk')) || 0;
             
             if (productId && quantity > 0 && price > 0) {
                 products.push({
                     id_produk: productId,
                     jumlah_produk: quantity,
-                    harga: price,
+                    harga_produk: price,
                     subtotal: quantity * price
                 });
             }
@@ -267,7 +267,7 @@ function generatePDF(products, sales, reportType, startDate, endDate) {
                 body: products.map(product => [
                     product.id_produk,
                     product.nama_produk,
-                    `Rp ${formatRupiah(product.harga)}`,
+                    `Rp ${formatRupiah(product.harga_produk)}`,
                     product.stok_barang
                 ]),
                 startY: 20
@@ -276,21 +276,6 @@ function generatePDF(products, sales, reportType, startDate, endDate) {
             break;
 
         case 'penjualan':
-            doc.text(`Laporan Penjualan (${startDate} - ${endDate})`, 10, 10);
-            doc.autoTable({
-                head: [['ID Penjualan', 'Nama Penjual', 'Total', 'Tanggal']],
-                body: filteredSales.map(sale => [
-                    sale.id_penjualan,
-                    sale.nama_penjual,
-                    new Date(sale.tanggal).toLocaleDateString('id-ID')
-                    `Rp ${formatRupiah(sale.total)}`,
-                ]),
-                startY: 20
-            });
-            doc.save('laporan_penjualan.pdf');
-            break;
-
-        case 'pendapatan':
             const totalPendapatan = filteredSales.reduce((total, sale) => total + sale.total, 0);
             
             doc.text(`Laporan Pendapatan (${startDate} - ${endDate})`, 10, 10);
@@ -315,7 +300,7 @@ function generatePDF(products, sales, reportType, startDate, endDate) {
                 startY: doc.lastAutoTable.finalY + 20
             });
             
-            doc.save('laporan_pendapatan.pdf');
+            doc.save('laporan_penjualan.pdf');
             break;
     }
 }

@@ -281,7 +281,7 @@
                                 <td>${item.id_produk || '-'}</td>
                                 <td>${item.nama_produk || '-'}</td>
                                 <td>${item.jumlah_produk || '0'}</td>
-                                <td>Rp ${formatRupiah(item.harga || 0)}</td>
+                                <td>Rp ${formatRupiah(item.harga_produk || 0)}</td>
                                 <td>Rp ${formatRupiah(item.subtotal || 0)}</td>
                             </tr>`;
                             produkBody.innerHTML += row;

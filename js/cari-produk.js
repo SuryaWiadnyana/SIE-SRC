@@ -72,7 +72,7 @@ function displayProducts(products = []) {
             <td>${product.kategori || '-'}</td>
             <td>${product.sub_kategori || '-'}</td>
             <td>${product.barcode_produk || '-'}</td>
-            <td>${formatCurrency(product.harga) || '-'}</td>
+            <td>${formatCurrency(product.harga_produk) || '-'}</td>
             <td>${product.stok_barang || '0'}</td>  
         `;
         tbody.appendChild(row);
