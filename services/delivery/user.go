@@ -50,7 +50,7 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 	adminOnly.Use(middleware.AuthMiddleware("admin"))
 	adminOnly.Post("/register", handler.RegisterUser)
 	adminOnly.Put("/update/:username", handler.UpdateUser)
-	adminOnly.Delete("/delete-user/:id", handler.DeleteUser)
+	adminOnly.Delete("/delete-user/:id_user", handler.DeleteUser)
 }
 
 func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
@@ -176,7 +176,7 @@ func (d *HttpDeliveryUser) GetAll(c *fiber.Ctx) error {
 
 // DeleteUser handles deleting a user by ID.
 func (d *HttpDeliveryUser) DeleteUser(c *fiber.Ctx) error {
-	id := c.Params("id")
+	id := c.Params("id_user")
 
 	err := d.HTTP.DeleteUser(context.Background(), id)
 	if err != nil {
@@ -272,7 +272,7 @@ func (d *HttpDeliveryUser) RegisterFirstAdmin(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Failed to check existing users: %v", err),
 		})
-	}	
+	}
 
 	registeredUser, err := d.HTTP.RegisterUser(context.Background(), &user)
 	if err != nil {

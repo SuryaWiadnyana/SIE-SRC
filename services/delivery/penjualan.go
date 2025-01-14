@@ -88,12 +88,12 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 					"message": fmt.Sprintf("Product at index %d in sale %d is missing product ID", j, i),
 				})
 			}
-			if prod.JumlahProduk <= 0 {
+			if prod.Stok <= 0 { // Periksa apakah stok produk valid
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"message": fmt.Sprintf("Product at index %d in sale %d has invalid quantity", j, i),
+					"message": fmt.Sprintf("Product at index %d in sale %d has invalid stock", j, i),
 				})
 			}
-			total += prod.HargaProduk * prod.JumlahProduk
+			total += prod.HargaProduk * prod.Stok
 		}
 
 		// Set the total
@@ -174,7 +174,7 @@ func (d *HttpDeliveryPenjualan) Update(c *fiber.Ctx) error {
 			})
 		}
 
-		if item.JumlahProduk <= 0 {
+		if sale.JumlahProduk <= 0 {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 				"error":     "Kuantitas produk harus lebih dari 0",
 				"itemIndex": i,

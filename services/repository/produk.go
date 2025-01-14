@@ -145,7 +145,7 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 			"kategori":       bd.Kategori,
 			"sub_kategori":   bd.SubKategori,
 			"barcode_produk": bd.KodeProduk,
-			"harga_produk":   bd.HargaProduk,
+			"harga":          bd.HargaProduk,
 			"stok_barang":    bd.Stok,
 			"updated_at":     bd.UpdatedAt,
 		},
@@ -329,6 +329,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		// Cek duplikat barcode
 		if existingBarcodes[produk.KodeProduk] {
 			log.Printf("Skip produk #%d: barcode %s sudah ada", i+1, produk.KodeProduk)
+			log.Printf("Existing barcodes: %v", existingBarcodes)
 			skippedCount++
 			continue
 		}

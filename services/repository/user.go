@@ -5,15 +5,41 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type mongoRepoUser struct {
 	DB *mongo.Database
+}
+
+// Generates the next available ID for user
+func (rp *mongoRepoUser) GenerateNextID(ctx context.Context) (string, error) {
+	userCollection := rp.DB.Collection(_UserCollection)
+
+	opts := options.FindOne().SetSort(bson.M{"id_user": -1})
+	var lastUser domain.User
+
+	err := userCollection.FindOne(ctx, bson.M{}, opts).Decode(&lastUser)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "US001", nil
+		}
+		return "", fmt.Errorf("error finding last user: %v", err)
+	}
+
+	numStr := lastUser.IDUser[2:]
+	num, err := strconv.Atoi(numStr)
+	if err != nil {
+		return "", fmt.Errorf("error parsing last ID number: %v", err)
+	}
+
+	newID := fmt.Sprintf("US%03d", num+1)
+	return newID, nil
 }
 
 func NewMongoRepoUser(client *mongo.Database) domain.UserRepository {
@@ -27,10 +53,15 @@ var _UserCollection = "users"
 func (rp *mongoRepoUser) RegisterUser(ctx context.Context, user *domain.User) (domain.User, error) {
 	collection := rp.DB.Collection(_UserCollection)
 
-	// Log the registration attempt
+	// Check if the username already exists
+	existingUser, err := rp.GetUserByUsername(ctx, user.Username)
+	if err == nil && existingUser != nil {
+		return domain.User{}, fmt.Errorf("username %s sudah digunakan", user.Username)
+	}
+
 	log.Printf("Attempting to register user: %s", user.Username)
 
-	_, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	_, err = bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Printf("Error encrypting password for user %s: %v", user.Username, err)
 		return domain.User{}, fmt.Errorf("gagal mengenkripsi password: %v", err)
@@ -38,13 +69,21 @@ func (rp *mongoRepoUser) RegisterUser(ctx context.Context, user *domain.User) (d
 
 	// Log the password hashing success
 
-	result, err := collection.InsertOne(ctx, user)
+	// Generate ID if empty
+	if user.IDUser == "" {
+		nextID, err := rp.GenerateNextID(ctx)
+		if err != nil {
+			log.Printf("Failed to generate ID for user %s: %v", user.Username, err)
+			return domain.User{}, fmt.Errorf("gagal generate ID: %v", err)
+		}
+		user.IDUser = nextID
+	}
+
+	_, err = collection.InsertOne(ctx, user)
 	if err != nil {
 		log.Printf("Failed to insert user into the database: %v", err)
 		return domain.User{}, fmt.Errorf("gagal membuat user: %v", err)
 	}
-
-	user.ID = result.InsertedID.(primitive.ObjectID)
 
 	// Log user creation success
 	log.Printf("User registered successfully: %s", user.Username)
@@ -89,7 +128,7 @@ func (rp *mongoRepoUser) GetUserById(ctx context.Context, id string) (*domain.Us
 	collection := rp.DB.Collection(_UserCollection)
 
 	var User domain.User
-	err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&User)
+	err := collection.FindOne(ctx, bson.M{"id_user": id}).Decode(&User)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("user dengan ID %s tidak ditemukan", id)
@@ -158,12 +197,7 @@ func (rp *mongoRepoUser) GetAll(ctx context.Context) ([]domain.User, error) {
 func (rp *mongoRepoUser) DeleteUser(ctx context.Context, id string) error {
 	collection := rp.DB.Collection(_UserCollection)
 
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return fmt.Errorf("invalid id format: %v", err)
-	}
-
-	result, err := collection.DeleteOne(ctx, bson.M{"_id": objectID})
+	result, err := collection.DeleteOne(ctx, bson.M{"id_user": id})
 	if err != nil {
 		return fmt.Errorf("error deleting user: %v", err)
 	}

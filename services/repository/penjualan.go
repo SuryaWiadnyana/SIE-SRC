@@ -68,61 +68,26 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 			return fmt.Errorf("gagal memulai transaksi: %v", err)
 		}
 
-		for i := range bd {
-			if bd[i].IDPenjualan == "" {
-				nextID, err := rp.GenerateNextID(ctx)
-				if err != nil {
-					return fmt.Errorf("gagal generate ID: %v", err)
-				}
-				bd[i].IDPenjualan = nextID
+	for i := range bd {
+		if bd[i].IDPenjualan == "" {
+			nextID, err := rp.GenerateNextID(ctx)
+			if err != nil {
+				return fmt.Errorf("gagal generate ID: %v", err)
 			}
-
-			if bd[i].NamaPenjual == "" {
-				return fmt.Errorf("nama penjual tidak boleh kosong pada data ke-%d", i+1)
-			}
-
-			if len(bd[i].Produk) == 0 {
-				return fmt.Errorf("minimal harus ada satu produk pada data ke-%d", i+1)
-			}
-
-			total := 0
-			for j, item := range bd[i].Produk {
-				if item.IDProduk == "" {
-					return fmt.Errorf("id produk tidak boleh kosong pada produk ke-%d, data ke-%d", j+1, i+1)
-				}
-
-				if item.JumlahProduk <= 0 {
-					return fmt.Errorf("jumlah produk harus lebih dari 0 pada produk ke-%d, data ke-%d", j+1, i+1)
-				}
-
-				produk, err := rp.RepoProduk.GetProdukById(sc, item.IDProduk)
-				if err != nil {
-					return fmt.Errorf("gagal mendapatkan info produk: %v", err)
-				}
-
-				if produk.Stok < item.JumlahProduk {
-					return fmt.Errorf("stok tidak mencukupi untuk produk %s (tersedia: %d, diminta: %d)",
-						produk.NamaProduk, produk.Stok, item.JumlahProduk)
-				}
-
-				err = rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.JumlahProduk)
-				if err != nil {
-					return fmt.Errorf("gagal mengurangi stok: %v", err)
-				}
-
-				bd[i].Produk[j].HargaProduk = produk.HargaProduk
-				bd[i].Produk[j].Subtotal = produk.HargaProduk * item.JumlahProduk
-				total += bd[i].Produk[j].Subtotal
-			}
-
-			bd[i].Total = total
-			bd[i].UpdatedAt = time.Now()
-			if bd[i].Tanggal_Penjualan.IsZero() {
-				bd[i].Tanggal_Penjualan = time.Now()
-			}
-
-			PenjualanDocs = append(PenjualanDocs, bd[i])
+			bd[i].IDPenjualan = nextID
 		}
+
+		if bd[i].NamaPenjual == "" {
+			return fmt.Errorf("nama penjual tidak boleh kosong pada data ke-%d", i+1)
+		}
+
+		bd[i].UpdatedAt = time.Now()
+		if bd[i].Tanggal_Penjualan.IsZero() {
+			bd[i].Tanggal_Penjualan = time.Now()
+		}
+
+		PenjualanDocs = append(PenjualanDocs, bd[i])
+	}
 
 		_, err := ListPenjualan.InsertMany(sc, PenjualanDocs)
 		if err != nil {
@@ -187,9 +152,6 @@ func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.P
 		return nil, fmt.Errorf("gagal mengambil data penjualan: %v", err)
 	}
 
-	// Log jumlah produk yang diambil
-	log.Printf("Jumlah produk yang diambil: %d", len(penjualan.Produk))
-
 	return &penjualan, nil
 }
 
@@ -218,48 +180,13 @@ func (rp *mongoRepoPenjualan) Update(ctx context.Context, bd *domain.Penjualan) 
 			return fmt.Errorf("gagal mengambil data penjualan: %v", err)
 		}
 
-		// Kembalikan stok produk lama
-		for _, item := range existingSales.Produk {
-			err := rp.RepoProduk.IncreaseProdukStock(sc, item.IDProduk, item.JumlahProduk)
-			if err != nil {
-				return fmt.Errorf("gagal mengembalikan stok produk %s: %v", item.IDProduk, err)
-			}
-		}
-
-		// Validasi dan update stok baru
-		total := 0
-		for _, item := range bd.Produk {
-			if item.JumlahProduk <= 0 {
-				return fmt.Errorf("kuantitas produk harus lebih dari 0")
-			}
-
-			produk, err := rp.RepoProduk.GetProdukById(sc, item.IDProduk)
-			if err != nil {
-				return fmt.Errorf("gagal mendapatkan info produk %s: %v", item.IDProduk, err)
-			}
-
-			if produk.Stok < item.JumlahProduk {
-				return fmt.Errorf("stok produk %s tidak mencukupi (tersedia: %d, diminta: %d)",
-					produk.NamaProduk, produk.Stok, item.JumlahProduk)
-			}
-
-			err = rp.RepoProduk.DecreaseProdukStock(sc, item.IDProduk, item.JumlahProduk)
-			if err != nil {
-				return fmt.Errorf("gagal mengurangi stok produk %s: %v", item.IDProduk, err)
-			}
-
-			total += produk.HargaProduk * item.JumlahProduk
-		}
-
 		// Update penjualan
 		bd.UpdatedAt = time.Now()
-		bd.Total = total
 
 		update := bson.M{
 			"$set": bson.M{
-				"nama_penjual":      bd.NamaPenjual,
+				"id_user":      bd.NamaPenjual,
 				"Tanggal_Penjualan": bd.Tanggal_Penjualan,
-				"produk":            bd.Produk,
 				"total":             bd.Total,
 				"updated_at":        bd.UpdatedAt,
 			},
@@ -301,13 +228,6 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 			return fmt.Errorf("gagal mengambil data penjualan: %v", err)
 		}
 
-		// Kembalikan stok produk
-		for _, item := range existingSales.Produk {
-			err := rp.RepoProduk.IncreaseProdukStock(sc, item.IDProduk, item.JumlahProduk)
-			if err != nil {
-				return fmt.Errorf("gagal mengembalikan stok produk %s: %v", item.IDProduk, err)
-			}
-		}
 
 		// Hapus penjualan
 		_, err = penjualanProduk.DeleteOne(sc, bson.M{"id_penjualan": id})
