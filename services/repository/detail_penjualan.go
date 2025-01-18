@@ -20,26 +20,33 @@ func NewMongoRepoDetailPenjualan(client *mongo.Database) domain.DetailPenjualanR
 	}
 }
 
-func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, bd []domain.DetailPenjualan) ([]domain.DetailPenjualan, error) {
-	collection := r.DB.Collection("detail_penjualan")
-	var detailDocs []interface{}
-
-	for _, detail := range bd {
-		detailDocs = append(detailDocs, detail)
+func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain.DetailPenjualan) (*domain.DetailPenjualan, error) {
+	id, err := r.GenerateNextID(ctx)
+	if err != nil {
+		log.Printf("Error generating ID: %v", err)
+		return nil, fmt.Errorf("gagal generate ID: %v", err)
 	}
 
-	_, err := collection.InsertMany(ctx, detailDocs)
+	log.Printf("Creating detail penjualan with ID %s for penjualan ID %s", id, dp.Penjualan.IDPenjualan)
+
+	// Set ID for detail penjualan
+	dp.ID_DetailPenjualan = id
+
+	collection := r.DB.Collection("detail_penjualan")
+	_, err = collection.InsertOne(ctx, dp)
 	if err != nil {
+		log.Printf("Error inserting detail penjualan: %v", err)
 		return nil, fmt.Errorf("gagal menyimpan detail penjualan: %v", err)
 	}
 
-	return bd, nil
+	log.Printf("Successfully created detail penjualan with ID %s", id)
+	return dp, nil
 }
 
-func (r *mongoRepoDetailPenjualan) UpdateDetails(ctx context.Context, bd *domain.DetailPenjualan) error {
+func (r *mongoRepoDetailPenjualan) UpdateDetails(ctx context.Context, dp *domain.DetailPenjualan) error {
 	collection := r.DB.Collection("detail_penjualan")
 
-	_, err := collection.UpdateOne(ctx, bson.M{"id_details": bd.ID_DetailPenjualan}, bson.M{"$set": bd})
+	_, err := collection.UpdateOne(ctx, bson.M{"id_details": dp.ID_DetailPenjualan}, bson.M{"$set": dp})
 	if err != nil {
 		return fmt.Errorf("gagal memperbarui detail penjualan: %v", err)
 	}
@@ -96,6 +103,17 @@ func (r *mongoRepoDetailPenjualan) Delete(ctx context.Context, id string) error 
 }
 
 func (r *mongoRepoDetailPenjualan) GenerateNextID(ctx context.Context) (string, error) {
-	// Implementasi untuk menghasilkan ID berikutnya untuk detail penjualan
-	return "DP001", nil // Placeholder
+	collection := r.DB.Collection("detail_penjualan")
+
+	// Get the count of existing documents
+	count, err := collection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		log.Printf("Error counting documents: %v", err)
+		return "", fmt.Errorf("gagal menghitung dokumen: %v", err)
+	}
+
+	// Generate next ID with format DP001, DP002, etc.
+	nextID := fmt.Sprintf("DP%03d", count+1)
+	log.Printf("Generated next ID: %s", nextID)
+	return nextID, nil
 }

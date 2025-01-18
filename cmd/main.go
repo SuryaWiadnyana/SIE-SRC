@@ -96,7 +96,19 @@ func startHTTPServer() {
 	// Penjualan Repository dan Use Case route
 	penjualanRepo := repository.NewMongoRepoPenjualan(db, produkRepo)
 	penjualanUseCase := usecase.NewUseCasePenjualan(penjualanRepo, 10*time.Second)
-	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase)
+
+	// Detail Penjualan Repository dan Use Case route
+	detailPenjualanRepo := repository.NewMongoRepoDetailPenjualan(db)
+	detailPenjualanUC := usecase.NewDetailPenjualanUsecase(detailPenjualanRepo)
+	log.Printf("Initializing detail penjualan use case...")
+
+	// Inisialisasi handler penjualan dengan detail penjualan use case
+	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase, userUseCase, detailPenjualanUC)
+	log.Printf("Handler penjualan initialized with detail penjualan use case")
+
+	// Inisialisasi handler detail penjualan
+	delivery.NewHttpDeliveryDetailPenjualan(app, detailPenjualanUC)
+	log.Printf("Detail penjualan handler initialized")
 
 	// Produk Use Case route
 	produkUseCase := usecase.NewUseCaseProduk(produkRepo, algoritmaRepo, penjualanRepo, 10*time.Second)

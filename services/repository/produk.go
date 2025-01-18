@@ -145,7 +145,7 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 			"kategori":       bd.Kategori,
 			"sub_kategori":   bd.SubKategori,
 			"barcode_produk": bd.KodeProduk,
-			"harga":          bd.HargaProduk,
+			"harga_produk":   bd.HargaProduk,
 			"stok_barang":    bd.Stok,
 			"updated_at":     bd.UpdatedAt,
 		},

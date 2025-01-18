@@ -68,26 +68,26 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 			return fmt.Errorf("gagal memulai transaksi: %v", err)
 		}
 
-	for i := range bd {
-		if bd[i].IDPenjualan == "" {
-			nextID, err := rp.GenerateNextID(ctx)
-			if err != nil {
-				return fmt.Errorf("gagal generate ID: %v", err)
+		for i := range bd {
+			if bd[i].IDPenjualan == "" {
+				nextID, err := rp.GenerateNextID(ctx)
+				if err != nil {
+					return fmt.Errorf("gagal generate ID: %v", err)
+				}
+				bd[i].IDPenjualan = nextID
 			}
-			bd[i].IDPenjualan = nextID
-		}
 
-		if bd[i].NamaPenjual == "" {
-			return fmt.Errorf("nama penjual tidak boleh kosong pada data ke-%d", i+1)
-		}
+			if bd[i].User.Username == "" {
+				return fmt.Errorf("username tidak boleh kosong pada data ke-%d", i+1)
+			}
 
-		bd[i].UpdatedAt = time.Now()
-		if bd[i].Tanggal_Penjualan.IsZero() {
-			bd[i].Tanggal_Penjualan = time.Now()
-		}
+			bd[i].UpdatedAt = time.Now()
+			if bd[i].Tanggal_Penjualan.IsZero() {
+				bd[i].Tanggal_Penjualan = time.Now()
+			}
 
-		PenjualanDocs = append(PenjualanDocs, bd[i])
-	}
+			PenjualanDocs = append(PenjualanDocs, bd[i])
+		}
 
 		_, err := ListPenjualan.InsertMany(sc, PenjualanDocs)
 		if err != nil {
@@ -185,7 +185,7 @@ func (rp *mongoRepoPenjualan) Update(ctx context.Context, bd *domain.Penjualan) 
 
 		update := bson.M{
 			"$set": bson.M{
-				"id_user":      bd.NamaPenjual,
+				"id_user":           bd.User.Username,
 				"Tanggal_Penjualan": bd.Tanggal_Penjualan,
 				"total":             bd.Total,
 				"updated_at":        bd.UpdatedAt,
@@ -227,7 +227,6 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 			}
 			return fmt.Errorf("gagal mengambil data penjualan: %v", err)
 		}
-
 
 		// Hapus penjualan
 		_, err = penjualanProduk.DeleteOne(sc, bson.M{"id_penjualan": id})

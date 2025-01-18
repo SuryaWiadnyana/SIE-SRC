@@ -15,6 +15,12 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 		tokenString := c.Get("Authorization")
 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
+		if tokenString == "" {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"message": "No token provided",
+			})
+		}
+
 		// Parsing token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// Validasi method signing
@@ -27,7 +33,8 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 		})
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Unauthorized",
+				"message": "Invalid token",
+				"error":   err.Error(),
 			})
 		}
 
@@ -35,23 +42,37 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok || !token.Valid {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Unauthorized",
+				"message": "Invalid token claims",
 			})
 		}
 
-		// Simpan token ke locals untuk digunakan di handler
-		c.Locals("user", token)
+		// Simpan claims ke locals untuk digunakan di handler
+		c.Locals("claims", claims)
+		c.Locals("username", claims["username"])
 
 		// Cek apakah role yang diminta sesuai
-		userRole := claims["role"].(string)
-		for _, role := range roles {
-			if userRole == role {
-				return c.Next()
+		userRole, ok := claims["role"].(string)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"message": "Invalid role claim",
+			})
+		}
+
+		if len(roles) > 0 {
+			hasRole := false
+			for _, role := range roles {
+				if userRole == role {
+					hasRole = true
+					break
+				}
+			}
+			if !hasRole {
+				return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+					"message": "Forbidden: insufficient role",
+				})
 			}
 		}
 
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error": "Forbidden",
-		})
+		return c.Next()
 	}
 }

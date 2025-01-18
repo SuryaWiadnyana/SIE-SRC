@@ -5,20 +5,14 @@ import (
 	"time"
 )
 
-type Penjual struct {
-	IDUser            string    `json:"id_user" bson:"id_user"`
-	NamaPenjual       string    `json:"nama_penjual" bson:"nama_penjual"`
-	Tanggal_Penjualan time.Time `json:"tanggal_penjualan" bson:"tanggal_penjualan" `
-}
-
 type Penjualan struct {
-	Penjual
-	Produk       []Produk
-	IDPenjualan  string    `json:"id_penjualan" bson:"id_penjualan"`
-	JumlahProduk int       `json:"jumlah_produk" bson:"jumlah_produk"`
-	Subtotal     int       `json:"subtotal" bson:"subtotal"`
-	Total        int       `json:"total" bson:"total"`
-	UpdatedAt    time.Time `json:"updated_at" bson:"updated_at"`
+	IDPenjualan       string    `json:"id_penjualan" bson:"id_penjualan"`
+	User              User      `json:"user" bson:"user"`
+	Tanggal_Penjualan time.Time `json:"tanggal_penjualan" bson:"tanggal_penjualan"`
+	JumlahProduk      int       `json:"jumlah_produk" bson:"jumlah_produk"`
+	Subtotal          int       `json:"subtotal" bson:"subtotal"`
+	Total             int       `json:"total" bson:"total"`
+	UpdatedAt         time.Time `json:"updated_at" bson:"updated_at"`
 }
 
 type PenjualanRepository interface {
