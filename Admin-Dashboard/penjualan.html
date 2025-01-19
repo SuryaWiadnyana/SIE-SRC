@@ -123,6 +123,7 @@
                                             <th>No</th>
                                             <th>ID Penjualan</th>
                                             <th>Nama Penjual</th>
+                                            <th>Jumlah Produk</th>
                                             <th>Total</th>
                                             <th>Tanggal Penjualan</th>
                                             <th>Aksi</th>
@@ -150,25 +151,23 @@
                                 <form id="formTambahPenjualan">
                                     <div class="form-group">
                                         <label for="namaPenjual">Nama Penjual</label>
-                                        <input type="text" class="form-control" id="namaPenjual" required>
+                                        <input type="text" class="form-control" id="namaPenjual" readonly>
                                     </div>
+
                                     <div class="form-group">
                                         <label>Produk</label>
                                         <div id="produkContainer">
                                             <div class="row mb-3 produk-item">
                                                 <div class="col-md-5">
-                                                    <select class="form-control select2 select-produk"
-                                                        style="width: 100%;" required>
+                                                    <select class="form-control select-produk" required>
                                                         <option value="">Pilih Produk</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <input type="number" class="form-control quantity"
-                                                        placeholder="Jumlah" min="1" required>
+                                                    <input type="number" class="form-control quantity" placeholder="Jumlah" min="1" required>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <input type="text" class="form-control subtotal"
-                                                        placeholder="Subtotal" readonly>
+                                                    <input type="text" class="form-control subtotal" placeholder="Subtotal" readonly>
                                                 </div>
                                                 <div class="col-md-1">
                                                     <button type="button" class="btn btn-danger btn-remove-produk">
@@ -181,6 +180,7 @@
                                             <i class="fas fa-plus"></i> Tambah Produk
                                         </button>
                                     </div>
+
                                     <div class="form-group">
                                         <label>Total</label>
                                         <input type="text" class="form-control" id="totalPenjualan" readonly>

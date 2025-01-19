@@ -89,19 +89,19 @@ $(document).ready(function() {
 
         // Event handler untuk tombol detail dan delete
         $('#tabelPenjualan tbody').on('click', '.btn-detail', function() {
-            const id = $(this).data('id');
-            window.location.href = `detail-penjualan.html?id=${id}`;
+            const id = $(this).data('id_details');
+            window.location.href = `detail-penjualan.html?id=${id_details}`;
         });
 
     // View sale details handler
     $(document).on('click', '.view-btn', function() {
-        const saleId = $(this).data('id');
+        const saleId = $(this).data('id_details');
         showDetailPenjualan(saleId);
     });
     
     // Event delegation for dynamic buttons
     $('#tabelPenjualan').on('click', '.view-btn', function() {
-        const id = $(this).data('id');
+        const id = $(this).data('id_penjualan');
         showDetailPenjualan(id);
     });
 
