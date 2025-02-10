@@ -18,8 +18,11 @@ type HttpDeliveryPenjualan struct {
 }
 
 type PenjualanRequest struct {
-	Penjualan domain.Penjualan `json:"penjualan"`
-	Produk    domain.Produk    `json:"produk"`
+	Penjualan struct {
+		ProdukTerjual   int `json:"produk_terjual"`
+		TotalPendapatan int `json:"total_pendapatan"`
+	} `json:"penjualan"`
+	Produk domain.Produk `json:"produk"`
 }
 
 func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, userUC domain.UserUseCase, detailUC domain.DetailPenjualanUseCase) {
@@ -61,16 +64,10 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		log.Printf("Error parsing request body: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Format request tidak valid",
-			"error":   err.Error(),
 		})
 	}
 
-	if len(requestList) == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Data penjualan tidak boleh kosong",
-		})
-	}
-
+	// Get username from context
 	username := c.Locals("username")
 	if username == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -85,92 +82,80 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		})
 	}
 
+	// Get user data
 	user, err := d.User.GetUserByUsername(c.Context(), usernameStr)
 	if err != nil {
 		log.Printf("Error getting user: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Gagal mendapatkan data pengguna",
-			"error":   err.Error(),
+			"message": fmt.Sprintf("Gagal mendapatkan data pengguna: %v", err),
 		})
 	}
 
-	// Extract penjualan list from request
+	// Convert request list to penjualan list
 	var penjualanList []domain.Penjualan
-	for i, req := range requestList {
-		penjualan := req.Penjualan
-		penjualan.User = *user
 
-		if penjualan.JumlahProduk <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": fmt.Sprintf("Jumlah produk tidak valid pada data ke-%d", i+1),
-			})
-		}
-
-		if penjualan.Total <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": fmt.Sprintf("Total tidak valid pada data ke-%d", i+1),
-			})
-		}
-
+	// Create a penjualan for each product with its quantity
+	for _, req := range requestList {
+		// Validasi ID Produk
 		if req.Produk.IDProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": fmt.Sprintf("Data produk tidak valid pada data ke-%d", i+1),
+				"message": "ID Produk tidak boleh kosong",
 			})
 		}
 
+		// Hitung subtotal
+		subtotal := req.Penjualan.ProdukTerjual * req.Produk.HargaProduk
+
+		penjualan := domain.Penjualan{
+			User: *user,
+			JumlahProduk: req.Penjualan.ProdukTerjual,
+			SubTotal:     subtotal,
+		}
 		penjualanList = append(penjualanList, penjualan)
 	}
 
-	// Create penjualan records
+	// Create penjualan
 	result, err := d.HTTP.CreateBulk(c.Context(), penjualanList)
 	if err != nil {
-		log.Printf("Error creating penjualan: %v", err)
+		log.Printf("Error creating sales: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Gagal membuat data penjualan",
-			"error":   err.Error(),
+			"message": fmt.Sprintf("Gagal membuat penjualan: %v", err),
 		})
 	}
-
-	// Check if DetailPenjualan is initialized
-	if d.DetailPenjualan == nil {
-		log.Printf("Warning: DetailPenjualan use case is not initialized")
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-			"message": "Data penjualan berhasil dibuat (detail penjualan tidak tersedia)",
-			"data":    result,
-		})
-	}
-
-	log.Printf("Starting to create %d detail penjualan records", len(result))
 
 	// Create detail penjualan for each penjualan
 	var details []domain.DetailPenjualan
-	for i, penjualan := range result {
-		detail := domain.DetailPenjualan{
-			Penjualan:       penjualan,
-			Produk:         requestList[i].Produk,
-			TotalPendapatan: penjualan.Total,
+	for _, penjualan := range result {
+		var produkList []domain.Produk
+		var totalPendapatan int
+
+		// Collect all products and calculate total
+		for _, req := range requestList {
+			produkList = append(produkList, req.Produk)
+			totalPendapatan += req.Penjualan.TotalPendapatan
 		}
 
-		log.Printf("Creating detail penjualan for penjualan ID %s with produk ID %s", penjualan.IDPenjualan, requestList[i].Produk.IDProduk)
+		// Create one detail with all products
+		detail := domain.DetailPenjualan{
+			Penjualan:       penjualan,
+			Produk:          produkList,
+			TotalPendapatan: totalPendapatan,
+		}
+
 		createdDetail, err := d.DetailPenjualan.CreateDetails(c.Context(), &detail)
 		if err != nil {
-			log.Printf("Error creating detail penjualan for penjualan ID %s: %v", penjualan.IDPenjualan, err)
+			log.Printf("Error creating detail penjualan: %v", err)
 			continue
 		}
 		if createdDetail != nil {
-			log.Printf("Successfully created detail penjualan with ID %s", createdDetail.ID_DetailPenjualan)
 			details = append(details, *createdDetail)
-		} else {
-			log.Printf("Warning: detail is nil for penjualan ID %s", penjualan.IDPenjualan)
 		}
 	}
 
-	log.Printf("Created %d detail penjualan records", len(details))
-
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Data penjualan dan detail berhasil dibuat",
+		"message": "Data penjualan berhasil dibuat",
 		"data":    result,
-		"details": details,
+		// "details": details,
 	})
 }
 

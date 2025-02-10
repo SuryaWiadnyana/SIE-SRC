@@ -54,34 +54,64 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 }
 
 func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
+	// Parse data dari body request
 	var user domain.User
 	if err := c.BodyParser(&user); err != nil {
+		log.Printf("Error saat parsing data registrasi: %v", err)
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error": "Format request tidak valid",
 		})
 	}
 
-	// Validasi role dari token
-	tokenUser := c.Locals("user").(*jwt.Token)
-	claims := tokenUser.Claims.(jwt.MapClaims)
-	userRole := claims["role"].(string)
+	// Validasi token dari pengguna
+	tokenUser := c.Locals("user")
+	if tokenUser == nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Token autentikasi tidak ditemukan",
+		})
+	}
 
+	// Validasi format token
+	token, ok := tokenUser.(*jwt.Token)
+	if !ok {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Format token tidak valid",
+		})
+	}
+
+	// Validasi klaim token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Klaim token tidak valid",
+		})
+	}
+
+	// Validasi role pengguna
+	userRole, ok := claims["role"].(string)
+	if !ok {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Klaim role dalam token tidak valid",
+		})
+	}
+
+	// Pastikan pengguna adalah admin
 	if userRole != "admin" {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{
-			"error": "Only admin can register new users",
+			"error": "Hanya admin yang dapat mendaftarkan pengguna baru",
 		})
 	}
 
-	// Tambahkan validasi data user
+	// Validasi data pengguna yang akan didaftarkan
 	if user.Username == "" || user.Password == "" || user.Role == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Username, password, and role are required",
+			"error": "Username, password, dan role harus diisi",
 		})
 	}
 
 	// Validasi role yang diperbolehkan
-	allowedRoles := []string{"admin", "owner"}
 	validRole := false
+	allowedRoles := []string{"admin", "owner"}
 	for _, role := range allowedRoles {
 		if user.Role == role {
 			validRole = true
@@ -91,59 +121,79 @@ func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
 
 	if !validRole {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid role. Allowed roles are: admin, owner",
+			"error": "Role tidak valid. Role yang diperbolehkan adalah: admin, owner",
 		})
 	}
 
+	// Daftarkan pengguna baru
 	registeredUser, err := d.HTTP.RegisterUser(context.Background(), &user)
 	if err != nil {
+		log.Printf("Gagal mendaftarkan pengguna: %v", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to register user: %v", err),
+			"error": fmt.Sprintf("Gagal mendaftarkan pengguna: %v", err),
 		})
 	}
 
+	log.Printf("Pengguna baru berhasil didaftarkan: %s dengan role: %s", user.Username, user.Role)
+
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
-		"message": "User registered successfully",
+		"success": true,
+		"message": "Pengguna berhasil didaftarkan",
 		"data":    registeredUser,
 	})
 }
 
 // Mengautentikasi user login
 func (d *HttpDeliveryUser) LoginUser(c *fiber.Ctx) error {
-	// Parsing data body yang dikirim
+	// Parse data dari body request
 	if err := c.BodyParser(&loginData); err != nil {
-		log.Printf("Error parsing login data for user %s: %v", loginData.Username, err)
+		log.Printf("Error saat parsing data login: %v", err)
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid input",
+			"error": "Format request tidak valid",
 		})
 	}
 
-	// Log request data untuk login
-	log.Printf("Login attempt for username: %s", loginData.Username)
+	// Validasi field yang diperlukan
+	if loginData.Username == "" || loginData.Password == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Username dan password harus diisi",
+		})
+	}
 
-	// Melakukan autentikasi user
+	// Catat percobaan login
+	log.Printf("Percobaan login untuk username: %s", loginData.Username)
+
+	// Autentikasi pengguna
 	user, err := d.HTTP.AuthenticateUser(context.Background(), loginData.Username, loginData.Password)
-	if err != nil || user == nil { // Pastikan user tidak nil
+	if err != nil || user == nil {
+		log.Printf("Autentikasi gagal untuk pengguna %s: %v", loginData.Username, err)
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-			"error": "username atau password tidak valid",
+			"error": "Username atau password tidak valid",
 		})
 	}
 
 	// Generate token JWT
 	token, err := GenerateToken(user.Username, user.Role)
 	if err != nil {
-		log.Printf("Failed to generate token for user %s: %v", user.Username, err)
+		log.Printf("Gagal generate token untuk pengguna %s: %v", user.Username, err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "gagal membuat token",
+			"error": "Gagal membuat token autentikasi",
 		})
 	}
 
-	log.Printf("Login successful for username: %s", user.Username)
+	log.Printf("Login berhasil untuk pengguna: %s dengan role: %s", user.Username, user.Role)
 
+	// Kirim response sukses dengan token
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"user":  user,
-		"token": token,
-		"role":  user.Role,
+		"success": true,
+		"message": "Login berhasil",
+		"data": fiber.Map{
+			"user": fiber.Map{
+				"username": user.Username,
+				"role":    user.Role,
+			},
+			"token": token,
+		},
 	})
 }
 
@@ -154,7 +204,7 @@ func (d *HttpDeliveryUser) GetUserByUsername(c *fiber.Ctx) error {
 	user, err := d.HTTP.GetUserByUsername(context.Background(), id)
 	if err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{
-			"error": "user tidak ditemukan",
+			"error": "Pengguna tidak ditemukan",
 		})
 	}
 
@@ -165,7 +215,7 @@ func (d *HttpDeliveryUser) GetAll(c *fiber.Ctx) error {
 	users, err := d.HTTP.GetAll(context.Background())
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to get users: %v", err),
+			"error": fmt.Sprintf("Gagal mendapatkan pengguna: %v", err),
 		})
 	}
 
@@ -181,12 +231,12 @@ func (d *HttpDeliveryUser) DeleteUser(c *fiber.Ctx) error {
 	err := d.HTTP.DeleteUser(context.Background(), id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "gagal menghapus user",
+			"error": "Gagal menghapus pengguna",
 		})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "user berhasil dihapus",
+		"message": "Pengguna berhasil dihapus",
 	})
 }
 
@@ -195,14 +245,14 @@ func (d *HttpDeliveryUser) UpdateUser(c *fiber.Ctx) error {
 	username := c.Params("username")
 	if username == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "username is required",
+			"error": "Username harus diisi",
 		})
 	}
 
 	var updateData domain.User
 	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error": "Format request tidak valid",
 		})
 	}
 
@@ -213,7 +263,7 @@ func (d *HttpDeliveryUser) UpdateUser(c *fiber.Ctx) error {
 
 	if userRole != "admin" {
 		return c.Status(http.StatusForbidden).JSON(fiber.Map{
-			"error": "Only admin can update users",
+			"error": "Hanya admin yang dapat mengupdate pengguna",
 		})
 	}
 
@@ -230,7 +280,7 @@ func (d *HttpDeliveryUser) UpdateUser(c *fiber.Ctx) error {
 
 		if !validRole {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid role. Allowed roles are: admin, owner",
+				"error": "Role tidak valid. Role yang diperbolehkan adalah: admin, owner",
 			})
 		}
 	}
@@ -238,12 +288,12 @@ func (d *HttpDeliveryUser) UpdateUser(c *fiber.Ctx) error {
 	err := d.HTTP.UpdateUser(context.Background(), username, &updateData)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to update user: %v", err),
+			"error": fmt.Sprintf("Gagal mengupdate pengguna: %v", err),
 		})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "User updated successfully",
+		"message": "Pengguna berhasil diupdate",
 	})
 }
 
@@ -252,7 +302,7 @@ func (d *HttpDeliveryUser) RegisterFirstAdmin(c *fiber.Ctx) error {
 	var user domain.User
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
+			"error": "Format request tidak valid",
 		})
 	}
 
@@ -262,7 +312,7 @@ func (d *HttpDeliveryUser) RegisterFirstAdmin(c *fiber.Ctx) error {
 	// Validasi data user
 	if user.Username == "" || user.Password == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Username and password are required",
+			"error": "Username dan password harus diisi",
 		})
 	}
 
@@ -270,19 +320,19 @@ func (d *HttpDeliveryUser) RegisterFirstAdmin(c *fiber.Ctx) error {
 	_, err := d.HTTP.GetAll(context.Background())
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to check existing users: %v", err),
+			"error": fmt.Sprintf("Gagal mendapatkan pengguna: %v", err),
 		})
 	}
 
 	registeredUser, err := d.HTTP.RegisterUser(context.Background(), &user)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to register user: %v", err),
+			"error": fmt.Sprintf("Gagal mendaftarkan pengguna: %v", err),
 		})
 	}
 
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
-		"message": "Admin registered successfully",
+		"message": "Admin berhasil didaftarkan",
 		"data":    registeredUser,
 	})
 }
@@ -295,7 +345,7 @@ func GenerateToken(username, role string) (string, error) {
 	expiration, err := strconv.Atoi(expirationHours)
 	if err != nil {
 		log.Printf("Error parsing expiration hours: %v", err) // Log jika parsing gagal
-		return "", fmt.Errorf("invalid expiration hours: %v", err)
+		return "", fmt.Errorf("jam kadaluarsa tidak valid: %v", err)
 	}
 
 	expirationTime := time.Now().Add(time.Hour * time.Duration(expiration))
@@ -313,9 +363,9 @@ func GenerateToken(username, role string) (string, error) {
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Printf("Error signing token for user %s: %v", username, err) // Log kesalahan saat signing
-		return "", fmt.Errorf("failed to sign token: %v", err)
+		return "", fmt.Errorf("gagal membuat token: %v", err)
 	}
 
-	log.Printf("Token generated successfully for user %s", username) // Log saat token berhasil dibuat
+	log.Printf("Token berhasil dibuat untuk pengguna %s", username) // Log saat token berhasil dibuat
 	return tokenString, nil
 }

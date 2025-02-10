@@ -33,7 +33,17 @@ func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain
 	dp.ID_DetailPenjualan = id
 
 	collection := r.DB.Collection("detail_penjualan")
-	_, err = collection.InsertOne(ctx, dp)
+
+	// Buat dokumen detail penjualan
+	detailDoc := bson.M{
+		"id_details":       id,
+		"penjualan":       dp.Penjualan,
+		"produk":          dp.Produk,
+		"total_pendapatan": dp.TotalPendapatan,
+	}
+
+	// Insert ke koleksi detail penjualan
+	_, err = collection.InsertOne(ctx, detailDoc)
 	if err != nil {
 		log.Printf("Error inserting detail penjualan: %v", err)
 		return nil, fmt.Errorf("gagal menyimpan detail penjualan: %v", err)
@@ -54,7 +64,7 @@ func (r *mongoRepoDetailPenjualan) UpdateDetails(ctx context.Context, dp *domain
 	return nil
 }
 
-func (r *mongoRepoDetailPenjualan) GetAllDetails(ctx context.Context) ([]domain.DetailPenjualan, error) {
+func (r *mongoRepoDetailPenjualan) GetAll(ctx context.Context) ([]domain.DetailPenjualan, error) {
 	collection := r.DB.Collection("detail_penjualan")
 	var details []domain.DetailPenjualan
 
@@ -116,4 +126,23 @@ func (r *mongoRepoDetailPenjualan) GenerateNextID(ctx context.Context) (string, 
 	nextID := fmt.Sprintf("DP%03d", count+1)
 	log.Printf("Generated next ID: %s", nextID)
 	return nextID, nil
+}
+
+func (r *mongoRepoDetailPenjualan) GetByPenjualanID(ctx context.Context, idPenjualan string) ([]domain.DetailPenjualan, error) {
+	collection := r.DB.Collection("detail_penjualan")
+	filter := bson.M{"penjualan.id_penjualan": idPenjualan}
+	cursor, err := collection.Find(ctx, filter)
+	if err != nil {
+		log.Printf("Error finding detail penjualan: %v", err)
+		return nil, fmt.Errorf("gagal mencari detail penjualan: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	var details []domain.DetailPenjualan
+	if err := cursor.All(ctx, &details); err != nil {
+		log.Printf("Error decoding detail penjualan: %v", err)
+		return nil, fmt.Errorf("gagal decode detail penjualan: %v", err)
+	}
+
+	return details, nil
 }

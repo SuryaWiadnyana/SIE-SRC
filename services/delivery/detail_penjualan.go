@@ -20,13 +20,57 @@ func NewHttpDeliveryDetailPenjualan(app fiber.Router, HTTP domain.DetailPenjuala
 	}
 
 	group := app.Group("/detail-penjualan")
-	group.Get("/by-id/:id_penjualan", handler.GetByID)
-	group.Get("/getall", handler.GetAllDetails)
 	group.Post("/create", handler.CreateDetail)
+	group.Get("/by-id/:id_penjualan", handler.GetByID)
+	group.Get("/getall", handler.GetAll)
 }
 
-func (d *HttpDeliveryDetailPenjualan) GetAllDetails(c *fiber.Ctx) error {
-	details, err := d.HTTP.GetAllDetails(context.Background())
+func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {
+	var detailPenjualan domain.DetailPenjualan
+	if err := c.BodyParser(&detailPenjualan); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Format data tidak valid",
+			"error":   err.Error(),
+		})
+	}
+
+	if detailPenjualan.Penjualan.IDPenjualan == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "ID Penjualan diperlukan",
+		})
+	}
+
+	if len(detailPenjualan.Produk) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Setidaknya satu produk diperlukan",
+		})
+	}
+
+	for _, produk := range detailPenjualan.Produk {
+		if produk.IDProduk == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "ID Produk diperlukan untuk semua produk",
+			})
+		}
+	}
+
+	result, err := d.HTTP.CreateDetails(c.Context(), &detailPenjualan)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal membuat detail penjualan",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Detail penjualan berhasil dibuat",
+		"data":    result,
+	})
+}
+
+
+func (d *HttpDeliveryDetailPenjualan) GetAll(c *fiber.Ctx) error {
+	details, err := d.HTTP.GetAll(context.Background())
 	if err != nil {
 		log.Printf("Error getting all sale details: %v", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -48,7 +92,7 @@ func (d *HttpDeliveryDetailPenjualan) GetByID(c *fiber.Ctx) error {
 		})
 	}
 
-	detail, err := d.HTTP.GetByID(c.Context(), id)
+	detail, err := d.HTTP.GetByPenjualanID(c.Context(), id)
 	if err != nil {
 		log.Printf("Error getting sale detail %s: %v", id, err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -65,41 +109,5 @@ func (d *HttpDeliveryDetailPenjualan) GetByID(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "Detail penjualan berhasil diambil",
 		"data":    detail,
-	})
-}
-
-func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {
-	var detailPenjualan domain.DetailPenjualan
-	if err := c.BodyParser(&detailPenjualan); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request format",
-			"error":   err.Error(),
-		})
-	}
-
-	// Validate required fields
-	if detailPenjualan.Penjualan.IDPenjualan == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "ID Penjualan is required",
-		})
-	}
-
-	if detailPenjualan.Produk.IDProduk == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "ID Produk is required",
-		})
-	}
-
-	result, err := d.HTTP.CreateDetails(c.Context(), &domain.DetailPenjualan{})
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to create sale detail",
-			"error":   err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Sale detail created successfully",
-		"data":    result,
 	})
 }

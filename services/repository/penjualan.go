@@ -26,6 +26,7 @@ func NewMongoRepoPenjualan(client *mongo.Database, produkRepo domain.ProdukRepos
 }
 
 var _Penjualan = "penjualan"
+var Produk domain.Produk
 
 // Generates the next available ID
 func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error) {
@@ -55,7 +56,6 @@ func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error
 // Create menambahkan Penjualan baru ke dalam koleksi.
 func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjualan) ([]domain.Penjualan, error) {
 	ListPenjualan := rp.DB.Collection(_Penjualan)
-	var PenjualanDocs []interface{}
 
 	sesi, err := rp.DB.Client().StartSession()
 	if err != nil {
@@ -68,28 +68,41 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 			return fmt.Errorf("gagal memulai transaksi: %v", err)
 		}
 
-		for i := range bd {
-			if bd[i].IDPenjualan == "" {
-				nextID, err := rp.GenerateNextID(ctx)
-				if err != nil {
-					return fmt.Errorf("gagal generate ID: %v", err)
-				}
-				bd[i].IDPenjualan = nextID
-			}
-
-			if bd[i].User.Username == "" {
-				return fmt.Errorf("username tidak boleh kosong pada data ke-%d", i+1)
-			}
-
-			bd[i].UpdatedAt = time.Now()
-			if bd[i].Tanggal_Penjualan.IsZero() {
-				bd[i].Tanggal_Penjualan = time.Now()
-			}
-
-			PenjualanDocs = append(PenjualanDocs, bd[i])
+		// Generate satu ID untuk semua produk
+		nextID, err := rp.GenerateNextID(ctx)
+		if err != nil {
+			return fmt.Errorf("gagal generate ID: %v", err)
 		}
 
-		_, err := ListPenjualan.InsertMany(sc, PenjualanDocs)
+		currentTime := time.Now()
+		var totalJumlahProduk int
+		var Total int
+		var Subtotal int
+
+		// Hitung total dan jumlah produk
+		for _, p := range bd {
+			if p.User.Username == "" {
+				return fmt.Errorf("username tidak boleh kosong")
+			}
+
+			totalJumlahProduk += p.JumlahProduk
+			Subtotal = p.SubTotal
+			Total += p.SubTotal
+		}
+
+		// Buat satu dokumen penjualan untuk semua produk
+		penjualanDoc := bson.M{
+			"id_penjualan":      nextID,
+			"user":              bd[0].User,
+			"tanggal_penjualan": currentTime,
+			"jumlah_produk":     totalJumlahProduk,
+			"subtotal":          Subtotal,
+			"total":             Total,
+			"updated_at":        currentTime,
+		}
+
+		// Insert satu dokumen penjualan
+		_, err = ListPenjualan.InsertOne(sc, penjualanDoc)
 		if err != nil {
 			return fmt.Errorf("gagal menyimpan data penjualan: %v", err)
 		}
@@ -97,6 +110,20 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 		if err := sesi.CommitTransaction(sc); err != nil {
 			return fmt.Errorf("gagal commit transaksi: %v", err)
 		}
+
+		// Buat satu hasil penjualan untuk response
+		result := domain.Penjualan{
+			IDPenjualan:       nextID,
+			User:              bd[0].User,
+			Tanggal_Penjualan: currentTime,
+			JumlahProduk:      totalJumlahProduk,
+			SubTotal:          Subtotal,
+			Total:             Total,
+			UpdatedAt:         currentTime,
+		}
+
+		// Update bd untuk response
+		bd = []domain.Penjualan{result}
 
 		return nil
 	})
@@ -153,54 +180,6 @@ func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.P
 	}
 
 	return &penjualan, nil
-}
-
-// Update memperbarui produk yang ada.
-func (rp *mongoRepoPenjualan) Update(ctx context.Context, bd *domain.Penjualan) error {
-	penjualanProduk := rp.DB.Collection(_Penjualan)
-
-	sesi, err := rp.DB.Client().StartSession()
-	if err != nil {
-		return fmt.Errorf("gagal memulai sesi: %v", err)
-	}
-	defer sesi.EndSession(ctx)
-
-	err = mongo.WithSession(ctx, sesi, func(sc mongo.SessionContext) error {
-		if err := sesi.StartTransaction(); err != nil {
-			return fmt.Errorf("gagal memulai transaksi: %v", err)
-		}
-
-		// Ambil data penjualan lama
-		var existingSales domain.Penjualan
-		err := penjualanProduk.FindOne(sc, bson.M{"id_penjualan": bd.IDPenjualan}).Decode(&existingSales)
-		if err != nil {
-			if err == mongo.ErrNoDocuments {
-				return fmt.Errorf("penjualan dengan ID %s tidak ditemukan", bd.IDPenjualan)
-			}
-			return fmt.Errorf("gagal mengambil data penjualan: %v", err)
-		}
-
-		// Update penjualan
-		bd.UpdatedAt = time.Now()
-
-		update := bson.M{
-			"$set": bson.M{
-				"id_user":           bd.User.Username,
-				"Tanggal_Penjualan": bd.Tanggal_Penjualan,
-				"total":             bd.Total,
-				"updated_at":        bd.UpdatedAt,
-			},
-		}
-
-		_, err = penjualanProduk.UpdateOne(sc, bson.M{"id_penjualan": bd.IDPenjualan}, update)
-		if err != nil {
-			return fmt.Errorf("gagal update penjualan: %v", err)
-		}
-
-		return sesi.CommitTransaction(sc)
-	})
-
-	return err
 }
 
 // Delete data penjualan berdasarkan ID.

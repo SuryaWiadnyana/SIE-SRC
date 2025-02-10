@@ -39,12 +39,6 @@ func (uc *PenjualanUseCase) GetByID(Ctx context.Context, id string) (*domain.Pen
 	return uc.PenjualanRepository.GetByID(ctx, id)
 }
 
-func (uc *PenjualanUseCase) Update(Ctx context.Context, bd *domain.Penjualan) error {
-	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
-	defer cancel()
-
-	return uc.PenjualanRepository.Update(ctx, bd)
-}
 
 func (uc *PenjualanUseCase) Delete(Ctx context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)

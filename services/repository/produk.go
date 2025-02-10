@@ -209,7 +209,7 @@ func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, k
 		"$set": bson.M{"updated_at": time.Now()},
 	}
 
-	result, err := DataProduk.UpdateOne(ctx, bson.M{"_id": id}, update)
+	result, err := DataProduk.UpdateOne(ctx, bson.M{"id_produk": id}, update)
 	if err != nil {
 		return fmt.Errorf("gagal mengupdate stok: %v", err)
 	}
