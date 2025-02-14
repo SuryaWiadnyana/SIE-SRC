@@ -3,18 +3,34 @@ const BASE_URL = 'http://localhost:8080'; // Adjust this to match your backend U
 
 // Handle API Response
 async function handleResponse(response) {
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    
     if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || errorData?.error || `HTTP error! status: ${response.status}`);
+        if (isJson) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`);
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    return { success: true, data };
+
+    if (isJson) {
+        const data = await response.json();
+        return { success: true, data };
+    }
+    
+    return { success: true };
 }
 
 // Authentication API
 const auth = {
     login: async (credentials) => {
         try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                return { success: true, data: { token, role: localStorage.getItem('role') } };
+            }
+
             const response = await fetch(`${BASE_URL}/user/login`, {
                 method: 'POST',
                 headers: {
@@ -30,8 +46,8 @@ const auth = {
                     username: credentials.username,
                     role: data.data.role
                 }));
-                console.log('Token:', data.token);  // Debug
-                console.log('Role:', data.role);    // Debug
+                console.log('Token:', data.data.token);  // Debug
+                console.log('Role:', data.data.role);    // Debug
                 console.log('LocalStorage:', localStorage); // Debug
                 // Check if role is admin or owner
                 if (['admin', 'owner'].includes(data.data.role)) {
@@ -132,6 +148,13 @@ const users = {
                 throw new Error('Tidak terautentikasi');
             }
 
+            console.log('Creating user with token:', token);
+            console.log('Request headers:', {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            });
+            console.log('Request body:', userData);
+
             const response = await fetch(`${BASE_URL}/user/admin/register`, {
                 method: 'POST',
                 headers: {
@@ -140,8 +163,25 @@ const users = {
                 },
                 body: JSON.stringify(userData)
             });
-            return handleResponse(response);
+
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.log('Error response:', errorText);
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.message || errorData.error || `HTTP error! status: ${response.status}`);
+                } catch (e) {
+                    throw new Error(`HTTP error! status: ${response.status}. Response: ${errorText}`);
+                }
+            }
+
+            const data = await response.json();
+            return { success: true, data };
         } catch (error) {
+            console.error('Create user error:', error);
             return { success: false, error: error.message };
         }
     },
@@ -153,6 +193,8 @@ const users = {
                 throw new Error('Tidak terautentikasi');
             }
 
+            console.log('Sending request with token:', token); // Debug log
+
             const response = await fetch(`${BASE_URL}/user/admin/update/${username}`, {
                 method: 'PUT',
                 headers: {
@@ -161,8 +203,16 @@ const users = {
                 },
                 body: JSON.stringify(userData)
             });
-            return handleResponse(response);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return { success: true, data: data.data };
         } catch (error) {
+            console.error('Update user error:', error);
             return { success: false, error: error.message };
         }
     },
@@ -541,4 +591,3 @@ export const api = {
         }
     }
 };
-
