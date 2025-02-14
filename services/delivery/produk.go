@@ -19,6 +19,10 @@ type HttpDeliveryProduk struct {
 	HTTP domain.ProdukUseCase
 }
 
+type ImportRequest struct {
+	Produk []domain.Produk `json:"produk"`
+}
+
 func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	handler := HttpDeliveryProduk{
 		HTTP: HTTP,
@@ -32,6 +36,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	group.Put("/update/:id_produk", handler.UpdateProduk)
 	group.Delete("/delete/:id_produk", handler.DeleteProduk)
 	group.Post("/importdata", handler.ImportProduk)
+	group.Post("/importJSON", handler.ImportProdukJSON)
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
@@ -325,5 +330,65 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": fmt.Sprintf("Berhasil mengimpor %d produk", len(produkList)),
+	})
+}
+
+func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
+	var req ImportRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format request tidak valid",
+		})
+	}
+
+	if len(req.Produk) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Tidak ada data produk untuk diimpor",
+		})
+	}
+
+	// Validasi data produk
+	for i, produk := range req.Produk {
+		if produk.NamaProduk == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Produk #%d: nama produk tidak boleh kosong", i+1),
+			})
+		}
+		if produk.KodeProduk == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Produk #%d: kode produk tidak boleh kosong", i+1),
+			})
+		}
+		if produk.HargaProduk <= 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Produk #%d: harga produk harus lebih dari 0", i+1),
+			})
+		}
+		if produk.Stok < 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Produk #%d: stok tidak boleh negatif", i+1),
+			})
+		}
+	}
+
+	// Import data ke database
+	err := d.HTTP.ImportData(c.Context(), req.Produk)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal mengimpor data: %v", err),
+		})
+	}
+
+	// Ambil data produk yang baru diimpor
+	importedProducts, err := d.HTTP.GetAllProduk(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Berhasil mengimpor tapi gagal mengambil data: %v", err),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": fmt.Sprintf("Berhasil mengimpor %d produk", len(req.Produk)),
+		"data": importedProducts,
 	})
 }

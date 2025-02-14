@@ -39,18 +39,18 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 	public.Post("/login", handler.LoginUser)
 	public.Post("/register", handler.RegisterFirstAdmin) // Endpoint untuk register admin pertama
 
-	// Routes yang membutuhkan authentication
-	protected := app.Group("/user")
-	protected.Use(middleware.AuthMiddleware("admin", "owner"))
-	protected.Get("/by-username/:username", handler.GetUserByUsername)
-	protected.Get("/getall", handler.GetAll)
-
-	// Routes khusus admin
+	// Routes khusus admin dengan middleware auth
 	adminOnly := app.Group("/user/admin")
 	adminOnly.Use(middleware.AuthMiddleware("admin"))
 	adminOnly.Post("/register", handler.RegisterUser)
 	adminOnly.Put("/update/:username", handler.UpdateUser)
 	adminOnly.Delete("/delete-user/:id_user", handler.DeleteUser)
+
+	// Routes yang membutuhkan authentication (admin atau owner)
+	protected := app.Group("/user")
+	protected.Use(middleware.AuthMiddleware("admin", "owner"))
+	protected.Get("/by-username/:username", handler.GetUserByUsername)
+	protected.Get("/getall", handler.GetAll)
 }
 
 func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
@@ -64,23 +64,15 @@ func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
 	}
 
 	// Validasi token dari pengguna
-	tokenUser := c.Locals("user")
-	if tokenUser == nil {
+	claims := c.Locals("claims")
+	if claims == nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Token autentikasi tidak ditemukan",
 		})
 	}
 
-	// Validasi format token
-	token, ok := tokenUser.(*jwt.Token)
-	if !ok {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Format token tidak valid",
-		})
-	}
-
 	// Validasi klaim token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	mapClaims, ok := claims.(jwt.MapClaims)
 	if !ok {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Klaim token tidak valid",
@@ -88,7 +80,7 @@ func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
 	}
 
 	// Validasi role pengguna
-	userRole, ok := claims["role"].(string)
+	userRole, ok := mapClaims["role"].(string)
 	if !ok {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Klaim role dalam token tidak valid",
@@ -257,8 +249,7 @@ func (d *HttpDeliveryUser) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	// Validasi role dari token
-	tokenUser := c.Locals("user").(*jwt.Token)
-	claims := tokenUser.Claims.(jwt.MapClaims)
+	claims := c.Locals("claims").(jwt.MapClaims)
 	userRole := claims["role"].(string)
 
 	if userRole != "admin" {

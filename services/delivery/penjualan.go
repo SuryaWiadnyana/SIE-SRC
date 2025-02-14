@@ -15,21 +15,22 @@ type HttpDeliveryPenjualan struct {
 	HTTP            domain.PenjualanUseCase
 	User            domain.UserUseCase
 	DetailPenjualan domain.DetailPenjualanUseCase
+	ProdukUC        domain.ProdukUseCase
 }
 
 type PenjualanRequest struct {
 	Penjualan struct {
-		ProdukTerjual   int `json:"produk_terjual"`
-		TotalPendapatan int `json:"total_pendapatan"`
+		ProdukTerjual int `json:"produk_terjual"`
 	} `json:"penjualan"`
 	Produk domain.Produk `json:"produk"`
 }
 
-func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, userUC domain.UserUseCase, detailUC domain.DetailPenjualanUseCase) {
+func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, userUC domain.UserUseCase, detailUC domain.DetailPenjualanUseCase, produkUC domain.ProdukUseCase) {
 	handler := &HttpDeliveryPenjualan{
 		HTTP:            HTTP,
 		User:            userUC,
 		DetailPenjualan: detailUC,
+		ProdukUC:        produkUC,
 	}
 
 	group := app.Group("/penjualan")
@@ -107,7 +108,7 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		subtotal := req.Penjualan.ProdukTerjual * req.Produk.HargaProduk
 
 		penjualan := domain.Penjualan{
-			User: *user,
+			User:         *user,
 			JumlahProduk: req.Penjualan.ProdukTerjual,
 			SubTotal:     subtotal,
 		}
@@ -132,14 +133,26 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		// Collect all products and calculate total
 		for _, req := range requestList {
 			produkList = append(produkList, req.Produk)
-			totalPendapatan += req.Penjualan.TotalPendapatan
+			totalPendapatan += req.Penjualan.ProdukTerjual * req.Produk.HargaProduk
+
+			// Kurangi stok produk setelah penjualan berhasil dibuat
+			_, err := d.ProdukUC.GetProdukById(c.Context(), req.Produk.IDProduk)
+			if err != nil {
+				log.Printf("Error mendapatkan produk: %v", err)
+				continue
+			}
+
+			if err := d.ProdukUC.DecreaseProdukStock(c.Context(), req.Produk.IDProduk, req.Penjualan.ProdukTerjual); err != nil {
+				log.Printf("Error mengurangi stok produk: %v", err)
+				continue
+			}
 		}
 
 		// Create one detail with all products
 		detail := domain.DetailPenjualan{
 			Penjualan:       penjualan,
 			Produk:          produkList,
-			TotalPendapatan: totalPendapatan,
+			TotalPendapatan: penjualan.Total,
 		}
 
 		createdDetail, err := d.DetailPenjualan.CreateDetails(c.Context(), &detail)

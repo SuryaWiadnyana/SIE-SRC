@@ -6,11 +6,11 @@ import (
 )
 
 type Produk struct {
-	IDProduk    string     `json:"id_produk" bson:"_id"`
+	IDProduk    string     `json:"id_produk" bson:"id_produk"`
 	NamaProduk  string     `json:"nama_produk" bson:"nama_produk"`
 	Kategori    string     `json:"kategori" bson:"kategori"`
 	SubKategori string     `json:"sub_kategori" bson:"sub_kategori"`
-	KodeProduk  string     `json:"barcode_produk" bson:"barcode_produk"`
+	KodeProduk  string     `json:"kode_produk" bson:"kode_produk"`
 	HargaProduk int        `json:"harga_produk" bson:"harga_produk"`
 	Stok        int        `json:"stok_barang" bson:"stok_barang"`
 	UpdatedAt   time.Time  `json:"updated_at" bson:"updated_at"`
@@ -37,5 +37,7 @@ type ProdukUseCase interface {
 	GetProdukByName(ctx context.Context, nama string) (*Produk, error)
 	UpdateProduk(ctx context.Context, bd *Produk) error
 	DeleteProduk(ctx context.Context, id string) error
+	DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error
+	IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	ImportData(ctx context.Context, produkList []Produk) error
 }

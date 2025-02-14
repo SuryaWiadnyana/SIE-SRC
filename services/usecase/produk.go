@@ -108,3 +108,13 @@ func (uc *ProdukUseCase) DeleteProduk(Ctx context.Context, id string) error {
 func (uc *ProdukUseCase) ImportData(ctx context.Context, produkList []domain.Produk) error {
 	return uc.ProdukRepository.ImportData(ctx, produkList)
 }
+
+// DecreaseProdukStock mengurangi stok produk
+func (uc *ProdukUseCase) DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
+	return uc.ProdukRepository.DecreaseProdukStock(ctx, id, kuantitas)
+}
+
+// IncreaseProdukStock menambah stok produk
+func (uc *ProdukUseCase) IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
+	return uc.ProdukRepository.IncreaseProdukStock(ctx, id, kuantitas)
+}

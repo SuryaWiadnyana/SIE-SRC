@@ -55,6 +55,10 @@ func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error
 
 // Create menambahkan Penjualan baru ke dalam koleksi.
 func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjualan) ([]domain.Penjualan, error) {
+	if rp.RepoProduk == nil {
+		return nil, fmt.Errorf("produk repository tidak tersedia")
+	}
+
 	ListPenjualan := rp.DB.Collection(_Penjualan)
 
 	sesi, err := rp.DB.Client().StartSession()

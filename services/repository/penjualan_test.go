@@ -16,7 +16,7 @@ import (
 )
 
 func setupTestDB(t *testing.T) (*mongo.Database, func()) {
-	uri := "mongodb+srv://SIE-SRC:hebI5AnhguRxKFIk@sie-src-environtment.01asg.mongodb.net/"
+	uri := "mongodb+srv://SIE-SRC:SieSRC101@sie-src.01asg.mongodb.net/"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -48,12 +48,27 @@ func cleanupCollection(ctx context.Context, db *mongo.Database, collectionName s
 func TestMongoRepoPenjualan_CreateBulk(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
+	var currentTime = time.Now()
 
 	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	sales := []domain.Penjualan{
-		{IDPenjualan: "12345", Total: 100000, UpdatedAt: time.Now()},
-		{IDPenjualan: "67890", Total: 200000, UpdatedAt: time.Now()},
+		{
+			User: domain.User{
+				Username: "testuser",
+			},
+			JumlahProduk: 2,
+			SubTotal:     100000,
+			UpdatedAt:    currentTime,
+		},
+		{
+			User: domain.User{
+				Username: "testuser",
+			},
+			JumlahProduk: 2,
+			SubTotal:     200000,
+			UpdatedAt:    currentTime,
+		},
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -73,13 +88,13 @@ func TestMongoRepoPenjualan_GetAll(t *testing.T) {
 	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk1 := domain.Penjualan{
-		IDPenjualan:  "12345",
-		Total:        100000,
+		IDPenjualan: "12345",
+		Total:       100000,
 	}
 
 	produk2 := domain.Penjualan{
-		IDPenjualan:  "67890",
-		Total:        200000,
+		IDPenjualan: "67890",
+		Total:       200000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -100,8 +115,8 @@ func TestMongoRepoPenjualan_GetByID(t *testing.T) {
 	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk := domain.Penjualan{
-		IDPenjualan:  "12345",
-		Total:        100000,
+		IDPenjualan: "12345",
+		Total:       100000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -126,7 +141,7 @@ func TestMongoRepoPenjualan_Update(t *testing.T) {
 	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk := domain.Penjualan{
-		IDPenjualan:  "12345",
+		IDPenjualan: "12345",
 		// Total:        100000,
 	}
 
@@ -152,8 +167,8 @@ func TestMongoRepoPenjualan_Delete(t *testing.T) {
 	repo := repository.NewMongoRepoPenjualan(db, nil)
 
 	produk := domain.Penjualan{
-		IDPenjualan:  "12345",
-		Total:        100000,
+		IDPenjualan: "12345",
+		Total:       100000,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

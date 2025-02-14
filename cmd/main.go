@@ -63,10 +63,11 @@ func startHTTPServer() {
 	// Middleware setup
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     os.Getenv("CORS_ALLOW_ORIGINS"),
-		AllowMethods:     "GET,POST,PUT,DELETE",
-		AllowHeaders:     "Content-Type, Authorization",
-		AllowCredentials: false,
+		AllowOrigins:     "http://127.0.0.1:5501",
+		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowCredentials: true,
+		MaxAge:           300,
 	}))
 	app.Use(limiter.New(limiter.Config{
 		Max:        100,
@@ -103,7 +104,8 @@ func startHTTPServer() {
 	log.Printf("Initializing detail penjualan use case...")
 
 	// Inisialisasi handler penjualan dengan detail penjualan use case
-	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase, userUseCase, detailPenjualanUC)
+	produkUseCase := usecase.NewUseCaseProduk(produkRepo, algoritmaRepo, penjualanRepo, 10*time.Second)
+	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase, userUseCase, detailPenjualanUC, produkUseCase)
 	log.Printf("Handler penjualan initialized with detail penjualan use case")
 
 	// Inisialisasi handler detail penjualan
@@ -111,7 +113,6 @@ func startHTTPServer() {
 	log.Printf("Detail penjualan handler initialized")
 
 	// Produk Use Case route
-	produkUseCase := usecase.NewUseCaseProduk(produkRepo, algoritmaRepo, penjualanRepo, 10*time.Second)
 	delivery.NewHttpDeliveryProduk(app, produkUseCase)
 
 	// Algoritma Use Case and Handler

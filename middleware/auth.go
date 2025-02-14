@@ -12,14 +12,22 @@ import (
 func AuthMiddleware(roles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Ambil token dari header
-		tokenString := c.Get("Authorization")
-		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-
-		if tokenString == "" {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "No token provided",
+				"error": "Token autentikasi tidak ditemukan",
 			})
 		}
+
+		// Pastikan format Bearer token benar
+		tokenParts := strings.Split(authHeader, " ")
+		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Format token tidak valid",
+			})
+		}
+
+		tokenString := tokenParts[1]
 
 		// Parsing token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -29,12 +37,15 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 			}
 			// Kembalikan secret key dari env
 			secretKey := os.Getenv("JWT_SECRET_KEY")
+			if secretKey == "" {
+				return nil, fmt.Errorf("JWT_SECRET_KEY tidak ditemukan")
+			}
 			return []byte(secretKey), nil
 		})
+
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Invalid token",
-				"error":   err.Error(),
+				"error": fmt.Sprintf("Token tidak valid: %v", err),
 			})
 		}
 
@@ -42,22 +53,19 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok || !token.Valid {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Invalid token claims",
+				"error": "Token claims tidak valid",
 			})
 		}
 
-		// Simpan claims ke locals untuk digunakan di handler
-		c.Locals("claims", claims)
-		c.Locals("username", claims["username"])
-
-		// Cek apakah role yang diminta sesuai
+		// Validasi role
 		userRole, ok := claims["role"].(string)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Invalid role claim",
+				"error": "Role tidak ditemukan dalam token",
 			})
 		}
 
+		// Cek apakah role yang diminta sesuai
 		if len(roles) > 0 {
 			hasRole := false
 			for _, role := range roles {
@@ -68,10 +76,15 @@ func AuthMiddleware(roles ...string) fiber.Handler {
 			}
 			if !hasRole {
 				return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-					"message": "Forbidden: insufficient role",
+					"error": "Anda tidak memiliki akses untuk melakukan operasi ini",
 				})
 			}
 		}
+
+		// Simpan claims ke locals untuk digunakan di handler
+		c.Locals("claims", claims)
+		c.Locals("username", claims["username"])
+		c.Locals("role", userRole)
 
 		return c.Next()
 	}

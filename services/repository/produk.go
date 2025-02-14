@@ -29,8 +29,8 @@ var _Produk = "produk"
 func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
-	// Find the last document sorted by _id in descending order
-	opts := options.FindOne().SetSort(bson.M{"_id": -1})
+	// Find the last document sorted by id_produk in descending order
+	opts := options.FindOne().SetSort(bson.M{"id_produk": -1})
 	var lastProduct domain.Produk
 
 	err := DataProduk.FindOne(ctx, bson.M{}, opts).Decode(&lastProduct)
@@ -105,7 +105,7 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var product domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{"_id": id, "is_deleted": nil}).Decode(&product)
+	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -138,16 +138,16 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 
 	bd.UpdatedAt = time.Now()
 
-	filter := bson.M{"_id": bd.IDProduk}
+	filter := bson.M{"id_produk": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
-			"nama_produk":    bd.NamaProduk,
-			"kategori":       bd.Kategori,
-			"sub_kategori":   bd.SubKategori,
-			"barcode_produk": bd.KodeProduk,
-			"harga_produk":   bd.HargaProduk,
-			"stok_barang":    bd.Stok,
-			"updated_at":     bd.UpdatedAt,
+			"nama_produk":  bd.NamaProduk,
+			"kategori":     bd.Kategori,
+			"sub_kategori": bd.SubKategori,
+			"kode_produk":  bd.KodeProduk,
+			"harga_produk": bd.HargaProduk,
+			"stok_barang":  bd.Stok,
+			"updated_at":   bd.UpdatedAt,
 		},
 	}
 
@@ -168,7 +168,7 @@ func (rp *mongoRepoProduk) DeleteProduk(ctx context.Context, id string) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	now := time.Now()
-	filter := bson.M{"_id": id}
+	filter := bson.M{"id_produk": id}
 	update := bson.M{
 		"$set": bson.M{
 			"is_deleted": now,
@@ -192,7 +192,7 @@ func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, k
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var product domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{"_id": id, "is_deleted": nil}).Decode(&product)
+	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -226,7 +226,7 @@ func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, k
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var existingProduct domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{"_id": id}).Decode(&existingProduct)
+	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id}).Decode(&existingProduct)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -247,7 +247,7 @@ func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, k
 		},
 	}
 
-	_, err = DataProduk.UpdateOne(ctx, bson.M{"_id": id}, update)
+	_, err = DataProduk.UpdateOne(ctx, bson.M{"id_produk": id}, update)
 	if err != nil {
 		return fmt.Errorf("gagal menambah stok produk: %v", err)
 	}
@@ -266,7 +266,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 
 	// 1. Dapatkan ID terakhir dari database
 	var lastProduct domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{}, options.FindOne().SetSort(bson.M{"_id": -1})).Decode(&lastProduct)
+	err := DataProduk.FindOne(ctx, bson.M{}, options.FindOne().SetSort(bson.M{"id_produk": -1})).Decode(&lastProduct)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return fmt.Errorf("error finding last product: %v", err)
 	}
@@ -281,22 +281,22 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		startID = lastIDNum + 1
 	}
 
-	// 2. Cek duplikat barcode
-	barcodes := make([]string, 0)
+	// 2. Cek duplikat kode produk
+	kodeProdukList := make([]string, 0)
 	for _, produk := range produkList {
 		if produk.KodeProduk != "" {
-			barcodes = append(barcodes, produk.KodeProduk)
+			kodeProdukList = append(kodeProdukList, produk.KodeProduk)
 		}
 	}
 
-	existingBarcodes := make(map[string]bool)
-	if len(barcodes) > 0 {
+	existingKodeProduk := make(map[string]bool)
+	if len(kodeProdukList) > 0 {
 		cursor, err := DataProduk.Find(ctx, bson.M{
-			"barcode_produk": bson.M{"$in": barcodes},
-			"is_deleted":     nil,
+			"kode_produk": bson.M{"$in": kodeProdukList},
+			"is_deleted":  nil,
 		})
 		if err != nil {
-			return fmt.Errorf("error checking existing barcodes: %v", err)
+			return fmt.Errorf("error checking existing kode produk: %v", err)
 		}
 		defer cursor.Close(ctx)
 
@@ -305,8 +305,8 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 			if err := cursor.Decode(&existing); err != nil {
 				return fmt.Errorf("error decoding existing product: %v", err)
 			}
-			existingBarcodes[existing.KodeProduk] = true
-			log.Printf("Found existing barcode: %s", existing.KodeProduk)
+			existingKodeProduk[existing.KodeProduk] = true
+			log.Printf("Found existing kode produk: %s", existing.KodeProduk)
 		}
 	}
 
@@ -326,10 +326,10 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 			continue
 		}
 
-		// Cek duplikat barcode
-		if existingBarcodes[produk.KodeProduk] {
-			log.Printf("Skip produk #%d: barcode %s sudah ada", i+1, produk.KodeProduk)
-			log.Printf("Existing barcodes: %v", existingBarcodes)
+		// Cek duplikat kode produk
+		if existingKodeProduk[produk.KodeProduk] {
+			log.Printf("Skip produk #%d: kode produk %s sudah ada", i+1, produk.KodeProduk)
+			log.Printf("Existing kode produk: %v", existingKodeProduk)
 			skippedCount++
 			continue
 		}
@@ -339,11 +339,11 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		log.Printf("Assigning ID %s to product %s", idStr, produk.NamaProduk)
 
 		doc := bson.D{
-			{Key: "_id", Value: idStr},
+			{Key: "id_produk", Value: idStr},
 			{Key: "nama_produk", Value: produk.NamaProduk},
 			{Key: "kategori", Value: produk.Kategori},
 			{Key: "sub_kategori", Value: produk.SubKategori},
-			{Key: "barcode_produk", Value: produk.KodeProduk},
+			{Key: "kode_produk", Value: produk.KodeProduk},
 			{Key: "harga_produk", Value: produk.HargaProduk},
 			{Key: "stok_barang", Value: produk.Stok},
 			{Key: "updated_at", Value: now},
@@ -354,8 +354,8 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		operations = append(operations, operation)
 		currentID++
 
-		// Tandai barcode sebagai sudah digunakan
-		existingBarcodes[produk.KodeProduk] = true
+		// Tandai kode produk sebagai sudah digunakan
+		existingKodeProduk[produk.KodeProduk] = true
 	}
 
 	if len(operations) == 0 {
