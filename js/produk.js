@@ -257,7 +257,7 @@ function displayProducts(products = []) {
             <td>${product.nama_produk || '-'}</td>
             <td>${product.kategori || '-'}</td>
             <td>${product.sub_kategori || '-'}</td>
-            <td>${product.barcode_produk || '-'}</td>
+            <td>${product.kode_produk || '-'}</td>
             <td>${formatCurrency(product.harga_produk) || '-'}</td>
             <td>${product.stok_barang || '0'}</td>
             <td>
@@ -326,7 +326,7 @@ async function handleAddProduct(e) {
             nama_produk: formData.get('nama_produk'),
             kategori: formData.get('kategori'),
             sub_kategori: formData.get('sub_kategori'),
-            barcode_produk: formData.get('barcode_produk'),
+            kode_produk: formData.get('kode_produk'),
             harga_produk: parseInt(formData.get('harga_produk')),
             stok_barang: parseInt(formData.get('stok_barang'))
         };
@@ -363,7 +363,7 @@ async function handleUpdateProduct(e) {
             nama_produk: document.getElementById('update_nama_produk').value,
             kategori: document.getElementById('update_kategori').value,
             sub_kategori: document.getElementById('update_sub_kategori').value,
-            barcode_produk: document.getElementById('update_barcode_produk').value,
+            kode_produk: document.getElementById('update_kode_produk').value,
             harga_produk: parseInt(document.getElementById('update_harga_produk').value) || 0,
             stok_barang: parseInt(document.getElementById('update_stok_barang').value) || 0
         };
@@ -372,14 +372,14 @@ async function handleUpdateProduct(e) {
         console.log('Product data to send:', productData);
         
         // Validate data
-        const requiredFields = ['nama_produk', 'kategori', 'barcode_produk'];
+        const requiredFields = ['nama_produk', 'kategori', 'kode_produk'];
         const emptyFields = requiredFields.filter(field => !productData[field] || productData[field].trim() === '');
         
         if (emptyFields.length > 0) {
             const fieldNames = {
                 nama_produk: 'Nama Produk',
                 kategori: 'Kategori',
-                barcode_produk: 'Barcode'
+                kode_produk: 'Kode Produk'
             };
             const missingFields = emptyFields.map(field => fieldNames[field]).join(', ');
             showAlert(`Field berikut harus diisi: ${missingFields}`, 'danger');
@@ -434,7 +434,7 @@ async function handleEditClick(event) {
             nama_produk: cells[1].textContent,
             kategori: cells[2].textContent,
             sub_kategori: cells[3].textContent,
-            barcode_produk: cells[4].textContent,
+            kode_produk: cells[4].textContent,
             harga_produk: parseInt(cells[5].textContent.replace(/[^\d]/g, '')),
             stok_barang: parseInt(cells[6].textContent)
         };
@@ -450,7 +450,7 @@ async function handleEditClick(event) {
         // Set form values
         document.getElementById('update_id_produk').value = product.id_produk;
         document.getElementById('update_nama_produk').value = product.nama_produk;
-        document.getElementById('update_barcode_produk').value = product.barcode_produk;
+        document.getElementById('update_kode_produk').value = product.kode_produk;
         document.getElementById('update_harga_produk').value = product.harga_produk;
         document.getElementById('update_stok_barang').value = product.stok_barang;
 

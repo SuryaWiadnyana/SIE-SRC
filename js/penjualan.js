@@ -91,10 +91,6 @@ function initializeDataTable() {
                         return data && data.username ? data.username : '-';
                     }
                 },
-                { 
-                    data: 'jumlah_produk',
-                    defaultContent: '0'
-                },
                 {
                     data: 'total',
                     render: function(data) {
@@ -109,24 +105,17 @@ function initializeDataTable() {
                 },
                 {
                     data: null,
-                    orderable: false,
                     render: function(data, type, row) {
-                        const userRole = getUserRole();
-                        let buttons = `
-                            <button class="btn btn-info btn-sm" onclick="showDetailPenjualan('${row.id_details}')">
-                                <i class="fas fa-eye"></i> Detail
-                            </button>
-                        `;
-                        
-                        if (userRole === 'admin' || userRole === 'owner') {
-                            buttons += `
-                                <button class="btn btn-danger btn-sm ml-1" onclick="deletePenjualan('${row.id_penjualan}')">
+                        return `
+                            <div class="btn-group">
+                                <button class="btn btn-info btn-sm detail-btn" data-id="${row.id_penjualan}">
+                                    <i class="fas fa-info-circle"></i> Detail
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id_penjualan}">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
-                            `;
-                        }
-                        
-                        return buttons;
+                            </div>
+                        `;
                     }
                 }
             ],
@@ -153,6 +142,17 @@ function initializeDataTable() {
                     sortDescending: ": aktifkan untuk mengurutkan kolom ke bawah"
                 }
             }
+        });
+
+        // Add event handlers for detail and delete buttons
+        $('#tabelPenjualan').on('click', '.detail-btn', function() {
+            const id = $(this).data('id');
+            window.location.href = `detail-penjualan.html?id=${id}`;
+        });
+
+        $('#tabelPenjualan').on('click', '.delete-btn', function() {
+            const id = $(this).data('id');
+            deletePenjualan(id);
         });
     } catch (error) {
         console.error('Error initializing DataTable:', error);
@@ -227,8 +227,7 @@ async function savePenjualan() {
         const penjualanData = {
             nama_penjual: userData.username,
             tanggal_penjualan: new Date().toISOString(),
-            jumlah_produk: products.length,
-            subtotal: parseInt(total),
+            subtotal: parseInt(subtotal),
             total: parseInt(total),
             updated_at: new Date().toISOString()
         };
@@ -261,7 +260,7 @@ async function savePenjualan() {
                         harga_produk: parseInt(product.harga_produk),
                         stok: parseInt(product.jumlah_produk)
                     },
-                    total_pendapatan: parseInt(product.harga_produk) * parseInt(product.jumlah_produk)
+                    // total_pendapatan: parseInt(product.harga_produk) * parseInt(product.jumlah_produk)
                 };
 
                 const detailResponse = await fetch('http://localhost:8080/detail-penjualan/create', {
@@ -373,7 +372,7 @@ function getSelectedProducts() {
                 id_produk: selectProduk.val(),
                 nama_produk: selectedOption.data('nama'),
                 harga_produk: hargaProduk,
-                jumlah_produk: jumlahProduk,
+                // jumlah_produk: jumlahProduk,
                 subtotal: jumlahProduk * hargaProduk
             });
         }
@@ -510,7 +509,7 @@ $(document).ready(function() {
                         username: userData.username
                     },
                     tanggal_penjualan: new Date().toISOString(),
-                    jumlah_produk: product.jumlah_produk,
+                    // jumlah_produk: product.jumlah_produk,
                     subtotal: product.subtotal,
                     total: product.subtotal,
                     updated_at: new Date().toISOString()
@@ -733,7 +732,7 @@ $(document).ready(function() {
                         return formatDate(data);
                     }
                 },
-                { data: 'jumlah_produk' },
+                // { data: 'jumlah_produk' },
                 { 
                     data: 'total',
                     render: function(data) {

@@ -57,7 +57,7 @@
         <!-- Nav Item - Penjualan -->
         <li class="nav-item active">
           <a class="nav-link" href="penjualan.html">
-            <i class="fas fa-fw fa-shopping-cart"></i>
+            <i class="fas fa-fw fa-money-bill"></i>
             <span>Manajemen Penjualan</span>
           </a>
         </li>
@@ -136,22 +136,42 @@
                 <div class="row mb-4">
                   <div class="col-md-6">
                     <p>
+                      <strong>ID Detail:</strong>
+                      <span id="id_details"></span>
+                    </p>
+                    <p>
                       <strong>ID Penjualan:</strong>
-                      <span id="detail-id"></span>
+                      <span id="id_penjualan"></span>
+                    </p>
+                    <p>
+                      <strong>ID User:</strong>
+                      <span id="id_user"></span>
                     </p>
                     <p>
                       <strong>Nama Penjual:</strong>
-                      <span id="detail-nama"></span>
+                      <span id="username"></span>
                     </p>
                     <p>
-                      <strong>Tanggal:</strong>
-                      <span id="detail-tanggal"></span>
+                      <strong>Tanggal Penjualan:</strong>
+                      <span id="tanggal_penjualan"></span>
                     </p>
                   </div>
                   <div class="col-md-6 text-right">
                     <p>
+                      <strong>Jumlah Produk:</strong>
+                      <span id="jumlah_produk"></span>
+                    </p>
+                    <p>
                       <strong>Total Penjualan:</strong>
-                      <span id="detail-total"></span>
+                      <span id="total"></span>
+                    </p>
+                    <p>
+                      <strong>Total Pendapatan:</strong>
+                      <span id="total_pendapatan"></span>
+                    </p>
+                    <p>
+                      <strong>Updated At:</strong>
+                      <span id="updated_at"></span>
                     </p>
                   </div>
                 </div>
@@ -159,6 +179,7 @@
                 <!-- Detail Produk Table -->
                 <div class="table-responsive">
                   <table
+                    id="tabelDetailPenjualan"
                     class="table table-bordered"
                     width="100%"
                     cellspacing="0"
@@ -167,9 +188,9 @@
                       <tr>
                         <th>ID Produk</th>
                         <th>Nama Produk</th>
+                        <th>Harga Produk</th>
                         <th>Jumlah</th>
-                        <th>Harga</th>
-                        <th>Subtotal</th>
+                        <th>Total Pendapatan</th>
                       </tr>
                     </thead>
                     <tbody id="detail-produk-body">
@@ -265,12 +286,18 @@
 
                 if (data && data.data) {
                     const penjualan = data.data;
-                    document.getElementById('detail-id').textContent = penjualan.id_penjualan || '-';
-                    document.getElementById('detail-nama').textContent = penjualan.username || '-';
-                    document.getElementById('detail-tanggal').textContent = penjualan.tanggal ? 
+                    document.getElementById('id_details').textContent = penjualan.id_details || '-';
+                    document.getElementById('id_penjualan').textContent = penjualan.id_penjualan || '-';
+                    document.getElementById('id_user').textContent = penjualan.id_user || '-';
+                    document.getElementById('username').textContent = penjualan.username || '-';
+                    document.getElementById('role').textContent = penjualan.role || '-';
+                    document.getElementById('tanggal_penjualan').textContent = penjualan.tanggal ? 
                         moment(penjualan.tanggal).format('DD/MM/YYYY HH:mm:ss') : '-';
-                    document.getElementById('detail-total').textContent = penjualan.total ? 
-                        'Rp ' + formatRupiah(penjualan.total) : '-';
+                    document.getElementById('jumlah_produk').textContent = penjualan.jumlah_produk || '0';
+                    document.getElementById('total').textContent = 'Rp ' + formatRupiah(penjualan.total || 0);
+                    document.getElementById('total_pendapatan').textContent = 'Rp ' + formatRupiah(penjualan.total_pendapatan || 0);
+                    document.getElementById('updated_at').textContent = penjualan.updated_at ? 
+                        moment(penjualan.updated_at).format('DD/MM/YYYY HH:mm:ss') : '-';
 
                     const produkBody = document.getElementById('detail-produk-body');
                     produkBody.innerHTML = '';
@@ -280,24 +307,24 @@
                             const row = `<tr>
                                 <td>${item.id_produk || '-'}</td>
                                 <td>${item.nama_produk || '-'}</td>
+                                <td>Rp ${formatRupiah(item.harga_produk || 0)}</td>
                                 <td>${item.jumlah_produk || '0'}</td>
-                                <td>Rp ${formatRupiah(item.harga || 0)}</td>
-                                <td>Rp ${formatRupiah(item.subtotal || 0)}</td>
+                                <td>Rp ${formatRupiah(item.total_pendapatan || 0)}</td>
                             </tr>`;
                             produkBody.innerHTML += row;
                         });
                     } else {
-                        produkBody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada data produk</td></tr>';
+                        produkBody.innerHTML = '<tr><td colspan="5" class="text-center">Tidak ada data produk</td></tr>';
                     }
                 } else {
                     console.error('Invalid data format:', data);
                     document.getElementById('detail-produk-body').innerHTML = 
-                        '<tr><td colspan="4" class="text-center">Data tidak tersedia</td></tr>';
+                        '<tr><td colspan="5" class="text-center">Data tidak tersedia</td></tr>';
                 }
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('detail-produk-body').innerHTML = 
-                    '<tr><td colspan="4" class="text-center">Terjadi kesalahan saat memuat data</td></tr>';
+                    '<tr><td colspan="5" class="text-center">Terjadi kesalahan saat memuat data</td></tr>';
             }
         });
 

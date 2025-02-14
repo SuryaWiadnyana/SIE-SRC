@@ -119,7 +119,6 @@ $(document).ready(function() {
             if (productId && quantity > 0 && price > 0) {
                 products.push({
                     id_produk: productId,
-                    jumlah_produk: quantity,
                     harga_produk: price,
                     subtotal: quantity * price
                 });

@@ -277,7 +277,7 @@ const products = {
         } catch (error) {
             let errorMessage = 'Gagal membuat produk: ';
             if (error.message.includes('duplicate key error')) {
-                const match = error.message.match(/\{ _id: "(.+?)" \}/);
+                const match = error.message.match(/\{ id_produk: "(.+?)" \}/);
                 const id = match ? match[1] : 'unknown';
                 errorMessage += `ID ${id} sudah digunakan`;
             } else {
