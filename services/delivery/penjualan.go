@@ -33,13 +33,12 @@ func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, us
 		ProdukUC:        produkUC,
 	}
 
-	group := app.Group("/penjualan")
-	// Menambahkan middleware auth untuk semua endpoint penjualan
-	group.Use(middleware.AuthMiddleware("admin", "owner"))
-	group.Post("/create", handler.CreateBulk)
-	group.Get("/getall", handler.GetAll)
-	group.Get("/by-id/:id_penjualan", handler.GetByID)
-	group.Delete("/delete/:id_penjualan", handler.Delete)
+	protected := app.Group("/penjualan")
+	protected.Use(middleware.AuthMiddleware("admin", "owner"))
+	protected.Post("/create", handler.CreateBulk)
+	protected.Get("/getall", handler.GetAll)
+	protected.Get("/by-id/:id_penjualan", handler.GetByID)
+	protected.Delete("/delete/:id_penjualan", handler.Delete)
 	// group.Put("/update/:id_penjualan", handler.Update)
 }
 

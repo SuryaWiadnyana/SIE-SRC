@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"SIE-SRC/domain"
+	"SIE-SRC/middleware"
 	"context"
 	"fmt"
 	"log"
@@ -19,10 +20,11 @@ func NewHttpDeliveryDetailPenjualan(app fiber.Router, HTTP domain.DetailPenjuala
 		HTTP: HTTP,
 	}
 
-	group := app.Group("/detail-penjualan")
-	group.Post("/create", handler.CreateDetail)
-	group.Get("/by-id/:id_penjualan", handler.GetByID)
-	group.Get("/getall", handler.GetAll)
+	protected := app.Group("/detail-penjualan")
+	protected.Use(middleware.AuthMiddleware("admin", "owner"))
+	protected.Post("/create", handler.CreateDetail)
+	protected.Get("/by-id/:id_penjualan", handler.GetByID)
+	protected.Get("/getall", handler.GetAll)
 }
 
 func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {

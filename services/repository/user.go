@@ -51,41 +51,41 @@ func NewMongoRepoUser(client *mongo.Database) domain.UserRepository {
 var _UserCollection = "users"
 
 func (rp *mongoRepoUser) RegisterUser(ctx context.Context, user *domain.User) (domain.User, error) {
-	collection := rp.DB.Collection(_UserCollection)
+    collection := rp.DB.Collection(_UserCollection)
 
-	// Check if the username already exists
-	existingUser, err := rp.GetUserByUsername(ctx, user.Username)
+    // Check if the username already exists
+    existingUser, err := rp.GetUserByUsername(ctx, user.Username)
 	if err == nil && existingUser != nil {
 		return domain.User{}, fmt.Errorf("username %s sudah digunakan", user.Username)
-	}
+    }
 
-	log.Printf("Attempting to register user: %s", user.Username)
+    log.Printf("Attempting to register user: %s", user.Username)
 
 	_, err = bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("Error encrypting password for user %s: %v", user.Username, err)
+    if err != nil {
+        log.Printf("Error encrypting password for user %s: %v", user.Username, err)
 		return domain.User{}, fmt.Errorf("gagal mengenkripsi password: %v", err)
-	}
+    }
 
 	// Log the password hashing success
 
-	// Generate ID if empty
-	if user.IDUser == "" {
-		nextID, err := rp.GenerateNextID(ctx)
-		if err != nil {
-			log.Printf("Failed to generate ID for user %s: %v", user.Username, err)
+    // Generate ID if empty
+    if user.IDUser == "" {
+        nextID, err := rp.GenerateNextID(ctx)
+        if err != nil {
+            log.Printf("Failed to generate ID for user %s: %v", user.Username, err)
 			return domain.User{}, fmt.Errorf("gagal generate ID: %v", err)
-		}
-		user.IDUser = nextID
-	}
+        }
+        user.IDUser = nextID
+    }
 
-	_, err = collection.InsertOne(ctx, user)
-	if err != nil {
-		log.Printf("Failed to insert user into the database: %v", err)
+    _, err = collection.InsertOne(ctx, user)
+    if err != nil {
+        log.Printf("Failed to insert user into the database: %v", err)
 		return domain.User{}, fmt.Errorf("gagal membuat user: %v", err)
-	}
+    }
 
-	// Log user creation success
+    // Log user creation success
 	log.Printf("User registered successfully: %s", user.Username)
 
 	return *user, nil

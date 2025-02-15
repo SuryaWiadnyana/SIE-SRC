@@ -37,7 +37,8 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 	// Routes publik
 	public := app.Group("/user")
 	public.Post("/login", handler.LoginUser)
-	public.Post("/register", handler.RegisterFirstAdmin) // Endpoint untuk register admin pertama
+	public.Post("/register", handler.RegisterFirstAdmin)
+	public.Get("/getall", handler.GetAll) // Endpoint untuk register admin pertama
 
 	// Routes khusus admin dengan middleware auth
 	adminOnly := app.Group("/user/admin")
@@ -45,12 +46,6 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 	adminOnly.Post("/register", handler.RegisterUser)
 	adminOnly.Put("/update/:username", handler.UpdateUser)
 	adminOnly.Delete("/delete-user/:id_user", handler.DeleteUser)
-
-	// Routes yang membutuhkan authentication (admin atau owner)
-	protected := app.Group("/user")
-	protected.Use(middleware.AuthMiddleware("admin", "owner"))
-	protected.Get("/by-username/:username", handler.GetUserByUsername)
-	protected.Get("/getall", handler.GetAll)
 }
 
 func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
@@ -71,11 +66,11 @@ func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validasi klaim token
+	// Cast claims ke jwt.MapClaims
 	mapClaims, ok := claims.(jwt.MapClaims)
 	if !ok {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Klaim token tidak valid",
+			"error": "Format token tidak valid",
 		})
 	}
 
@@ -117,10 +112,21 @@ func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
 		})
 	}
 
+	// Log informasi admin yang melakukan registrasi
+	adminUsername, _ := mapClaims["username"].(string)
+	log.Printf("Admin %s mencoba mendaftarkan user baru: %s dengan role %s", 
+		adminUsername, user.Username, user.Role)
+
 	// Daftarkan pengguna baru
 	registeredUser, err := d.HTTP.RegisterUser(context.Background(), &user)
 	if err != nil {
 		log.Printf("Gagal mendaftarkan pengguna: %v", err)
+		if err.Error() == fmt.Sprintf("username %s sudah digunakan", user.Username) {
+			return c.Status(http.StatusConflict).JSON(fiber.Map{
+				"error": err.Error(),
+				"data" : registeredUser,
+			})
+		}
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Gagal mendaftarkan pengguna: %v", err),
 		})
@@ -131,7 +137,10 @@ func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "Pengguna berhasil didaftarkan",
-		"data":    registeredUser,
+		"data": fiber.Map{
+			"username": user.Username,
+			"role": user.Role,
+		},
 	})
 }
 
@@ -182,7 +191,7 @@ func (d *HttpDeliveryUser) LoginUser(c *fiber.Ctx) error {
 		"data": fiber.Map{
 			"user": fiber.Map{
 				"username": user.Username,
-				"role":    user.Role,
+				"role":     user.Role,
 			},
 			"token": token,
 		},
