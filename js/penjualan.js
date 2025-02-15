@@ -8,177 +8,226 @@ function formatRupiah(angka) {
     }).format(angka);
 }
 
+// Format date
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+}
+
+let penjualanTable;
+let subtotal = 0;
+
 $(document).ready(function() {
     // Check authentication
     const token = localStorage.getItem('token');
     if (!token) {
+        console.log('No token found, redirecting to login');
         window.location.href = '../login.html';
         return;
     }
 
-    // Pastikan tabel ada sebelum inisialisasi DataTables
-    if (!$('#tabelPenjualan').length) {
-        console.error('Table element not found!');
+    // Verify token format
+    try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length !== 3) {
+            console.error('Invalid token format');
+            localStorage.clear();
+            window.location.href = '../login.html';
+            return;
+        }
+    } catch (error) {
+        console.error('Error parsing token:', error);
+        localStorage.clear();
+        window.location.href = '../login.html';
         return;
     }
 
-    // Initialize DataTable
-    initializeDataTable();
-    
-    // Load product options
-    loadProdukOptions();
+    // Set username
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    if (!userData || !userData.username) {
+        console.error('No user data found');
+        localStorage.clear();
+        window.location.href = '../login.html';
+        return;
+    }
+    $('#username').text(userData.username);
+    $('#namaPenjual').val(userData.username);
 
-    // Event handler untuk tombol simpan
-    $('#btn-simpan-penjualan').on('click', function() {
-        savePenjualan();
+    // Test API connection
+    fetch('http://localhost:8080/penjualan/getall', {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('API test failed with status: ' + response.status);
+        }
+        console.log('API connection successful');
+        initializeDataTable();
+    })
+    .catch(error => {
+        console.error('API test failed:', error);
+        if (error.message.includes('401')) {
+            localStorage.clear();
+            window.location.href = '../login.html';
+        }
     });
 });
 
 // Initialize DataTable
 function initializeDataTable() {
     const token = localStorage.getItem('token');
-    if (!token) return;
-
-    try {
-        if ($.fn.DataTable.isDataTable('#tabelPenjualan')) {
-            $('#tabelPenjualan').DataTable().destroy();
-        }
-
-        penjualanTable = $('#tabelPenjualan').DataTable({
-            processing: true,
-            serverSide: false,
-            ajax: {
-                url: 'http://localhost:8080/penjualan/getall',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                dataSrc: function(response) {
-                    if (!response.data) return [];
-                    return response.data.map(item => {
-                        if (item.penjualan) {
-                            return {
-                                ...item.penjualan,
-                                user: item.penjualan.user
-                            };
-                        }
-                        return item;
-                    });
-                },
-                error: function(xhr, error, thrown) {
-                    console.error('DataTables error:', error);
-                    if (xhr.status === 401) {
-                        alert('Sesi login telah berakhir. Silakan login kembali.');
-                        localStorage.clear();
-                        window.location.href = '../login.html';
-                    }
-                }
+    
+    penjualanTable = $('#tabelPenjualan').DataTable({
+        processing: true,
+        serverSide: false,
+        ajax: {
+            url: 'http://localhost:8080/penjualan/getall',
+            type: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
             },
-            columns: [
-                { 
-                    data: null,
-                    render: function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                { 
-                    data: 'id_penjualan',
-                    defaultContent: '-'
-                },
-                { 
-                    data: 'user',
-                    render: function(data) {
-                        return data && data.username ? data.username : '-';
-                    }
-                },
-                {
-                    data: 'total',
-                    render: function(data) {
-                        return formatRupiah(data || 0);
-                    }
-                },
-                {
-                    data: 'tanggal_penjualan',
-                    render: function(data) {
-                        return data ? moment(data).format('DD/MM/YYYY HH:mm:ss') : '-';
-                    }
-                },
-                {
-                    data: null,
-                    render: function(data, type, row) {
-                        return `
-                            <div class="btn-group">
-                                <button class="btn btn-info btn-sm detail-btn" data-id="${row.id_penjualan}">
-                                    <i class="fas fa-info-circle"></i> Detail
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id_penjualan}">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </div>
-                        `;
-                    }
+            dataSrc: function(response) {
+                console.log('Response from server:', response);
+                if (!response.data) {
+                    console.warn('No data in response');
+                    return [];
                 }
-            ],
-            order: [[0, 'desc']],
-            language: {
-                processing: "Memproses...",
-                search: "Cari:",
-                lengthMenu: "Tampilkan _MENU_ data",
-                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                infoFiltered: "(disaring dari _MAX_ data keseluruhan)",
-                infoPostFix: "",
-                loadingRecords: "Memuat...",
-                zeroRecords: "Tidak ditemukan data yang sesuai",
-                emptyTable: "Tidak ada data yang tersedia",
-                paginate: {
-                    first: "Pertama",
-                    previous: "Sebelumnya",
-                    next: "Selanjutnya",
-                    last: "Terakhir"
-                },
-                aria: {
-                    sortAscending: ": aktifkan untuk mengurutkan kolom ke atas",
-                    sortDescending: ": aktifkan untuk mengurutkan kolom ke bawah"
+                return response.data;
+            },
+            error: function(xhr, error, thrown) {
+                console.error('DataTables error:', error);
+                console.error('XHR:', xhr);
+                console.error('Thrown:', thrown);
+                if (xhr.status === 401) {
+                    console.error('Authentication failed');
+                    localStorage.clear();
+                    window.location.href = '../login.html';
+                } else {
+                    console.error('Other error occurred:', xhr.responseText);
                 }
             }
-        });
+        },
+        columns: [
+            { 
+                data: null,
+                render: function(data, type, row, meta) {
+                    return meta.row + 1;
+                }
+            },
+            { data: 'id_penjualan' },
+            { 
+                data: 'user',
+                render: function(data) {
+                    return data ? data.username : '-';
+                }
+            },
+            { 
+                data: 'total',
+                render: function(data) {
+                    return formatRupiah(data);
+                }
+            },
+            { 
+                data: 'tanggal_penjualan',
+                render: function(data) {
+                    return formatDate(data);
+                }
+            },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <button class="btn btn-info btn-sm" onclick="showDetailPenjualan('${row.id_penjualan}')">
+                            <i class="fas fa-info-circle"></i> Detail
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePenjualan('${row.id_penjualan}')">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    `;
+                }
+            }
+        ],
+        order: [[1, 'desc']]
+    });
 
-        // Add event handlers for detail and delete buttons
-        $('#tabelPenjualan').on('click', '.detail-btn', function() {
-            const id = $(this).data('id');
-            window.location.href = `detail-penjualan.html?id=${id}`;
-        });
+    // Load product options
+    loadProdukOptions();
 
-        $('#tabelPenjualan').on('click', '.delete-btn', function() {
-            const id = $(this).data('id');
-            deletePenjualan(id);
-        });
-    } catch (error) {
-        console.error('Error initializing DataTable:', error);
-    }
+    // Event handlers
+    setupEventHandlers();
+}
+
+// Setup event handlers
+function setupEventHandlers() {
+    // Event handler untuk tombol simpan
+    $('#btnSimpanPenjualan').on('click', function() {
+        savePenjualan();
+    });
+
+    // Event handler untuk perubahan jumlah produk
+    $(document).on('input', '.quantity', function() {
+        const row = $(this).closest('.produk-item');
+        const selectedOption = row.find('.select-produk option:selected');
+        const quantity = parseInt($(this).val()) || 0;
+        const harga = parseInt(selectedOption.data('harga')) || 0;
+        subtotal = quantity * harga;
+        row.find('.subtotal').val(formatRupiah(subtotal));
+        updateTotal();
+    });
+
+    // Event handler untuk perubahan produk
+    $(document).on('change', '.select-produk', function() {
+        const row = $(this).closest('.produk-item');
+        const quantity = parseInt(row.find('.quantity').val()) || 0;
+        const selectedOption = $(this).find('option:selected');
+        const harga = parseInt(selectedOption.data('harga')) || 0;
+        subtotal = quantity * harga;
+        row.find('.subtotal').val(formatRupiah(subtotal));
+        updateTotal();
+    });
+
+    // Event handler untuk tombol tambah produk
+    $('#btnTambahProduk').on('click', function() {
+        addProductRow();
+    });
+
+    // Event handler untuk tombol hapus produk
+    $(document).on('click', '.btn-remove-produk', function() {
+        if ($('.produk-item').length > 1) {
+            $(this).closest('.produk-item').remove();
+            updateTotal();
+        } else {
+            alert('Minimal harus ada satu produk!');
+        }
+    });
 }
 
 // Load product options
 async function loadProdukOptions() {
     try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No token found');
-        }
-
         const response = await fetch('http://localhost:8080/produk/getallproduk', {
-            method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
             }
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error('Failed to fetch products');
         }
 
         const data = await response.json();
+        console.log('Product data:', data);
+        
         if (data.data) {
             const options = data.data.map(product => {
                 const formattedPrice = formatRupiah(product.harga_produk);
@@ -427,9 +476,108 @@ function addProductRow() {
     `;
     $('#produkContainer').append(newRow);
     
-    // Load product options for the new select
+    // Load product options for new select
     const newSelect = $('#produkContainer .produk-item:last-child .select-produk');
-    loadProdukOptions();
+    const existingOptions = $('.select-produk').first().html();
+    newSelect.html(existingOptions);
+}
+
+// Update total
+function updateTotal() {
+    let total = 0;
+    $('.produk-item').each(function() {
+        const subtotalStr = $(this).find('.subtotal').val();
+        if (subtotalStr) {
+            const subtotalNum = parseInt(subtotalStr.replace(/[^0-9]/g, ''));
+            total += subtotalNum;
+        }
+    });
+    $('#totalPenjualan').val(formatRupiah(total));
+}
+
+// Save penjualan
+async function savePenjualan() {
+    try {
+        const token = localStorage.getItem('token');
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        
+        if (!token || !userData) {
+            alert('Sesi login telah berakhir. Silakan login kembali.');
+            localStorage.clear();
+            window.location.href = '../login.html';
+            return;
+        }
+
+        const products = [];
+        let total = 0;
+
+        $('.produk-item').each(function() {
+            const row = $(this);
+            const selectProduk = row.find('.select-produk');
+            const selectedOption = selectProduk.find('option:selected');
+            const quantity = parseInt(row.find('.quantity').val()) || 0;
+            const harga = parseInt(selectedOption.data('harga')) || 0;
+            const subtotal = quantity * harga;
+
+            if (selectProduk.val() && quantity > 0) {
+                products.push({
+                    id_produk: selectProduk.val(),
+                    nama_produk: selectedOption.data('nama'),
+                    harga_produk: harga,
+                    jumlah_produk: quantity,
+                    subtotal: subtotal
+                });
+                total += subtotal;
+            }
+        });
+
+        if (products.length === 0) {
+            alert('Minimal satu produk harus dipilih!');
+            return;
+        }
+
+        const penjualanData = {
+            user: {
+                username: userData.username
+            },
+            tanggal_penjualan: new Date().toISOString(),
+            total: total,
+            details: products.map(product => ({
+                produk: {
+                    id_produk: product.id_produk,
+                    nama_produk: product.nama_produk,
+                    harga: product.harga_produk
+                },
+                jumlah_produk: product.jumlah_produk,
+                subtotal: product.subtotal
+            }))
+        };
+
+        console.log('Sending data:', penjualanData);
+
+        const response = await fetch('http://localhost:8080/penjualan/create', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(penjualanData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save sale');
+        }
+
+        alert('Data penjualan berhasil disimpan');
+        $('#modal-tambah-penjualan').modal('hide');
+        resetForm();
+        penjualanTable.ajax.reload();
+
+    } catch (error) {
+        console.error('Error saving penjualan:', error);
+        alert('Gagal menyimpan data penjualan: ' + error.message);
+    }
 }
 
 // Reset form
@@ -439,321 +587,93 @@ function resetForm() {
     updateTotal();
 }
 
-// Event handlers
-$(document).ready(function() {
-    // Add first product row
-    loadProdukOptions();
-    
-    // Add product button click handler
-    $('#btnTambahProduk').click(addProductRow);
-    
-    // Remove product button click handler
-    $(document).on('click', '.btn-remove-produk', function() {
-        if ($('.produk-item').length > 1) {
-            $(this).closest('.produk-item').remove();
-            updateTotal();
-        } else {
-            alert('Minimal harus ada satu produk!');
-        }
-    });
-    
-    // Quantity change handler
-    $(document).on('input', '.quantity', updateTotal);
-    
-    // Product selection change handler
-    $(document).on('change', '.select-produk', updateTotal);
-    
-    // Fill seller name when modal opens
-    $('#modal-tambah-penjualan').on('show.bs.modal', function() {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        if (userData && userData.username) {
-            $('#namaPenjual').val(userData.username);
-        }
-        // Reset form when modal opens
-        resetForm();
-        // Add first product row
-        addProductRow();
-    });
-
-    // Auto refresh table every 30 seconds
-    setInterval(function() {
-        if (penjualanTable) {
-            penjualanTable.ajax.reload(null, false);
-        }
-    }, 30000);
-
-    // Save button click handler
-    $('#btnSimpanPenjualan').click(async function() {
-        try {
-            const products = getSelectedProducts();
-            const total = calculateTotal();
-
-            if (products.length === 0) {
-                alert('Minimal satu produk harus dipilih!');
-                return;
-            }
-
-            const token = localStorage.getItem('token');
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            
-            if (!token || !userData || !userData.username) {
-                alert('Sesi login telah berakhir. Silakan login kembali.');
-                localStorage.clear();
-                window.location.href = '../login.html';
-                return;
-            }
-
-            const penjualanRequests = products.map(product => ({
-                penjualan: {
-                    user: {
-                        username: userData.username
-                    },
-                    tanggal_penjualan: new Date().toISOString(),
-                    // jumlah_produk: product.jumlah_produk,
-                    subtotal: product.subtotal,
-                    total: product.subtotal,
-                    updated_at: new Date().toISOString()
-                },
-                produk: {
-                    id_produk: product.id_produk,
-                    nama_produk: product.nama_produk,
-                    harga_produk: product.harga_produk
-                }
-            }));
-
-            // Create penjualan
-            const response = await fetch('http://localhost:8080/penjualan/create', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(penjualanRequests)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to save sale');
-            }
-
-            const responsePenjualan = await response.json();
-            if (!responsePenjualan.data || !responsePenjualan.data.length) {
-                throw new Error('No sale data returned from server');
-            }
-
-            alert('Data penjualan berhasil disimpan');
-            $('#modal-tambah-penjualan').modal('hide');
-            
-            // Reload table immediately after successful save
-            if (penjualanTable) {
-                penjualanTable.ajax.reload();
-            }
-
-            // Reset form
-            resetForm();
-            
-        } catch (error) {
-            console.error('Error saving penjualan:', error);
-            if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-                alert('Sesi login telah berakhir. Silakan login kembali.');
-                localStorage.clear();
-                window.location.href = '../login.html';
-            } else {
-                alert('Error saving penjualan: ' + error.message);
-            }
-        }
-    });
-
-    // Show detail penjualan
-    async function showDetailPenjualan(id_details) {
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('Sesi login telah berakhir. Silakan login kembali.');
-                localStorage.clear();
-                window.location.href = '../login.html';
-                return;
-            }
-
-            // Get penjualan data
-            const response = await fetch(`http://localhost:8080/penjualan/by-id/${id_penjualan}`, {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch sale data');
-            }
-
-            const penjualanData = await response.json();
-            if (!penjualanData.data) {
-                throw new Error('Sale data not found');
-            }
-
-            const penjualan = penjualanData.data;
-
-            // Get detail penjualan
-            const detailResponse = await fetch(`http://localhost:8080/detail-penjualan/by-id/${id_details}`, {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            if (!detailResponse.ok) {
-                throw new Error('Failed to fetch sale details');
-            }
-
-            const detailData = await detailResponse.json();
-            const details = detailData.data || [];
-
-            // Update modal content
-            $('#detail-id-penjualan').text(penjualan.id_penjualan);
-            $('#detail-nama-penjual').text(penjualan.User.username);
-            $('#detail-tanggal-penjualan').text(formatDate(penjualan.tanggal_penjualan));
-            $('#detail-jumlah-produk').text(penjualan.jumlah_produk);
-            $('#detail-total').text(formatRupiah(penjualan.total));
-
-            // Clear and populate product details table
-            const tbody = $('#tabel-detail-produk tbody');
-            tbody.empty();
-
-            details.forEach(detail => {
-                tbody.append(`
-                    <tr>
-                        <td>${detail.produk.nama_produk}</td>
-                        <td>${formatRupiah(detail.produk.harga_produk)}</td>
-                        <td>${detail.produk.stok}</td>
-                        <td>${formatRupiah(detail.total_pendapatan)}</td>
-                    </tr>
-                `);
-            });
-
-            // Show modal
-            $('#modal-detail-penjualan').modal('show');
-        } catch (error) {
-            console.error('Error showing sale details:', error);
-            alert('Gagal menampilkan detail penjualan: ' + error.message);
-        }
-    }
-
-    // Delete penjualan
-    async function deletePenjualan(id_penjualan) {
-        try {
-            if (!confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
-                return;
-            }
-
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert('Sesi login telah berakhir. Silakan login kembali.');
-                localStorage.clear();
-                window.location.href = '../login.html';
-                return;
-            }
-
-            // Delete detail penjualan first
-            const detailResponse = await fetch(`http://localhost:8080/detail-penjualan/delete/${id_details}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            if (!detailResponse.ok) {
-                throw new Error('Failed to delete sale details');
-            }
-
-            // Then delete penjualan
-            const response = await fetch(`http://localhost:8080/penjualan/delete/${id_penjualan}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete sale');
-            }
-
-            alert('Data penjualan berhasil dihapus');
-            if (penjualanTable) {
-                penjualanTable.ajax.reload();
-            }
-        } catch (error) {
-            console.error('Error deleting sale:', error);
-            alert('Gagal menghapus data penjualan: ' + error.message);
-        }
-    }
-
-    // Format date
-    function formatDate(dateString) {
-        const options = { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        };
-        return new Date(dateString).toLocaleDateString('id-ID', options);
-    }
-
-    // Initialize DataTable
-    let penjualanTable;
-    $(document).ready(function() {
+// Show detail penjualan
+async function showDetailPenjualan(id_penjualan) {
+    try {
         const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Sesi login telah berakhir. Silakan login kembali.');
-            localStorage.clear();
-            window.location.href = '../login.html';
-            return;
+        const response = await fetch(`http://localhost:8080/penjualan/${id_penjualan}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch penjualan details');
         }
 
-        penjualanTable = $('#tabel-penjualan').DataTable({
-            ajax: {
-                url: 'http://localhost:8080/penjualan/getall',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                dataSrc: 'data'
-            },
-            columns: [
-                { 
-                    data: null,
-                    render: function(data, type, row, meta) {
-                        return meta.row + 1;
-                    }
-                },
-                { data: 'id_penjualan' },
-            { data: 'User.username' },
-                { 
-                    data: 'tanggal_penjualan',
-                    render: function(data) {
-                        return formatDate(data);
-                    }
-                },
-                // { data: 'jumlah_produk' },
-                { 
-                    data: 'total',
-                    render: function(data) {
-                        return formatRupiah(data);
-                    }
-                },
-                {
-                    data: null,
-                    render: function(data) {
-                        return `
-                            <button class="btn btn-info btn-sm" onclick="showDetailPenjualan('${data.id_penjualan}')">
-                                <i class="fas fa-eye"></i> Detail
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePenjualan('${data.id_penjualan}')">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
-                        `;
-                    }
-                }
-            ],
-            order: [[1, 'desc']]
+        const data = await response.json();
+        console.log('Detail penjualan:', data);
+
+        let detailsHtml = `
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Produk</th>
+                            <th>Jumlah</th>
+                            <th>Harga</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        data.details.forEach((detail, index) => {
+            detailsHtml += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${detail.produk ? detail.produk.nama_produk : '-'}</td>
+                    <td>${detail.jumlah_produk}</td>
+                    <td>${formatRupiah(detail.produk ? detail.produk.harga : 0)}</td>
+                    <td>${formatRupiah(detail.subtotal)}</td>
+                </tr>
+            `;
         });
-    });
-});
+
+        detailsHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-right">Total:</th>
+                            <th>${formatRupiah(data.total)}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+
+        $('#detailPenjualanContent').html(detailsHtml);
+        $('#modalDetailPenjualan').modal('show');
+    } catch (error) {
+        console.error('Error showing penjualan details:', error);
+        alert('Gagal menampilkan detail penjualan');
+    }
+}
+
+// Delete penjualan
+async function deletePenjualan(id_penjualan) {
+    if (!confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8080/penjualan/${id_penjualan}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete penjualan');
+        }
+
+        penjualanTable.ajax.reload();
+        alert('Data penjualan berhasil dihapus');
+    } catch (error) {
+        console.error('Error deleting penjualan:', error);
+        alert('Gagal menghapus data penjualan');
+    }
+}

@@ -17,11 +17,84 @@ let activeFilters = {
 
 // Predefined categories and sub-categories
 const PRODUCT_CATEGORIES = {
-    'Makanan': ['Makanan Ringan', 'Makanan Berat', 'Makanan Instan', 'Bumbu Dapur', 'Bahan Masakan'],
-    'Minuman': ['Air Mineral', 'Minuman Bersoda', 'Minuman Kemasan', 'Kopi & Teh'],
-    'Kebutuhan Rumah Tangga': ['Pembersih', 'Peralatan Rumah', 'Perlengkapan Mandi', 'Deterjen'],
-    'Kesehatan & Kecantikan': ['Obat-obatan', 'Perawatan Wajah', 'Perawatan Tubuh', 'Vitamin'],
-    'Perlengkapan Bayi': ['Susu Formula', 'Popok', 'Perlengkapan Mandi Bayi', 'Makanan Bayi']
+    'Makanan': [
+        'Makanan Ringan', 
+        'Makanan Berat', 
+        'Makanan Instan', 
+        'Bumbu Dapur', 
+        'Bahan Masakan',
+        'Mie & Pasta',
+        'Biskuit & Kue',
+        'Coklat & Permen',
+        'Sereal & Sarapan'
+    ],
+    'Minuman': [
+        'Air Mineral', 
+        'Minuman Bersoda', 
+        'Minuman Kemasan', 
+        'Kopi & Teh',
+        'Susu & Krimer',
+        'Sirup & Sari Buah',
+        'Minuman Energi',
+        'Minuman Kesehatan'
+    ],
+    'Kebutuhan Rumah Tangga': [
+        'Pembersih', 
+        'Peralatan Rumah', 
+        'Perlengkapan Mandi', 
+        'Deterjen',
+        'Pengharum Ruangan',
+        'Tisu & Kertas',
+        'Plastik & Pembungkus',
+        'Peralatan Dapur',
+        'Perlengkapan Mencuci'
+    ],
+    'Kesehatan & Kecantikan': [
+        'Obat-obatan', 
+        'Perawatan Wajah', 
+        'Perawatan Tubuh', 
+        'Vitamin',
+        'Perawatan Rambut',
+        'Perawatan Gigi',
+        'Kosmetik',
+        'Parfum & Deodoran',
+        'Pembalut & Kapas',
+        'Masker & Hand Sanitizer'
+    ],
+    'Perlengkapan Bayi': [
+        'Susu Formula', 
+        'Popok', 
+        'Perlengkapan Mandi Bayi', 
+        'Makanan Bayi',
+        'Perawatan Bayi',
+        'Perlengkapan Makan Bayi',
+        'Mainan Bayi',
+        'Pakaian Bayi'
+    ],
+    'Makanan Segar': [
+        'Buah-buahan',
+        'Sayuran',
+        'Daging',
+        'Ikan & Seafood',
+        'Telur',
+        'Tahu & Tempe',
+        'Roti & Kue Segar'
+    ],
+    'Alat Tulis & Kantor': [
+        'Kertas',
+        'Alat Tulis',
+        'Buku & Notes',
+        'Perlengkapan Sekolah',
+        'Perlengkapan Kantor',
+        'Amplop & Packaging'
+    ],
+    'Elektronik & Gadget': [
+        'Baterai',
+        'Charger & Kabel',
+        'Lampu',
+        'Peralatan Elektronik',
+        'Aksesoris Gadget'
+    ]
 };
 
 // Update modal form when category is selected
@@ -294,10 +367,11 @@ function handleSearch(e) {
             
             if (result.success && result.data && result.data.data) {
                 const allProducts = result.data.data;
-                // Filter produk berdasarkan ID, nama, kategori, atau sub kategori
+                // Filter produk berdasarkan ID, nama, kode prouk,kategori, atau sub kategori
                 const filteredProducts = allProducts.filter(product => 
                     (product.id_produk && product.id_produk.toLowerCase().includes(searchTerm.toLowerCase())) ||
                     (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (product.kode_produk && product.kode_produk.toLowerCase().includes(searchTerm.toLowerCase())) ||
                     (product.kategori && product.kategori.toLowerCase().includes(searchTerm.toLowerCase())) ||
                     (product.sub_kategori && product.sub_kategori.toLowerCase().includes(searchTerm.toLowerCase()))
                 );
