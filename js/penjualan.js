@@ -22,65 +22,143 @@ function formatDate(dateString) {
 }
 
 let penjualanTable;
-let subtotal = 0;
+let currentSubTotal = 0;
 
-$(document).ready(function() {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.log('No token found, redirecting to login');
-        window.location.href = '../login.html';
-        return;
-    }
-
-    // Verify token format
+// Initialize page
+async function initializePage() {
+    console.log('Starting penjualan page initialization...');
+    
     try {
+        // Show loading indicator
+        $('.loading').show();
+        
+        // Check authentication
+        const token = localStorage.getItem('token');
+        let userData = null;
+        try {
+            userData = JSON.parse(localStorage.getItem('userData'));
+        } catch (error) {
+            console.error('Error parsing userData:', error);
+            throw new Error('Invalid user data');
+        }
+        const userRole = localStorage.getItem('role');
+
+        console.log('=== Authentication Debug Info ===');
+        console.log('Token:', token);
+        console.log('UserData:', userData);
+        console.log('Role:', userRole);
+        console.log('=============================');
+
+        if (!token || !userData || !userRole) {
+            throw new Error('Missing authentication data');
+        }
+
+        // Verify token format and expiration
         const tokenParts = token.split('.');
         if (tokenParts.length !== 3) {
-            console.error('Invalid token format');
-            localStorage.clear();
-            window.location.href = '../login.html';
-            return;
+            throw new Error('Invalid token format');
         }
-    } catch (error) {
-        console.error('Error parsing token:', error);
-        localStorage.clear();
-        window.location.href = '../login.html';
-        return;
-    }
 
-    // Set username
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    if (!userData || !userData.username) {
-        console.error('No user data found');
-        localStorage.clear();
-        window.location.href = '../login.html';
-        return;
-    }
-    $('#username').text(userData.username);
-    $('#namaPenjual').val(userData.username);
+        // Decode token payload
+        const payload = JSON.parse(atob(tokenParts[1]));
+        console.log('Token payload:', payload);
 
-    // Test API connection
-    fetch('http://localhost:8080/penjualan/getall', {
-        headers: {
-            'Authorization': 'Bearer ' + token
+        // Check token expiration
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < currentTime) {
+            throw new Error('Token expired');
         }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('API test failed with status: ' + response.status);
+
+        // Verify user role
+        const allowedRoles = ['admin', 'owner'];
+        const currentRole = userRole.toLowerCase();
+        if (!allowedRoles.includes(currentRole)) {
+            throw new Error('Unauthorized role');
         }
+
+        // Set username if authentication is valid
+        const displayName = userData.username || userData.name || 'User';
+        $('#username').text(displayName);
+        $('#namaPenjual').val(displayName);
+
+        // Test API connection
+        console.log('Testing API connection...');
+        await testApiConnection();
         console.log('API connection successful');
-        initializeDataTable();
-    })
-    .catch(error => {
-        console.error('API test failed:', error);
-        if (error.message.includes('401')) {
-            localStorage.clear();
-            window.location.href = '../login.html';
+
+        // Initialize components
+        await initializeDataTable();
+        await setupEventHandlers();
+        
+        console.log('Page initialization completed successfully');
+    } catch (error) {
+        console.error('=== Initialization Error ===');
+        console.error('Error type:', error.constructor.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('==========================');
+        
+        if (error.message.includes('auth') || 
+            error.message.includes('token') || 
+            error.message.includes('401') || 
+            error.message.includes('403')) {
+            redirectToLogin();
+        } else {
+            alert('Terjadi kesalahan saat memuat halaman: ' + error.message);
         }
-    });
-});
+    } finally {
+        // Hide loading indicator
+        $('.loading').hide();
+    }
+}
+
+function redirectToLogin() {
+    console.log('Redirecting to login page...');
+    console.log('Clearing localStorage...');
+    localStorage.clear();
+    console.log('localStorage cleared');
+    window.location.href = '../login.html';
+}
+
+async function testApiConnection() {
+    const token = localStorage.getItem('token');
+    console.log('Making test request to API...');
+    
+    try {
+        const response = await fetch('http://127.0.0.1:8080/penjualan/getall', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        console.log('API Response status:', response.status);
+        console.log('API Response headers:', Object.fromEntries([...response.headers]));
+
+        if (!response.ok) {
+            let errorMessage = 'API test failed';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || `Status: ${response.status}`;
+            } catch (e) {
+                const errorText = await response.text();
+                errorMessage = `${errorMessage}. Status: ${response.status}. Error: ${errorText}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const responseData = await response.json();
+        console.log('API Response data:', responseData);
+
+        return responseData;
+    } catch (error) {
+        console.error('API test error:', error);
+        throw error;
+    }
+}
 
 // Initialize DataTable
 function initializeDataTable() {
@@ -90,29 +168,23 @@ function initializeDataTable() {
         processing: true,
         serverSide: false,
         ajax: {
-            url: 'http://localhost:8080/penjualan/getall',
+            url: 'http://127.0.0.1:8080/penjualan/getall',
             type: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + token
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
+            credentials: 'include',
             dataSrc: function(response) {
-                console.log('Response from server:', response);
-                if (!response.data) {
-                    console.warn('No data in response');
-                    return [];
-                }
-                return response.data;
+                console.log('DataTable response:', response);
+                return response.data || [];
             },
             error: function(xhr, error, thrown) {
-                console.error('DataTables error:', error);
-                console.error('XHR:', xhr);
-                console.error('Thrown:', thrown);
+                console.error('DataTable error:', error);
                 if (xhr.status === 401) {
-                    console.error('Authentication failed');
                     localStorage.clear();
                     window.location.href = '../login.html';
-                } else {
-                    console.error('Other error occurred:', xhr.responseText);
                 }
             }
         },
@@ -128,6 +200,18 @@ function initializeDataTable() {
                 data: 'user',
                 render: function(data) {
                     return data ? data.username : '-';
+                }
+            },
+            { 
+                data: 'jumlah_produk',
+                render: function(data) {
+                    return data || 0;
+                }
+            },
+            { 
+                data: 'subtotal',
+                render: function(data) {
+                    return formatRupiah(data);
                 }
             },
             { 
@@ -158,47 +242,24 @@ function initializeDataTable() {
         ],
         order: [[1, 'desc']]
     });
-
-    // Load product options
-    loadProdukOptions();
-
-    // Event handlers
-    setupEventHandlers();
 }
 
-// Setup event handlers
 function setupEventHandlers() {
-    // Event handler untuk tombol simpan
-    $('#btnSimpanPenjualan').on('click', function() {
-        savePenjualan();
-    });
+    // Load initial product options
+    loadProdukOptions();
 
     // Event handler untuk perubahan jumlah produk
     $(document).on('input', '.quantity', function() {
-        const row = $(this).closest('.produk-item');
-        const selectedOption = row.find('.select-produk option:selected');
-        const quantity = parseInt($(this).val()) || 0;
-        const harga = parseInt(selectedOption.data('harga')) || 0;
-        subtotal = quantity * harga;
-        row.find('.subtotal').val(formatRupiah(subtotal));
-        updateTotal();
+        updateSubtotalForRow($(this).closest('.produk-item'));
     });
 
     // Event handler untuk perubahan produk
     $(document).on('change', '.select-produk', function() {
-        const row = $(this).closest('.produk-item');
-        const quantity = parseInt(row.find('.quantity').val()) || 0;
-        const selectedOption = $(this).find('option:selected');
-        const harga = parseInt(selectedOption.data('harga')) || 0;
-        subtotal = quantity * harga;
-        row.find('.subtotal').val(formatRupiah(subtotal));
-        updateTotal();
+        updateSubtotalForRow($(this).closest('.produk-item'));
     });
 
     // Event handler untuk tombol tambah produk
-    $('#btnTambahProduk').on('click', function() {
-        addProductRow();
-    });
+    $('#btnTambahProduk').on('click', addProductRow);
 
     // Event handler untuk tombol hapus produk
     $(document).on('click', '.btn-remove-produk', function() {
@@ -209,256 +270,73 @@ function setupEventHandlers() {
             alert('Minimal harus ada satu produk!');
         }
     });
+
+    // Event handler untuk tombol simpan
+    $('#btnSimpanPenjualan').on('click', savePenjualan);
 }
 
-// Load product options
 async function loadProdukOptions() {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/produk/getallproduk', {
+        const response = await fetch('http://127.0.0.1:8080/produk/getallproduk', {
+            method: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + token
-            }
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch products');
-        }
+        if (!response.ok) throw new Error('Failed to fetch products');
 
         const data = await response.json();
-        console.log('Product data:', data);
-        
         if (data.data) {
-            const options = data.data.map(product => {
-                const formattedPrice = formatRupiah(product.harga_produk);
-                return `<option value="${product.id_produk}" 
+            const options = data.data.map(product => 
+                `<option value="${product.id_produk}" 
                     data-nama="${product.nama_produk}"
                     data-harga="${product.harga_produk}">
-                    ${product.nama_produk} - ${formattedPrice}
-                </option>`;
-            }).join('');
+                    ${product.nama_produk} - ${formatRupiah(product.harga_produk)}
+                </option>`
+            ).join('');
 
             $('.select-produk').html('<option value="">Pilih Produk</option>' + options);
         }
     } catch (error) {
         console.error('Error loading products:', error);
-        if (error.message.includes('401')) {
-            alert('Sesi login telah berakhir. Silakan login kembali.');
-            localStorage.clear();
-            window.location.href = '../login.html';
-        } else {
-            alert('Gagal memuat data produk');
-        }
+        alert('Gagal memuat data produk');
     }
 }
 
-// Save new penjualan
-async function savePenjualan() {
-    try {
-        const products = getSelectedProducts();
-        const total = calculateTotal();
-
-        if (products.length === 0) {
-            alert('Minimal satu produk harus dipilih!');
-            return;
-        }
-
-        const token = localStorage.getItem('token');
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        
-        if (!token || !userData || !userData.username) {
-            alert('Sesi login telah berakhir. Silakan login kembali.');
-            localStorage.clear();
-            window.location.href = '../login.html';
-            return;
-        }
-
-        const penjualanData = {
-            nama_penjual: userData.username,
-            tanggal_penjualan: new Date().toISOString(),
-            subtotal: parseInt(subtotal),
-            total: parseInt(total),
-            updated_at: new Date().toISOString()
-        };
-
-        const response = await fetch('http://localhost:8080/penjualan/create', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify([penjualanData])
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to save sale');
-        }
-
-        const responsePenjualan = await response.json();
-
-        if (responsePenjualan.data && responsePenjualan.data.length > 0) {
-            const idPenjualan = responsePenjualan.data[0].id_penjualan;
-            
-            for (const product of products) {
-                const detailData = {
-                    penjualan: responsePenjualan.data[0],
-                    produk: {
-                        id_produk: product.id_produk,
-                        nama_produk: product.nama_produk,
-                        harga_produk: parseInt(product.harga_produk),
-                        stok: parseInt(product.jumlah_produk)
-                    },
-                    // total_pendapatan: parseInt(product.harga_produk) * parseInt(product.jumlah_produk)
-                };
-
-                const detailResponse = await fetch('http://localhost:8080/detail-penjualan/create', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(detailData)
-                });
-
-                if (!detailResponse.ok) {
-                    throw new Error('Failed to save sale detail');
-                }
-            }
-
-            alert('Data penjualan berhasil disimpan');
-            $('#modal-tambah-penjualan').modal('hide');
-            resetForm();
-            
-            if (penjualanTable) {
-                penjualanTable.ajax.reload();
-            }
-        }
-    } catch (error) {
-        console.error('Error saving penjualan:', error);
-        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-            alert('Sesi login telah berakhir. Silakan login kembali.');
-            localStorage.clear();
-            window.location.href = '../login.html';
-        } else {
-            alert('Gagal menyimpan data penjualan: ' + error.message);
-        }
-    }
+function updateSubtotalForRow(row) {
+    const quantity = parseInt(row.find('.quantity').val()) || 0;
+    const selectedOption = row.find('.select-produk option:selected');
+    const harga = parseInt(selectedOption.data('harga')) || 0;
+    const subtotal = quantity * harga;
+    
+    row.find('.subtotal').val(formatRupiah(subtotal));
+    updateTotal();
 }
 
-// Get username from userData
-function getUsernameFromToken() {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    return userData?.username || null;
-}
-
-// Fill seller name automatically when modal opens
-$('#modal-tambah-penjualan').on('show.bs.modal', function () {
-    const username = getUsernameFromToken();
-    if (username) {
-        $('#namaPenjual').val(username);
-        $('#namaPenjual').prop('readonly', true);
-    } else {
-        alert('Sesi login telah berakhir. Silakan login kembali.');
-        localStorage.clear();
-        window.location.href = '../login.html';
-    }
-});
-
-// Function to get user role
-function getUserRole() {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    return userData?.role || null;
-}
-
-// Function to delete penjualan
-async function deletePenjualan(id_penjualan_) {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No token found');
-        }
-
-        const response = await fetch(`http://localhost:8080/penjualan/delete/${id_penjualan}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete sale');
-        }
-
-        alert('Data penjualan berhasil dihapus');
-        if (penjualanTable) {
-            penjualanTable.ajax.reload();
-        }
-    } catch (error) {
-        console.error('Error deleting penjualan:', error);
-        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-            alert('Sesi login telah berakhir. Silakan login kembali.');
-            localStorage.clear();
-            window.location.href = '../login.html';
-        } else {
-            alert('Gagal menghapus data penjualan: ' + error.message);
-        }
-    }
-}
-
-// Get selected products from the form
-function getSelectedProducts() {
-    const products = [];
-    $('.produk-item').each(function() {
-        const row = $(this);
-        const selectProduk = row.find('.select-produk');
-        const selectedOption = selectProduk.find('option:selected');
-        const jumlahProduk = parseInt(row.find('.quantity').val()) || 0;
-        const hargaProduk = parseInt(selectedOption.data('harga')) || 0;
-        
-        if (selectProduk.val() && jumlahProduk > 0) {
-            products.push({
-                id_produk: selectProduk.val(),
-                nama_produk: selectedOption.data('nama'),
-                harga_produk: hargaProduk,
-                // jumlah_produk: jumlahProduk,
-                subtotal: jumlahProduk * hargaProduk
-            });
-        }
-    });
-    return products;
-}
-
-// Calculate total from selected products
-function calculateTotal() {
+function updateTotal() {
     let total = 0;
     $('.produk-item').each(function() {
-        const row = $(this);
-        const selectProduk = row.find('.select-produk');
-        const selectedOption = selectProduk.find('option:selected');
-        const jumlahProduk = parseInt(row.find('.quantity').val()) || 0;
-        const hargaProduk = selectedOption.data('harga') || 0;
-        const subtotal = jumlahProduk * hargaProduk;
-        
-        row.find('.subtotal').val(formatRupiah(subtotal));
-        total += subtotal;
+        const subtotalStr = $(this).find('.subtotal').val();
+        if (subtotalStr) {
+            const subtotalNum = parseInt(subtotalStr.replace(/[^0-9]/g, ''));
+            total += subtotalNum;
+        }
     });
-    return total;
-}
-
-// Update total when quantity changes
-function updateTotal() {
-    const total = calculateTotal();
     $('#totalPenjualan').val(formatRupiah(total));
 }
 
-// Add product row
 function addProductRow() {
     const newRow = `
         <div class="row mb-3 produk-item">
             <div class="col-md-5">
                 <select class="form-control select-produk" required>
                     <option value="">Pilih Produk</option>
+                    ${$('.select-produk').first().html()}
                 </select>
             </div>
             <div class="col-md-3">
@@ -475,41 +353,22 @@ function addProductRow() {
         </div>
     `;
     $('#produkContainer').append(newRow);
-    
-    // Load product options for new select
-    const newSelect = $('#produkContainer .produk-item:last-child .select-produk');
-    const existingOptions = $('.select-produk').first().html();
-    newSelect.html(existingOptions);
 }
 
-// Update total
-function updateTotal() {
-    let total = 0;
-    $('.produk-item').each(function() {
-        const subtotalStr = $(this).find('.subtotal').val();
-        if (subtotalStr) {
-            const subtotalNum = parseInt(subtotalStr.replace(/[^0-9]/g, ''));
-            total += subtotalNum;
-        }
-    });
-    $('#totalPenjualan').val(formatRupiah(total));
-}
-
-// Save penjualan
 async function savePenjualan() {
     try {
         const token = localStorage.getItem('token');
         const userData = JSON.parse(localStorage.getItem('userData'));
         
         if (!token || !userData) {
-            alert('Sesi login telah berakhir. Silakan login kembali.');
-            localStorage.clear();
+            alert('Sesi login telah berakhir');
             window.location.href = '../login.html';
             return;
         }
 
-        const products = [];
-        let total = 0;
+        const penjualanItems = [];
+        let totalJumlahProduk = 0;
+        let totalHarga = 0;
 
         $('.produk-item').each(function() {
             const row = $(this);
@@ -520,53 +379,52 @@ async function savePenjualan() {
             const subtotal = quantity * harga;
 
             if (selectProduk.val() && quantity > 0) {
-                products.push({
-                    id_produk: selectProduk.val(),
-                    nama_produk: selectedOption.data('nama'),
-                    harga_produk: harga,
+                penjualanItems.push({
+                    id_penjualan: '', // Will be generated by backend
+                    user: {
+                        username: userData.username
+                    },
+                    tanggal_penjualan: new Date().toISOString(),
                     jumlah_produk: quantity,
-                    subtotal: subtotal
+                    subtotal: subtotal,
+                    total: subtotal,
+                    produk: {
+                        id_produk: selectProduk.val(),
+                        nama_produk: selectedOption.data('nama'),
+                        harga: harga
+                    }
                 });
-                total += subtotal;
+                totalJumlahProduk += quantity;
+                totalHarga += subtotal;
             }
         });
 
-        if (products.length === 0) {
+        if (penjualanItems.length === 0) {
             alert('Minimal satu produk harus dipilih!');
             return;
         }
 
-        const penjualanData = {
-            user: {
-                username: userData.username
-            },
-            tanggal_penjualan: new Date().toISOString(),
-            total: total,
-            details: products.map(product => ({
-                produk: {
-                    id_produk: product.id_produk,
-                    nama_produk: product.nama_produk,
-                    harga: product.harga_produk
-                },
-                jumlah_produk: product.jumlah_produk,
-                subtotal: product.subtotal
-            }))
-        };
-
-        console.log('Sending data:', penjualanData);
-
-        const response = await fetch('http://localhost:8080/penjualan/create', {
+        const response = await fetch('http://127.0.0.1:8080/penjualan/create', {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify(penjualanData)
+            credentials: 'include',
+            body: JSON.stringify(penjualanItems)
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to save sale');
+            let errorMessage = 'Failed to save penjualan';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData.error || `Status: ${response.status}`;
+            } catch (e) {
+                const errorText = await response.text();
+                errorMessage = `${errorMessage}. Status: ${response.status}. Error: ${errorText}`;
+            }
+            throw new Error(errorMessage);
         }
 
         alert('Data penjualan berhasil disimpan');
@@ -580,26 +438,26 @@ async function savePenjualan() {
     }
 }
 
-// Reset form
 function resetForm() {
     $('#produkContainer').empty();
     addProductRow();
     updateTotal();
 }
 
-// Show detail penjualan
 async function showDetailPenjualan(id_penjualan) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8080/penjualan/${id_penjualan}`, {
+        const response = await fetch(`http://127.0.0.1:8080/penjualan/${id_penjualan}`, {
+            method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch penjualan details');
-        }
+        if (!response.ok) throw new Error('Failed to fetch penjualan details');
 
         const data = await response.json();
         console.log('Detail penjualan:', data);
@@ -609,36 +467,24 @@ async function showDetailPenjualan(id_penjualan) {
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Nama Produk</th>
-                            <th>Jumlah</th>
-                            <th>Harga</th>
+                            <th>ID Penjualan</th>
+                            <th>Penjual</th>
+                            <th>Jumlah Produk</th>
                             <th>Subtotal</th>
+                            <th>Total</th>
+                            <th>Tanggal</th>
                         </tr>
                     </thead>
                     <tbody>
-        `;
-
-        data.details.forEach((detail, index) => {
-            detailsHtml += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${detail.produk ? detail.produk.nama_produk : '-'}</td>
-                    <td>${detail.jumlah_produk}</td>
-                    <td>${formatRupiah(detail.produk ? detail.produk.harga : 0)}</td>
-                    <td>${formatRupiah(detail.subtotal)}</td>
-                </tr>
-            `;
-        });
-
-        detailsHtml += `
-                    </tbody>
-                    <tfoot>
                         <tr>
-                            <th colspan="4" class="text-right">Total:</th>
-                            <th>${formatRupiah(data.total)}</th>
+                            <td>${data.id_penjualan}</td>
+                            <td>${data.user ? data.user.username : '-'}</td>
+                            <td>${data.jumlah_produk}</td>
+                            <td>${formatRupiah(data.subtotal)}</td>
+                            <td>${formatRupiah(data.total)}</td>
+                            <td>${formatDate(data.tanggal_penjualan)}</td>
                         </tr>
-                    </tfoot>
+                    </tbody>
                 </table>
             </div>
         `;
@@ -651,7 +497,6 @@ async function showDetailPenjualan(id_penjualan) {
     }
 }
 
-// Delete penjualan
 async function deletePenjualan(id_penjualan) {
     if (!confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
         return;
@@ -659,21 +504,32 @@ async function deletePenjualan(id_penjualan) {
 
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8080/penjualan/${id_penjualan}`, {
+        const response = await fetch(`http://127.0.0.1:8080/penjualan/${id_penjualan}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to delete penjualan');
-        }
+        if (!response.ok) throw new Error('Failed to delete penjualan');
 
-        penjualanTable.ajax.reload();
         alert('Data penjualan berhasil dihapus');
+        penjualanTable.ajax.reload();
     } catch (error) {
         console.error('Error deleting penjualan:', error);
         alert('Gagal menghapus data penjualan');
     }
+}
+
+// Export initialization function
+export function initializePenjualan() {
+    $(document).ready(() => {
+        initializePage().catch(error => {
+            console.error('Failed to initialize page:', error);
+            alert('Failed to initialize page. Please try again.');
+        });
+    });
 }
