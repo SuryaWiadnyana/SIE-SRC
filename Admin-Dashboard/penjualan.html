@@ -168,10 +168,10 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <input type="number" class="form-control quantity" placeholder="Jumlah" min="1" required>
+                                                    <input type="number" class="form-control produk-terjual" placeholder="Jumlah" min="1" required>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <input type="text" class="form-control subtotal" placeholder="Subtotal" readonly>
+                                                    <input type="text" class="form-control subtotal" placeholder="Rp 0" readonly>
                                                 </div>
                                                 <div class="col-md-1">
                                                     <button type="button" class="btn btn-danger btn-remove-produk">
@@ -187,13 +187,77 @@
 
                                     <div class="form-group">
                                         <label>Total</label>
-                                        <input type="text" class="form-control" id="totalPenjualan" readonly>
+                                        <input type="text" class="form-control" id="totalPenjualan" value="Rp 0" readonly>
                                     </div>
                                 </form>
                             </div>
                             <div class="modal-footer justify-content-between">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-                                <button type="button" class="btn btn-primary" id="btnSimpanPenjualan">Simpan</button>
+                                <button type="submit" class="btn btn-primary" form="formTambahPenjualan">Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Detail Penjualan -->
+                <div class="modal fade" id="modalDetailPenjualan">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Detail Penjualan</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <tr>
+                                                            <th style="width: 200px">ID Penjualan</th>
+                                                            <td id="detailIdPenjualan">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Nama Penjual</th>
+                                                            <td id="detailNamaPenjual">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Tanggal Penjualan</th>
+                                                            <td id="detailTanggalPenjualan">-</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <h5 class="mt-4">Daftar Produk</h5>
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Nama Produk</th>
+                                                                <th>Jumlah</th>
+                                                                <th>Harga Satuan</th>
+                                                                <th>Subtotal</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="detailProdukList">
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th colspan="3" class="text-right">Total</th>
+                                                                <th id="detailTotal">Rp 0</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
                             </div>
                         </div>
                     </div>
