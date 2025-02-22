@@ -138,7 +138,33 @@ async function initializeDataTable() {
         console.log('Fetched sales data:', result);
 
         // Extract penjualan data from the response
-        const penjualanData = result.data ? result.data.map(item => item.penjualan || item) : [];
+        const penjualanData = result.data ? result.data.map(item => {
+            console.log('Processing item:', item);
+            
+            // Jika item adalah detail penjualan
+            if (item.id_details) {
+                console.log('Found detail penjualan:', item);
+                // Jika item memiliki penjualan, gunakan data penjualan
+                if (item.penjualan) {
+                    const penjualan = item.penjualan;
+                    penjualan.id_details = item.id_details;
+                    return penjualan;
+                }
+                // Jika tidak, gunakan item langsung
+                return item;
+            }
+            
+            // Jika item tidak memiliki id_details tapi memiliki id_penjualan
+            if (item.id_penjualan) {
+                console.log('Found penjualan:', item);
+                return item;
+            }
+            
+            console.log('No identifiers found in item');
+            return item;
+        }) : [];
+        
+        console.log('Processed penjualan data:', penjualanData);
 
         // Destroy existing DataTable if it exists
         if ($.fn.DataTable.isDataTable('#penjualanTable')) {
@@ -176,11 +202,12 @@ async function initializeDataTable() {
                 {
                     data: null,
                     render: function(data, type, row) {
+                        console.log('Rendering row data:', row);
                         return `
-                            <button class="btn btn-info btn-sm detail-btn mr-1" data-id="${row.id_penjualan}">
+                            <button class="btn btn-info btn-sm detail-btn" data-id_details="${row.id_details || ''}" data-id_penjualan="${row.id_penjualan || ''}">
                                 <i class="fas fa-eye"></i> Detail
                             </button>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id_penjualan}">
+                            <button class="btn btn-danger btn-sm delete-btn" data-id_penjualan="${row.id_penjualan || ''}">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         `;
@@ -215,15 +242,42 @@ async function initializeDataTable() {
         });
 
         // Add event listeners for buttons
-        $('#penjualanTable tbody').on('click', '.detail-btn', async function() {
-            const id = $(this).data('id');
-            await showDetailPenjualan(id);
+        $('#penjualanTable tbody').on('click', '.detail-btn', function() {
+            const button = $(this);
+            const id_details = button.data('id_details');
+            const id_penjualan = button.data('id_penjualan');
+            
+            console.log('Detail button clicked:', {
+                button: button.prop('outerHTML'),
+                id_details: id_details,
+                id_penjualan: id_penjualan,
+                allData: button.data()
+            });
+            
+            if (id_details) {
+                console.log('Using id_details:', id_details);
+                window.location.href = `detail-penjualan.html?id_details=${id_details}`;
+            } else if (id_penjualan) {
+                // Jika tidak ada id_details, coba cari detail berdasarkan id_penjualan
+                console.log('Using id_penjualan as fallback:', id_penjualan);
+                window.location.href = `detail-penjualan.html?id_penjualan=${id_penjualan}`;
+            } else {
+                console.error('No identifiers found in button');
+                alert('ID Detail Penjualan tidak ditemukan');
+            }
         });
 
-        $('#penjualanTable tbody').on('click', '.delete-btn', async function() {
-            const id = $(this).data('id');
-            if (confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
-                await deletePenjualan(id);
+        $('#penjualanTable tbody').on('click', '.delete-btn', function() {
+            const id_penjualan = $(this).data('id_penjualan');
+            console.log('Delete button clicked for ID:', id_penjualan);
+            
+            if (id_penjualan) {
+                if (confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
+                    deletePenjualan(id_penjualan);
+                }
+            } else {
+                console.error('No id_penjualan found for delete button');
+                alert('ID Penjualan tidak ditemukan');
             }
         });
 
@@ -441,8 +495,34 @@ async function refreshDataTable() {
         console.log('Refreshed sales data:', result);
 
         // Extract penjualan data from the response
-        const penjualanData = result.data ? result.data.map(item => item.penjualan || item) : [];
+        const penjualanData = result.data ? result.data.map(item => {
+            console.log('Processing item:', item);
+            
+            // Jika item adalah detail penjualan
+            if (item.id_details) {
+                console.log('Found detail penjualan:', item);
+                // Jika item memiliki penjualan, gunakan data penjualan
+                if (item.penjualan) {
+                    const penjualan = item.penjualan;
+                    penjualan.id_details = item.id_details;
+                    return penjualan;
+                }
+                // Jika tidak, gunakan item langsung
+                return item;
+            }
+            
+            // Jika item tidak memiliki id_details tapi memiliki id_penjualan
+            if (item.id_penjualan) {
+                console.log('Found penjualan:', item);
+                return item;
+            }
+            
+            console.log('No identifiers found in item');
+            return item;
+        }) : [];
         
+        console.log('Processed penjualan data:', penjualanData);
+
         // Clear and reload data
         penjualanTable.clear();
         penjualanTable.rows.add(penjualanData);
@@ -455,94 +535,30 @@ async function refreshDataTable() {
     }
 }
 
-async function deletePenjualan(id) {
+async function deletePenjualan(id_penjualan) {
     try {
         const token = localStorage.getItem('token');
-        console.log('Deleting penjualan:', id);
+        console.log('Deleting penjualan with ID:', id_penjualan);
 
-        const response = await fetch(`http://127.0.0.1:8080/penjualan/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8080/penjualan/delete/${id_penjualan}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`
             }
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Delete response:', response.status, errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        // Refresh the table after successful deletion
         await refreshDataTable();
         alert('Data penjualan berhasil dihapus');
     } catch (error) {
         console.error('Error deleting penjualan:', error);
-        alert('Gagal menghapus data penjualan');
-    }
-}
-
-async function showDetailPenjualan(id) {
-    try {
-        const token = localStorage.getItem('token');
-        console.log('Fetching penjualan detail:', id);
-
-        const response = await fetch(`http://127.0.0.1:8080/penjualan/detail/${id}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Detail penjualan:', result);
-
-        if (!result.data) {
-            throw new Error('Data penjualan tidak ditemukan');
-        }
-
-        // Update detail modal
-        $('#detailIdPenjualan').text(result.data.penjualan?.id_penjualan || '-');
-        $('#detailNamaPenjual').text(result.data.penjualan?.user?.username || '-');
-        $('#detailTanggalPenjualan').text(result.data.penjualan?.tanggal_penjualan ? 
-            formatDate(result.data.penjualan.tanggal_penjualan) : '-');
-
-        // Clear and populate product list
-        let total = 0;
-        let produkListHtml = '';
-
-        if (result.data.details && result.data.details.length > 0) {
-            produkListHtml = result.data.details.map(detail => {
-                const subtotal = (detail.produk_terjual || 0) * (detail.produk?.harga_produk || 0);
-                total += subtotal;
-                return `
-                    <tr>
-                        <td>${detail.produk?.nama_produk || '-'}</td>
-                        <td>${detail.produk_terjual || 0}</td>
-                        <td>${formatRupiah(detail.produk?.harga_produk || 0)}</td>
-                        <td>${formatRupiah(subtotal)}</td>
-                    </tr>
-                `;
-            }).join('');
-        } else {
-            produkListHtml = `
-                <tr>
-                    <td colspan="4" class="text-center">Tidak Ada Data Produk</td>
-                </tr>
-            `;
-        }
-
-        $('#detailProdukList').html(produkListHtml);
-        $('#detailTotal').text(formatRupiah(total));
-
-        // Show modal
-        $('#modalDetailPenjualan').modal('show');
-    } catch (error) {
-        console.error('Error fetching penjualan detail:', error);
-        alert('Gagal memuat detail penjualan: ' + error.message);
+        alert('Gagal menghapus data penjualan: ' + error.message);
     }
 }
 

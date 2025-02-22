@@ -1,137 +1,226 @@
-$(document).ready(function() {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '../login.html';
-        return;
-    }
+// Initialize DataTable
+let detailTable;
 
-    // Get ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id_details');
-    
-    if (!id) {
-        showNotification('error', 'ID Detail Penjualan tidak ditemukan');
-        return;
-    }
-
-    // Initialize DataTable
-    const table = $('#tabelDetailPenjualan').DataTable({
-        responsive: true,
-        searching: false,
-        paging: false,
-        info: false,
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json',
-            emptyTable: "Tidak ada data produk"
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No token found');
+            window.location.href = '../login.html';
+            return;
         }
-    });
 
-    // Load detail penjualan
-    loadDetailPenjualan(id);
+        // Set username from localStorage
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('usernameDisplay').textContent = username;
+        }
 
-    // Function to load detail penjualan
-    async function loadDetailPenjualan(id) {
-        try {
-            const response = await $.ajax({
-                url: `http://localhost:8080/detail-penjualan/by-id/${id}`,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-
-            if (response.data) {
-                const detail = response.data;
-                console.log('Detail data:', detail); // For debugging
-                
-                // Update info penjualan
-                $('#id_details').text(detail.id_details || '-');
-                
-                if (detail.penjualan) {
-                    $('#id_penjualan').text(detail.penjualan.id_penjualan || '-');
-                    
-                    if (detail.penjualan.user) {
-                        $('#id_user').text(detail.penjualan.user.id_user || '-');
-                        $('#username').text(detail.penjualan.user.username || '-');
-                        $('#role').text(detail.penjualan.user.role || '-');
-                    } else {
-                        console.log('User data not found in penjualan');
-                    }
-                    
-                    // Handle tanggal_penjualan
-                    if (detail.penjualan.tanggal_penjualan) {
-                        let tanggal = detail.penjualan.tanggal_penjualan;
-                        // Check if it's a MongoDB date object
-                        if (tanggal.$date) {
-                            tanggal = tanggal.$date;
-                        }
-                        $('#tanggal_penjualan').text(moment(tanggal).format('DD/MM/YYYY HH:mm:ss'));
-                    } else {
-                        $('#tanggal_penjualan').text('-');
-                    }
-
-                    $('#jumlah_produk').text(detail.penjualan.jumlah_produk || '0');
-                    $('#total').text('Rp ' + formatRupiah(detail.penjualan.total || 0));
-                    
-                    // Handle updated_at
-                    if (detail.penjualan.updated_at) {
-                        let updatedAt = detail.penjualan.updated_at;
-                        if (updatedAt.$date) {
-                            updatedAt = updatedAt.$date;
-                        }
-                        $('#updated_at').text(moment(updatedAt).format('DD/MM/YYYY HH:mm:ss'));
-                    } else {
-                        $('#updated_at').text('-');
-                    }
-                } else {
-                    console.log('Penjualan data not found in detail');
-                }
-
-                $('#total_pendapatan').text('Rp ' + formatRupiah(detail.total_pendapatan || 0));
-
-                // Clear existing table rows
-                table.clear();
-
-                // Add product details
-                if (detail.produk) {
-                    console.log('Product data:', detail.produk); // Debug product data
-                    table.row.add([
-                        detail.produk.id_produk || detail.produk.id_produk || '-',
-                        detail.produk.nama_produk || '-',
-                        'Rp ' + formatRupiah(detail.produk.harga_produk || 0),
-                        detail.penjualan ? detail.penjualan.jumlah_produk || 0 : 0,
-                        'Rp ' + formatRupiah(detail.total_pendapatan || 0)
-                    ]).draw();
-                } else {
-                    console.log('Product data not found in detail');
-                    table.row.add(['-', '-', 'Rp 0', 0, 'Rp 0']).draw();
-                }
-            } else {
-                showNotification('error', 'Data detail penjualan tidak ditemukan');
+        // Initialize DataTable
+        detailTable = $('#tabelDetailPenjualan').DataTable({
+            responsive: true,
+            searching: false,
+            paging: false,
+            info: false,
+            language: {
+                emptyTable: "Tidak ada data produk"
             }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('error', 'Gagal memuat detail penjualan');
-        }
-    }
-
-    // Helper function to format currency
-    function formatRupiah(angka) {
-        return new Intl.NumberFormat('id-ID').format(angka);
-    }
-
-    // Function to show notifications
-    function showNotification(type, message) {
-        toastr[type](message, '', {
-            closeButton: true,
-            tapToDismiss: false,
-            timeOut: 3000
         });
-    }
 
-    // Button to go back to penjualan list
-    $('#btnKembali').on('click', function() {
-        window.location.href = 'penjualan.html';
-    });
+        // Get IDs from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const id_details = urlParams.get('id_details');
+        const id_penjualan = urlParams.get('id_penjualan');
+        
+        console.log('URL parameters:', {
+            id_details: id_details,
+            id_penjualan: id_penjualan
+        });
+        
+        if (!id_details && !id_penjualan) {
+            console.error('No ID found in URL parameters');
+            showNotification('error', 'ID Penjualan tidak ditemukan');
+            setTimeout(() => {
+                window.location.href = 'penjualan.html';
+            }, 2000);
+            return;
+        }
+
+        // Load detail penjualan
+        if (id_details) {
+            console.log('Loading detail by id_details:', id_details);
+            await loadDetailPenjualan(id_details);
+        } else {
+            console.log('Loading detail by id_penjualan:', id_penjualan);
+            await loadDetailByPenjualanID(id_penjualan);
+        }
+    } catch (error) {
+        console.error('Error in initialization:', error);
+        showNotification('error', 'Terjadi kesalahan saat memuat data');
+        setTimeout(() => {
+            window.location.href = 'penjualan.html';
+        }, 2000);
+    }
+});
+
+// Function to load detail penjualan by id_details
+async function loadDetailPenjualan(id_details) {
+    try {
+        const token = localStorage.getItem('token');
+        console.log('Fetching detail penjualan with ID:', id_details);
+
+        const response = await fetch(`http://127.0.0.1:8080/detail-penjualan/by-id/${id_details}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        console.log('Response status:', response.status);
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
+        }
+
+        const result = JSON.parse(responseText);
+        console.log('Parsed result:', result);
+
+        if (!result.data) {
+            throw new Error('Data detail penjualan tidak ditemukan');
+        }
+
+        await updateUI(result.data);
+    } catch (error) {
+        console.error('Error in loadDetailPenjualan:', error);
+        throw error;
+    }
+}
+
+// Function to load detail by penjualan ID
+async function loadDetailByPenjualanID(id_penjualan) {
+    try {
+        const token = localStorage.getItem('token');
+        console.log('Fetching detail by penjualan ID:', id_penjualan);
+
+        const response = await fetch(`http://127.0.0.1:8080/detail-penjualan/by-penjualan-id/${id_penjualan}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        console.log('Response status:', response.status);
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Detail penjualan tidak ditemukan');
+            }
+            throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
+        }
+
+        const result = JSON.parse(responseText);
+        console.log('Parsed result:', result);
+
+        if (!result.data || result.data.length === 0) {
+            throw new Error('Data detail penjualan tidak ditemukan');
+        }
+
+        // Ambil detail penjualan pertama
+        await updateUI(result.data[0]);
+    } catch (error) {
+        console.error('Error in loadDetailByPenjualanID:', error);
+        throw error;
+    }
+}
+
+// Function to update UI with detail data
+async function updateUI(detail) {
+    try {
+        console.log('Updating UI with detail:', detail);
+        
+        // Update info penjualan
+        $('#id_details').text(detail.id_details || '-');
+        
+        const penjualan = detail.penjualan || {};
+        $('#id_penjualan').text(penjualan.id_penjualan || '-');
+        
+        const user = penjualan.user || {};
+        // $('#id_user').text(user.id_user || '-');
+        $('#username').text(user.username || '-');
+        $('#role').text(user.role || '-');
+        
+        // Format tanggal
+        $('#tanggal_penjualan').text(penjualan.tanggal_penjualan ? 
+            moment(penjualan.tanggal_penjualan).format('DD/MM/YYYY HH:mm:ss') : '-');
+
+        // Update jumlah produk (total dari produk_terjual)
+        $('#jumlah_produk').text(penjualan.jumlah_produk || '0');
+
+        // Update total pendapatan berdasarkan perhitungan dari backend
+        $('#total_pendapatan').text(formatRupiah(detail.total_pendapatan || 0));
+        
+        // Format updated_at
+        $('#updated_at').text(penjualan.updated_at ? 
+            moment(penjualan.updated_at).format('DD/MM/YYYY HH:mm:ss') : '-');
+
+        // Clear existing table rows
+        detailTable.clear();
+
+        // Add product details
+        const products = detail.produk || [];
+        if (Array.isArray(products) && products.length > 0) {
+            products.forEach(produk => {
+                detailTable.row.add([
+                    produk.id_produk || '-',
+                    produk.nama_produk || '-',
+                    produk.kategori || '-',
+                    formatRupiah(produk.harga_produk || 0), // Menggunakan subtotal
+                ]);
+            });
+        } else {
+            console.warn('No product data or invalid format');
+        }
+
+        // Draw the table
+        detailTable.draw();
+
+        // Update total pendapatan
+        $('#total_pendapatan').text(formatRupiah(detail.total_pendapatan || 0));
+
+    } catch (error) {
+        console.error('Error updating UI:', error);
+        showNotification('error', 'Terjadi kesalahan saat memperbarui tampilan');
+    }
+}
+
+// Helper function to format currency
+function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(angka);
+}
+
+// Function to show notifications
+function showNotification(type, message) {
+    console.log(`${type} notification:`, message);
+    alert(message);
+}
+
+// Event handler untuk logout
+document.getElementById('logoutButton').addEventListener('click', function() {
+    localStorage.removeItem('token');
+    window.location.href = '../login.html';
+});
+
+// Button to go back to penjualan list
+$('#btnKembali').on('click', function() {
+    window.location.href = 'penjualan.html';
 });
