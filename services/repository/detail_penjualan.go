@@ -37,8 +37,8 @@ func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain
 	// Buat dokumen detail penjualan
 	detailDoc := bson.M{
 		"id_details":       id,
-		"penjualan":       dp.Penjualan,
-		"produk":          dp.Produk,
+		"penjualan":        dp.Penjualan,
+		"produk":           dp.Produk,
 		"total_pendapatan": dp.TotalPendapatan,
 	}
 

@@ -14,7 +14,7 @@ type DetailPenjualan struct {
 type DetailPenjualanRepository interface {
 	CreateDetails(ctx context.Context, bd *DetailPenjualan) (*DetailPenjualan, error)
 	GetAll(ctx context.Context) ([]DetailPenjualan, error)
-	// GetByID(ctx context.Context, id string) (*DetailPenjualan, error)
+	GetByID(ctx context.Context, id string) (*DetailPenjualan, error)
 	GetByPenjualanID(ctx context.Context, idPenjualan string) ([]DetailPenjualan, error)
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)
@@ -23,7 +23,7 @@ type DetailPenjualanRepository interface {
 type DetailPenjualanUseCase interface {
 	CreateDetails(ctx context.Context, bd *DetailPenjualan) (*DetailPenjualan, error)
 	GetAll(ctx context.Context) ([]DetailPenjualan, error)
-	// GetByID(ctx context.Context, id string) (*DetailPenjualan, error)
+	GetByID(ctx context.Context, id string) (*DetailPenjualan, error)
 	GetByPenjualanID(ctx context.Context, idPenjualan string) ([]DetailPenjualan, error)
 	Delete(ctx context.Context, id string) error
 }

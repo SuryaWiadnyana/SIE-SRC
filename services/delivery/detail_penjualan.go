@@ -23,8 +23,9 @@ func NewHttpDeliveryDetailPenjualan(app fiber.Router, HTTP domain.DetailPenjuala
 	protected := app.Group("/detail-penjualan")
 	protected.Use(middleware.AuthMiddleware("admin", "owner"))
 	protected.Post("/create", handler.CreateDetail)
-	protected.Get("/by-id/:id_penjualan", handler.GetByID)
+	protected.Get("/by-id/:id_details", handler.GetByID)
 	protected.Get("/getall", handler.GetAll)
+	protected.Get("/by-penjualan-id/:id_penjualan", handler.GetByPenjualanID)
 }
 
 func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {
@@ -70,7 +71,6 @@ func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {
 	})
 }
 
-
 func (d *HttpDeliveryDetailPenjualan) GetAll(c *fiber.Ctx) error {
 	details, err := d.HTTP.GetAll(context.Background())
 	if err != nil {
@@ -87,29 +87,57 @@ func (d *HttpDeliveryDetailPenjualan) GetAll(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryDetailPenjualan) GetByID(c *fiber.Ctx) error {
-	id := c.Params("id_penjualan")
+	id := c.Params("id_details")
 	if id == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID tidak boleh kosong",
+		})
+	}
+
+	detail, err := d.HTTP.GetByID(c.Context(), id)
+	if err != nil {
+		log.Printf("Error getting detail %s: %v", id, err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal mendapatkan detail: %v", err),
+		})
+	}
+
+	if detail == nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "Detail tidak ditemukan",
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Detail berhasil diambil",
+		"data":    detail,
+	})
+}
+
+func (d *HttpDeliveryDetailPenjualan) GetByPenjualanID(c *fiber.Ctx) error {
+	id_penjualan := c.Params("id_penjualan")
+	if id_penjualan == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID Penjualan tidak boleh kosong",
 		})
 	}
 
-	detail, err := d.HTTP.GetByPenjualanID(c.Context(), id)
+	details, err := d.HTTP.GetByPenjualanID(c.Context(), id_penjualan)
 	if err != nil {
-		log.Printf("Error getting sale detail %s: %v", id, err)
+		log.Printf("Error getting details for penjualan %s: %v", id_penjualan, err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Gagal mendapatkan detail penjualan: %v", err),
+			"error": fmt.Sprintf("Gagal mendapatkan detail: %v", err),
 		})
 	}
 
-	if detail == nil {
+	if len(details) == 0 {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{
 			"error": "Detail penjualan tidak ditemukan",
 		})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Detail penjualan berhasil diambil",
-		"data":    detail,
+		"message": "Detail berhasil diambil",
+		"data":    details,
 	})
 }
