@@ -189,7 +189,7 @@ func (rp *mongoRepoProduk) DeleteProduk(ctx context.Context, id string) error {
 	return nil
 }
 
-// DecreaseProdukStock mengurangi stok produk
+// DecreaseProdukStock untuk mengurangi stok produk
 func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
@@ -389,7 +389,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 	return nil
 }
 
-// GetFrequentItemsets mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
+// Mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
 func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemset, error) {
 	// Ambil semua data detail penjualan
 	DetailPenjualan := rp.DB.Collection("detail_penjualan")
@@ -421,7 +421,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		if products, ok := detail["produk"].(primitive.A); ok {
 			// Set untuk mencegah duplikasi dalam satu transaksi
 			seenItems := make(map[string]bool)
-			
+
 			for _, p := range products {
 				if product, ok := p.(bson.M); ok {
 					idProduk := product["id_produk"].(string)
@@ -444,20 +444,39 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		}
 	}
 
-	// Buat itemset dari 2 produk yang sering muncul bersama
 	var result []domain.FrequentItemset
+
+	// Fungsi untuk mengecek apakah itemset muncul dalam transaksi
+	checkItemsetInTransaction := func(itemset []string, products primitive.A) bool {
+		itemPresent := make(map[string]bool)
+		for _, p := range products {
+			if product, ok := p.(bson.M); ok {
+				idProduk := product["id_produk"].(string)
+				itemPresent[idProduk] = true
+			}
+		}
+		
+		for _, item := range itemset {
+			if !itemPresent[item] {
+				return false
+			}
+		}
+		return true
+	}
+
+	// Cari frequent itemset dengan 2 produk
 	for i := 0; i < len(frequentItems); i++ {
 		for j := i + 1; j < len(frequentItems); j++ {
 			item1 := frequentItems[i]
 			item2 := frequentItems[j]
-			
+
 			// Hitung support untuk pasangan produk
 			pairCount := 0.0
 			for _, detail := range details {
 				if products, ok := detail["produk"].(primitive.A); ok {
 					hasItem1 := false
 					hasItem2 := false
-					
+
 					for _, p := range products {
 						if product, ok := p.(bson.M); ok {
 							idProduk := product["id_produk"].(string)
@@ -469,7 +488,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 							}
 						}
 					}
-					
+
 					if hasItem1 && hasItem2 {
 						pairCount++
 					}
@@ -484,6 +503,38 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 					Produk:  []string{item1, item2},
 				}
 				result = append(result, itemset)
+			}
+		}
+	}
+
+	// Cari frequent itemset dengan 3 produk
+	for i := 0; i < len(frequentItems); i++ {
+		for j := i + 1; j < len(frequentItems); j++ {
+			for k := j + 1; k < len(frequentItems); k++ {
+				item1 := frequentItems[i]
+				item2 := frequentItems[j]
+				item3 := frequentItems[k]
+
+				// Hitung support untuk triplet produk
+				tripletCount := 0.0
+				for _, detail := range details {
+					if products, ok := detail["produk"].(primitive.A); ok {
+						triplet := []string{item1, item2, item3}
+						if checkItemsetInTransaction(triplet, products) {
+							tripletCount++
+						}
+					}
+				}
+
+				tripletSupport := tripletCount / totalTransactions
+				if tripletSupport >= minSupport {
+					itemset := domain.FrequentItemset{
+						Items:   []string{itemNames[item1], itemNames[item2], itemNames[item3]},
+						Support: tripletSupport,
+						Produk:  []string{item1, item2, item3},
+					}
+					result = append(result, itemset)
+				}
 			}
 		}
 	}
