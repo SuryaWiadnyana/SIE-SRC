@@ -17,6 +17,12 @@ type Produk struct {
 	IsDeleted   *time.Time `json:"is_deleted" bson:"is_deleted"`
 }
 
+type FrequentItemset struct {
+	Items   []string `json:"items"`
+	Support float64  `json:"support"`
+	Produk  []string   `json:"produk"`
+}
+
 type ProdukRepository interface {
 	CreateProduk(ctx context.Context, bd *Produk) (Produk, error)
 	GetAllProduk(ctx context.Context) ([]Produk, error)
@@ -28,6 +34,7 @@ type ProdukRepository interface {
 	IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	ImportData(ctx context.Context, produkList []Produk) error
 	GenerateNextID(ctx context.Context) (string, error)
+	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 }
 
 type ProdukUseCase interface {
@@ -35,6 +42,7 @@ type ProdukUseCase interface {
 	GetAllProduk(ctx context.Context) ([]Produk, error)
 	GetProdukById(ctx context.Context, id string) (*Produk, error)
 	GetProdukByName(ctx context.Context, nama string) (*Produk, error)
+	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 	UpdateProduk(ctx context.Context, bd *Produk) error
 	DeleteProduk(ctx context.Context, id string) error
 	DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error

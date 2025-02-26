@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"SIE-SRC/config"
-	"SIE-SRC/domain"
 	"SIE-SRC/services/delivery"
 	"SIE-SRC/services/repository"
 	"SIE-SRC/services/usecase"
@@ -84,12 +83,12 @@ func startHTTPServer() {
 	userUseCase := usecase.NewMongoUseCaseUser(userRepo, 10*time.Second)
 	delivery.NewHttpDeliveryUser(app, userUseCase)
 
-	// Algoritma Repository Route
-	algoritmaData := domain.Algoritma{
-		Items:   []string{},
-		Support: 0,
-	}
-	algoritmaRepo := repository.NewMongoAlgoritmaRepo(algoritmaData, 10*time.Second) // Tambahkan argumen sesuai definisi
+	// // Algoritma Repository Route
+	// algoritmaData := domain.Algoritma{
+	// 	Items:   []string{},
+	// 	Support: 0,
+	// }
+	// algoritmaRepo := repository.NewMongoAlgoritmaRepo(algoritmaData, 10*time.Second) // Tambahkan argumen sesuai definisi
 
 	// Produk Repository
 	produkRepo := repository.NewMongoRepoProduk(db)
@@ -104,7 +103,7 @@ func startHTTPServer() {
 	log.Printf("Initializing detail penjualan use case...")
 
 	// Inisialisasi handler penjualan dengan detail penjualan use case
-	produkUseCase := usecase.NewUseCaseProduk(produkRepo, algoritmaRepo, penjualanRepo, 10*time.Second)
+	produkUseCase := usecase.NewUseCaseProduk(produkRepo, penjualanRepo, 10*time.Second)
 	delivery.NewHttpDeliveryPenjualan(app, penjualanUseCase, userUseCase, detailPenjualanUC, produkUseCase)
 	log.Printf("Handler penjualan initialized with detail penjualan use case")
 
@@ -116,8 +115,8 @@ func startHTTPServer() {
 	delivery.NewHttpDeliveryProduk(app, produkUseCase)
 
 	// Algoritma Use Case and Handler
-	algoritmaUseCase := usecase.NewAlgoritmaUsecase(algoritmaRepo)
-	delivery.NewAlgoritmaHandler(app, algoritmaUseCase)
+	// algoritmaUseCase := usecase.NewAlgoritmaUsecase(algoritmaRepo)
+	// delivery.NewAlgoritmaHandler(app, algoritmaUseCase)
 
 	// Signal handling for graceful shutdown
 	quit := make(chan os.Signal, 1)

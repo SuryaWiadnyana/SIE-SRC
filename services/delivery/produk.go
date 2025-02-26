@@ -4,6 +4,7 @@ import (
 	"SIE-SRC/domain"
 	"context"
 	"encoding/csv"
+	"SIE-SRC/middleware"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,6 +30,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	}
 
 	group := app.Group("/produk")
+	group.Use(middleware.AuthMiddleware("admin", "owner"))
 	group.Post("/createproduk", handler.CreateProduk)
 	group.Get("/getallproduk", handler.GetAllProduk)
 	group.Get("/by-id/:id_produk", handler.GetProdukById)
@@ -37,6 +39,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	group.Delete("/delete/:id_produk", handler.DeleteProduk)
 	group.Post("/importdata", handler.ImportProduk)
 	group.Post("/importJSON", handler.ImportProdukJSON)
+	group.Get("/getfrequentitemsets", handler.GetFrequentItemsets)
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
@@ -79,44 +82,78 @@ func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
-	id := c.Params("id_produk")
-	if id == "" {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID diperlukan",
-		})
-	}
+	idProduk := c.Params("id_produk")
 
-	data, err := d.HTTP.GetProdukById(context.Background(), id)
+	produk, err := d.HTTP.GetProdukById(c.Context(), idProduk)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal untuk mendapatkan data",
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Data ditemukan",
-		"data":    data,
+	// Ambil frequent itemsets dengan minimum support 0.3 (30%)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.3)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": fmt.Sprintf("Gagal mendapatkan itemset yang sering muncul: %v", err),
+		})
+	}
+
+	// Filter itemsets yang mengandung produk yang dicari
+	var relatedItemsets []domain.FrequentItemset
+	for _, itemset := range itemsets {
+		for _, produkId := range itemset.Produk {
+			if produkId == idProduk {
+				relatedItemsets = append(relatedItemsets, itemset)
+				break
+			}
+		}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Data produk berhasil diambil",
+		"data": map[string]interface{}{
+			"produk": produk,
+			"produk_terkait": relatedItemsets,
+		},
 	})
 }
 
 func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
-	nama := c.Params("nama_produk")
-	if nama == "" {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Nama produk diperlukan",
-		})
-	}
+	namaProduk := c.Params("nama_produk")
 
-	data, err := d.HTTP.GetProdukByName(context.Background(), nama)
+	produk, err := d.HTTP.GetProdukByName(c.Context(), namaProduk)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal untuk mendapatkan data",
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Data ditemukan",
-		"data":    data,
+	// Ambil frequent itemsets dengan minimum support 0.3 (30%)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.3)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": fmt.Sprintf("Gagal mendapatkan itemset yang sering muncul: %v", err),
+		})
+	}
+
+	// Filter itemsets yang mengandung produk yang dicari
+	var relatedItemsets []domain.FrequentItemset
+	for _, itemset := range itemsets {
+		for _, item := range itemset.Items {
+			if strings.Contains(strings.ToLower(item), strings.ToLower(namaProduk)) {
+				relatedItemsets = append(relatedItemsets, itemset)
+				break
+			}
+		}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Data produk berhasil diambil",
+		"data": map[string]interface{}{
+			"produk": produk,
+			"produk_terkait": relatedItemsets,
+		},
 	})
 }
 
@@ -389,6 +426,60 @@ func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": fmt.Sprintf("Berhasil mengimpor %d produk", len(req.Produk)),
-		"data": importedProducts,
+		"data":    importedProducts,
+	})
+}
+
+// GetFrequentItemsets mengembalikan itemset yang sering muncul dari data penjualan
+func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
+	// Validasi token
+	claims := c.Locals("claims")
+	if claims == nil {
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Token autentikasi tidak ditemukan",
+		})
+	}
+
+	// Mengambil nilai minimum support dari parameter query, nilai default 0.1 (10%)
+	minSupport := 0.1
+	if supportStr := c.Query("min_support"); supportStr != "" {
+		support, err := strconv.ParseFloat(supportStr, 64)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Format min_support tidak valid",
+			})
+		}
+		if support <= 0 || support > 1 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "min_support harus antara 0 dan 1",
+			})
+		}
+		minSupport = support
+	}
+
+	// Memanggil fungsi GetFrequentItemsets dari usecase
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), minSupport)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": fmt.Sprintf("Gagal mendapatkan itemset yang sering muncul: %v", err),
+		})
+	}
+
+	// Format response
+	response := make([]map[string]interface{}, len(itemsets))
+	for i, itemset := range itemsets {
+		response[i] = map[string]interface{}{
+			"items":   itemset.Items,
+			"support": itemset.Support,
+			"produk":  itemset.Produk,
+		}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Berhasil mendapatkan itemset yang sering muncul",
+		"data": map[string]interface{}{
+			"min_support": minSupport,
+			"itemsets":    response,
+		},
 	})
 }

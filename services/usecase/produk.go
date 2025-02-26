@@ -8,60 +8,21 @@ import (
 
 type ProdukUseCase struct {
 	ProdukRepository    domain.ProdukRepository
-	AlgoritmaRepository domain.AlgoritmaRepository
+	// AlgoritmaRepository domain.AlgoritmaRepository
 	PenjualanRepository domain.PenjualanRepository
 	contextTimeout      time.Duration
 }
 
-func NewUseCaseProduk(PR domain.ProdukRepository, AR domain.AlgoritmaRepository, PJR domain.PenjualanRepository, T time.Duration) domain.ProdukUseCase {
+func NewUseCaseProduk(PR domain.ProdukRepository, PJR domain.PenjualanRepository, T time.Duration) domain.ProdukUseCase {
 	return &ProdukUseCase{
 		ProdukRepository:    PR,
-		AlgoritmaRepository: AR,
+		// AlgoritmaRepository: AR,
 		PenjualanRepository: PJR,
 		contextTimeout:      T,
 	}
 }
 
-// func (uc *ProdukUseCase) GetRekomendasiProduk(Ctx context.Context, produk string, minSupport float64) ([]domain.Algoritma, error) {
-// 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
-// 	defer cancel()
 
-// 	// Get all sales data
-// 	sales, err := uc.PenjualanRepository.GetAll(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Transform sales data into transaction format
-// 	var transactions [][]string
-// 	for _, sale := range sales {
-// 		var items []string
-// 		for _, detail := range sale.Produk {
-// 			items = append(items, detail.IDProduk)
-// 		}
-// 		transactions = append(transactions, items)
-// 	}
-
-// 	// Get recommendations using the algorithm
-// 	rules := uc.AlgoritmaRepository.GetRekomendasiProduk(transactions, produk, minSupport)
-
-// 	// Convert rules to product recommendations
-// 	var recommendations []domain.Algoritma
-// 	for _, rule := range rules {
-// 		// Skip if no recommended items
-// 		if len(rule.Items) == 0 {
-// 			continue
-// 		}
-
-// 		// Add recommendation
-// 		recommendations = append(recommendations, domain.Algoritma{
-// 			Items:   rule.Items,
-// 			Support: rule.Support,
-// 		})
-// 	}
-
-// 	return recommendations, nil
-// }
 
 func (uc *ProdukUseCase) GetAllProduk(Ctx context.Context) ([]domain.Produk, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
@@ -117,4 +78,11 @@ func (uc *ProdukUseCase) DecreaseProdukStock(ctx context.Context, id string, kua
 // IncreaseProdukStock menambah stok produk
 func (uc *ProdukUseCase) IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
 	return uc.ProdukRepository.IncreaseProdukStock(ctx, id, kuantitas)
+}
+
+// GetFrequentItemsets mengimplementasikan algoritma Apriori
+func (uc *ProdukUseCase) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemset, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+	defer cancel()
+	return uc.ProdukRepository.GetFrequentItemsets(ctx, minSupport)
 }

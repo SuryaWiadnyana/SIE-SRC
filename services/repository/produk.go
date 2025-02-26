@@ -5,10 +5,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -385,4 +387,111 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 	log.Printf("Berhasil mengimpor %d produk, %d produk dilewati",
 		result.InsertedCount, skippedCount)
 	return nil
+}
+
+// GetFrequentItemsets mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
+func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemset, error) {
+	// Ambil semua data detail penjualan
+	DetailPenjualan := rp.DB.Collection("detail_penjualan")
+
+	cursor, err := DetailPenjualan.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("error saat mengambil data detail penjualan: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	// Simpan semua transaksi
+	var details []bson.M
+	if err = cursor.All(ctx, &details); err != nil {
+		return nil, fmt.Errorf("error saat decode data detail penjualan: %v", err)
+	}
+
+	// Hitung total transaksi
+	totalTransactions := float64(len(details))
+	if totalTransactions == 0 {
+		return []domain.FrequentItemset{}, nil
+	}
+
+	// Map untuk menyimpan jumlah kemunculan setiap produk
+	itemCounts := make(map[string]float64)
+	itemNames := make(map[string]string) // Map untuk menyimpan nama produk
+
+	// Hitung jumlah kemunculan untuk setiap produk
+	for _, detail := range details {
+		if products, ok := detail["produk"].(primitive.A); ok {
+			// Set untuk mencegah duplikasi dalam satu transaksi
+			seenItems := make(map[string]bool)
+			
+			for _, p := range products {
+				if product, ok := p.(bson.M); ok {
+					idProduk := product["id_produk"].(string)
+					if !seenItems[idProduk] {
+						itemCounts[idProduk]++
+						itemNames[idProduk] = product["nama_produk"].(string)
+						seenItems[idProduk] = true
+					}
+				}
+			}
+		}
+	}
+
+	// Filter produk yang memenuhi minimum support
+	var frequentItems []string
+	for item, count := range itemCounts {
+		support := count / totalTransactions
+		if support >= minSupport {
+			frequentItems = append(frequentItems, item)
+		}
+	}
+
+	// Buat itemset dari 2 produk yang sering muncul bersama
+	var result []domain.FrequentItemset
+	for i := 0; i < len(frequentItems); i++ {
+		for j := i + 1; j < len(frequentItems); j++ {
+			item1 := frequentItems[i]
+			item2 := frequentItems[j]
+			
+			// Hitung support untuk pasangan produk
+			pairCount := 0.0
+			for _, detail := range details {
+				if products, ok := detail["produk"].(primitive.A); ok {
+					hasItem1 := false
+					hasItem2 := false
+					
+					for _, p := range products {
+						if product, ok := p.(bson.M); ok {
+							idProduk := product["id_produk"].(string)
+							if idProduk == item1 {
+								hasItem1 = true
+							}
+							if idProduk == item2 {
+								hasItem2 = true
+							}
+						}
+					}
+					
+					if hasItem1 && hasItem2 {
+						pairCount++
+					}
+				}
+			}
+
+			pairSupport := pairCount / totalTransactions
+			if pairSupport >= minSupport {
+				itemset := domain.FrequentItemset{
+					Items:   []string{itemNames[item1], itemNames[item2]},
+					Support: pairSupport,
+					Produk:  []string{item1, item2},
+				}
+				result = append(result, itemset)
+			}
+		}
+	}
+
+	// Urutkan berdasarkan nilai support tertinggi
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Support > result[j].Support
+	})
+
+	return result, nil
 }
