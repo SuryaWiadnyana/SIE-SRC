@@ -100,11 +100,17 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 	}
 
 	// Filter itemsets yang mengandung produk yang dicari
-	var relatedItemsets []domain.FrequentItemset
+	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
-		for _, produkId := range itemset.Produk {
+		for i, produkId := range itemset.Produk {
 			if produkId == idProduk {
-				relatedItemsets = append(relatedItemsets, itemset)
+				// Ambil ID produk lainnya dari itemset
+				otherProdukId := itemset.Produk[1-i] // Jika i=0 maka 1-i=1, jika i=1 maka 1-i=0
+				// Ambil detail produk terkait
+				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+				if err == nil {
+					relatedProducts = append(relatedProducts, *relatedProduk)
+				}
 				break
 			}
 		}
@@ -114,7 +120,7 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 		"message": "Data produk berhasil diambil",
 		"data": map[string]interface{}{
 			"produk": produk,
-			"produk_terkait": relatedItemsets,
+			"produk_terkait": relatedProducts,
 		},
 	})
 }
@@ -138,11 +144,17 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 	}
 
 	// Filter itemsets yang mengandung produk yang dicari
-	var relatedItemsets []domain.FrequentItemset
+	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
-		for _, item := range itemset.Items {
+		for i, item := range itemset.Items {
 			if strings.Contains(strings.ToLower(item), strings.ToLower(namaProduk)) {
-				relatedItemsets = append(relatedItemsets, itemset)
+				// Ambil ID produk lainnya dari itemset
+				otherProdukId := itemset.Produk[1-i] // Jika i=0 maka 1-i=1, jika i=1 maka 1-i=0
+				// Ambil detail produk terkait
+				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+				if err == nil {
+					relatedProducts = append(relatedProducts, *relatedProduk)
+				}
 				break
 			}
 		}
@@ -152,7 +164,7 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 		"message": "Data produk berhasil diambil",
 		"data": map[string]interface{}{
 			"produk": produk,
-			"produk_terkait": relatedItemsets,
+			"produk_terkait": relatedProducts,
 		},
 	})
 }
@@ -469,9 +481,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 	response := make([]map[string]interface{}, len(itemsets))
 	for i, itemset := range itemsets {
 		response[i] = map[string]interface{}{
-			"items":   itemset.Items,
-			"support": itemset.Support,
-			"produk":  itemset.Produk,
+			"produk": itemset.Produk,
 		}
 	}
 
