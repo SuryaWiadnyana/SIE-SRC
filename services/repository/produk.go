@@ -498,9 +498,9 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 			pairSupport := pairCount / totalTransactions
 			if pairSupport >= minSupport {
 				itemset := domain.FrequentItemset{
-					Items:   []string{itemNames[item1], itemNames[item2]},
-					Support: pairSupport,
-					Produk:  []string{item1, item2},
+					Produk:   []string{item1, item2},
+					Support:  pairSupport,
+					ProdukList:  []string{itemNames[item1], itemNames[item2]},
 				}
 				result = append(result, itemset)
 			}
@@ -529,9 +529,9 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 				tripletSupport := tripletCount / totalTransactions
 				if tripletSupport >= minSupport {
 					itemset := domain.FrequentItemset{
-						Items:   []string{itemNames[item1], itemNames[item2], itemNames[item3]},
-						Support: tripletSupport,
-						Produk:  []string{item1, item2, item3},
+						Produk:   []string{item1, item2, item3},
+						Support:  tripletSupport,
+						ProdukList:  []string{itemNames[item1], itemNames[item2], itemNames[item3]},
 					}
 					result = append(result, itemset)
 				}

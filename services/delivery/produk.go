@@ -146,7 +146,7 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 	// Filter itemsets yang mengandung produk yang dicari
 	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
-		for i, item := range itemset.Items {
+		for i, item := range itemset.Produk {
 			if strings.Contains(strings.ToLower(item), strings.ToLower(namaProduk)) {
 				// Ambil ID produk lainnya dari itemset
 				otherProdukId := itemset.Produk[1-i] // Jika i=0 maka 1-i=1, jika i=1 maka 1-i=0
@@ -489,7 +489,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		"message": "Berhasil mendapatkan itemset yang sering muncul",
 		"data": map[string]interface{}{
 			"min_support": minSupport,
-			"itemsets":    response,
+			"list_produk":    response,
 		},
 	})
 }
