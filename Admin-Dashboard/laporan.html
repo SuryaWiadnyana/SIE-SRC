@@ -395,44 +395,44 @@
                         });
 
                         // Add details for each sale on new pages
-                        for (const sale of reportData) {
-                            doc.addPage();
+                        // for (const sale of reportData) {
+                        //     doc.addPage();
                             
                             // Add sale header
-                            doc.setFontSize(14);
-                            doc.text(`Detail Penjualan - ${sale.id_penjualan}`, 20, 20);
-                            doc.setFontSize(12);
-                            doc.text(`Tanggal: ${formatDate(sale.tanggal_penjualan)}`, 20, 30);
+                            // doc.setFontSize(14);
+                            // doc.text(`Detail Penjualan - ${sale.id_penjualan}`, 20, 20);
+                            // doc.setFontSize(12);
+                            // doc.text(`Tanggal: ${formatDate(sale.tanggal_penjualan)}`, 20, 30);
 
-                            try {
-                                const details = await fetchSaleDetails(sale.id_penjualan);
-                                if (details && details.length > 0) {
-                                    const detailsData = details.map(detail => [
-                                        detail.id_detail_penjualan || '-',
-                                        detail.produk?.nama_produk || '-',
-                                        detail.jumlah_produk || 0,
-                                        formatCurrency(detail.produk?.harga || 0),
-                                        formatCurrency(detail.subtotal || 0)
-                                    ]);
+                        //     try {
+                        //         const details = await fetchSaleDetails(sale.id_penjualan);
+                        //         if (details && details.length > 0) {
+                        //             const detailsData = details.map(detail => [
+                        //                 detail.id_detail_penjualan || '-',
+                        //                 detail.produk?.nama_produk || '-',
+                        //                 detail.jumlah_produk || 0,
+                        //                 formatCurrency(detail.produk?.harga || 0),
+                        //                 formatCurrency(detail.subtotal || 0)
+                        //             ]);
 
-                                    doc.autoTable({
-                                        startY: 40,
-                                        head: [['ID', 'Produk', 'Jumlah', 'Harga', 'Subtotal']],
-                                        body: detailsData,
-                                        theme: 'grid',
-                                        headStyles: { fillColor: [41, 128, 185] }
-                                    });
+                        //             doc.autoTable({
+                        //                 startY: 40,
+                        //                 head: [['ID', 'Produk', 'Jumlah', 'Harga', 'Subtotal']],
+                        //                 body: detailsData,
+                        //                 theme: 'grid',
+                        //                 headStyles: { fillColor: [41, 128, 185] }
+                        //             });
 
-                                    // Add subtotal
-                                    const subtotal = details.reduce((sum, detail) => sum + (detail.subtotal || 0), 0);
-                                    doc.setFontSize(12);
-                                    doc.text(`Total: ${formatCurrency(subtotal)}`, 20, doc.autoTable.previous.finalY + 10);
-                                }
-                            } catch (error) {
-                                console.error(`Error mengambil detail untuk penjualan ${sale.id_penjualan}:`, error);
-                                doc.text('Tidak dapat memuat detail penjualan', 20, 40);
-                            }
-                        }
+                        //             // Add subtotal
+                        //             const subtotal = details.reduce((sum, detail) => sum + (detail.subtotal || 0), 0);
+                        //             doc.setFontSize(12);
+                        //             doc.text(`Total: ${formatCurrency(subtotal)}`, 20, doc.autoTable.previous.finalY + 10);
+                        //         }
+                        //     } catch (error) {
+                        //         // console.error(`Error mengambil detail untuk penjualan ${sale.id_penjualan}:`, error);
+                        //         // doc.text('Tidak dapat memuat detail penjualan', 20, 40);
+                        //     }
+                        // }
 
                         doc.save(`laporan_penjualan_${startDate}_${endDate}.pdf`);
                     } else if (reportType === 'produk') {
