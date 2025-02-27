@@ -214,7 +214,7 @@ async function initializeDataTable() {
                     }
                 }
             ],
-            order: [[3, 'desc']], // Sort by date descending
+            order: [[0, 'asc']], // Sort by ID Penjualan ascending
             responsive: true,
             language: {
                 emptyTable: "Tidak Ada Data Penjualan",

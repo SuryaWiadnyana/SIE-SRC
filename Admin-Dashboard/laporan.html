@@ -2,23 +2,27 @@
 <html lang="en">
 
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.15/jspdf.plugin.autotable.min.js"></script>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
     <title>SIE-SRC |  Cetak Laporan</title>
 
+    <!-- Custom fonts for this template-->
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles -->
+    <!-- Custom styles for this template-->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../css/sie-src-theme.css" rel="stylesheet">
+
+    <!-- jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 </head>
 
@@ -121,19 +125,25 @@
                             <form id="reportFilterForm">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <label>Jenis Laporan</label>
-                                        <select class="form-control" id="reportType">
-                                            <option value="penjualan">Laporan Penjualan</option>
-                                            <option value="produk">Laporan Produk</option>
-                                        </select>
+                                        <div class="form-group">
+                                            <label>Jenis Laporan</label>
+                                            <select class="form-control" id="reportType">
+                                                <option value="penjualan">Laporan Penjualan</option>
+                                                <option value="produk">Laporan Produk</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label>Tanggal Mulai</label>
-                                        <input type="date" class="form-control" id="startDate">
+                                    <div class="col-md-4 date-range">
+                                        <div class="form-group">
+                                            <label for="startDate">Tanggal Mulai</label>
+                                            <input type="date" class="form-control" id="startDate">
+                                        </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label>Tanggal Selesai</label>
-                                        <input type="date" class="form-control" id="endDate">
+                                    <div class="col-md-4 date-range">
+                                        <div class="form-group">
+                                            <label for="endDate">Tanggal Selesai</label>
+                                            <input type="date" class="form-control" id="endDate">
+                                        </div>
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-primary mt-3" id="generatePdf">
@@ -183,7 +193,6 @@
         </div>
     </div>
 
-
     <!-- Bootstrap core JavaScript-->
     <script src="../vendor/jquery/jquery.min.js"></script>
     <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -193,112 +202,354 @@
 
     <!-- Custom scripts for all pages-->
     <script src="../js/sb-admin-2.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script src="../vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    <!-- Select2 -->
-    <script src="../vendor/select2/js/select2.full.min.js"></script>
-
-    <!-- SweetAlert2 -->
-    <script src="../vendor/sweetalert2/sweetalert2.min.js"></script>
-
-    <!-- Moment.js -->
     <script src="../vendor/moment/moment.min.js"></script>
 
-    <!-- Page specific script -->
-    <script src="../js/login.js"></script>
-    <script src="../js/penjualan.js"></script>
-
     <script>
-        document.getElementById('logoutButton').addEventListener('click', function () {
-            localStorage.clear();
-        });
-    </script>
+        // Initialize jsPDF
+        window.jsPDF = window.jspdf.jsPDF;
 
-<script type="module">
-    document.addEventListener('DOMContentLoaded', () => {
-        const generatePdfButton = document.getElementById('generatePdf');
-        if (generatePdfButton) {
-            generatePdfButton.addEventListener('click', async () => {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            const API_URL = 'http://localhost:8080';
+
+            // Format currency
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            };
+
+            // Format date
+            const formatDate = (dateString) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            // Fetch sales data
+            const fetchSalesData = async (startDate, endDate) => {
                 try {
-                    // Fetch product and sales data
-                    const products = await fetchProducts();
-                    const sales = await fetchSales();
+                    const response = await fetch(`${API_URL}/penjualan/getall`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
 
-                    // Ambil jenis laporan dari dropdown
-                    const reportType = document.getElementById('reportType').value;
-                    const startDate = document.getElementById('startDate').value;
-                    const endDate = document.getElementById('endDate').value;
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            localStorage.clear();
+                            window.location.href = '../login.html';
+                            return;
+                        }
+                        throw new Error('Gagal mengambil data penjualan');
+                    }
 
-                    // Generate PDF with the fetched data
-                    generatePDF(products, sales, reportType, startDate, endDate);
+                    const result = await response.json();
+                    const data = result.data;
+                    
+                    return data.filter(sale => {
+                        const saleDate = new Date(sale.tanggal_penjualan);
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        end.setHours(23, 59, 59);
+                        return saleDate >= start && saleDate <= end;
+                    });
                 } catch (error) {
-                    showAlert('Error fetching data: ' + error.message, 'danger');
+                    console.error('Error mengambil data penjualan:', error);
+                    throw error;
+                }
+            };
+
+            // Fetch product data
+            const fetchProductData = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        window.location.href = '../login.html';
+                        return;
+                    }
+
+                    const response = await fetch(`${API_URL}/produk/getallproduk`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            localStorage.clear();
+                            window.location.href = '../login.html';
+                            return;
+                        }
+                        throw new Error('Gagal mengambil data produk');
+                    }
+
+                    const result = await response.json();
+                    console.log('Raw API Response:', result); // Debug log untuk melihat response mentah
+
+                    if (!result.data || !Array.isArray(result.data)) {
+                        throw new Error('Format data produk tidak valid');
+                    }
+
+                    // Map data dengan lebih detail
+                    const mappedData = result.data.map(product => {
+                        console.log('Processing product:', product); // Debug log untuk setiap produk
+                        return {
+                            id_produk: product.id_produk,
+                            nama_produk: product.nama_produk,
+                            harga_produk: product.harga_produk ? parseFloat(product.harga_produk) : 0, // Menggunakan harga_produk
+                            stok_barang: product.stok_barang ? parseInt(product.stok_barang) : 0 // Menggunakan stok_barang
+                        };
+                    });
+
+                    console.log('Mapped product data:', mappedData); // Debug log untuk data yang sudah diproses
+                    return mappedData;
+                } catch (error) {
+                    console.error('Error fetching product data:', error);
+                    throw error;
+                }
+            };
+
+            // Fetch sale details
+            const fetchSaleDetails = async (saleId) => {
+                try {
+                    const response = await fetch(`${API_URL}/detail-penjualan/by-penjualan-id/${saleId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            localStorage.clear();
+                            window.location.href = '../login.html';
+                            return;
+                        }
+                        throw new Error('Gagal mengambil detail penjualan');
+                    }
+
+                    const result = await response.json();
+                    return result.data;
+                } catch (error) {
+                    console.error(`Error mengambil detail penjualan ${saleId}:`, error);
+                    throw error;
+                }
+            };
+
+            // Generate PDF button click handler
+            document.getElementById('generatePdf').addEventListener('click', async function() {
+                try {
+                    const reportType = document.getElementById('reportType').value;
+                    const doc = new jsPDF();
+
+                    if (reportType === 'penjualan') {
+                        const startDate = document.getElementById('startDate').value;
+                        const endDate = document.getElementById('endDate').value;
+
+                        if (!startDate || !endDate) {
+                            alert('Mohon pilih periode tanggal untuk laporan penjualan');
+                            return;
+                        }
+
+                        const reportData = await fetchSalesData(startDate, endDate);
+
+                        // Add header
+                        doc.setFontSize(16);
+                        doc.text('Laporan Penjualan', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                        
+                        // Add period
+                        doc.setFontSize(12);
+                        doc.text(`Periode: ${formatDate(startDate)} s/d ${formatDate(endDate)}`, 20, 30);
+                        
+                        // Add table
+                        const tableData = reportData.map((sale, index) => [
+                            index + 1,
+                            formatDate(sale.tanggal_penjualan),
+                            sale.id_penjualan,
+                            formatCurrency(sale.total)
+                        ]);
+
+                        // Calculate total
+                        const total = reportData.reduce((sum, sale) => sum + sale.total, 0);
+                        tableData.push(['', '', 'Total Pendapatan:', formatCurrency(total)]);
+
+                        doc.autoTable({
+                            startY: 40,
+                            head: [['No', 'Tanggal Penjual', 'ID Penjualan', 'Total']],
+                            body: tableData,
+                            theme: 'grid',
+                            headStyles: { fillColor: [41, 128, 185] },
+                            footStyles: { fillColor: [41, 128, 185] }
+                        });
+
+                        // Add details for each sale on new pages
+                        for (const sale of reportData) {
+                            doc.addPage();
+                            
+                            // Add sale header
+                            doc.setFontSize(14);
+                            doc.text(`Detail Penjualan - ${sale.id_penjualan}`, 20, 20);
+                            doc.setFontSize(12);
+                            doc.text(`Tanggal: ${formatDate(sale.tanggal_penjualan)}`, 20, 30);
+
+                            try {
+                                const details = await fetchSaleDetails(sale.id_penjualan);
+                                if (details && details.length > 0) {
+                                    const detailsData = details.map(detail => [
+                                        detail.id_detail_penjualan || '-',
+                                        detail.produk?.nama_produk || '-',
+                                        detail.jumlah_produk || 0,
+                                        formatCurrency(detail.produk?.harga || 0),
+                                        formatCurrency(detail.subtotal || 0)
+                                    ]);
+
+                                    doc.autoTable({
+                                        startY: 40,
+                                        head: [['ID', 'Produk', 'Jumlah', 'Harga', 'Subtotal']],
+                                        body: detailsData,
+                                        theme: 'grid',
+                                        headStyles: { fillColor: [41, 128, 185] }
+                                    });
+
+                                    // Add subtotal
+                                    const subtotal = details.reduce((sum, detail) => sum + (detail.subtotal || 0), 0);
+                                    doc.setFontSize(12);
+                                    doc.text(`Total: ${formatCurrency(subtotal)}`, 20, doc.autoTable.previous.finalY + 10);
+                                }
+                            } catch (error) {
+                                console.error(`Error mengambil detail untuk penjualan ${sale.id_penjualan}:`, error);
+                                doc.text('Tidak dapat memuat detail penjualan', 20, 40);
+                            }
+                        }
+
+                        doc.save(`laporan_penjualan_${startDate}_${endDate}.pdf`);
+                    } else if (reportType === 'produk') {
+                        try {
+                            const productData = await fetchProductData();
+                            console.log('Final product data for PDF:', productData); // Debug log
+
+                            // Add header
+                            doc.setFontSize(16);
+                            doc.text('Laporan Produk', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                            
+                            // Add date
+                            doc.setFontSize(12);
+                            doc.text(`Tanggal: ${formatDate(new Date())}`, 20, 30);
+
+                            if (productData && productData.length > 0) {
+                                // Add table
+                                const tableData = productData.map((product, index) => {
+                                    console.log('Processing product for table:', product); // Debug log
+                                    const harga = product.harga_produk ? parseFloat(product.harga_produk) : 0;
+                                    const stok = product.stok_barang ? parseInt(product.stok_barang) : 0;
+                                    
+                                    return [
+                                        index + 1,
+                                        product.id_produk || '-',
+                                        product.nama_produk || '-',
+                                        formatCurrency(harga),
+                                        stok.toString()
+                                    ];
+                                });
+
+                                console.log('Table data:', tableData); // Debug log
+
+                                doc.autoTable({
+                                    startY: 40,
+                                    head: [['No', 'ID Produk', 'Nama Produk', 'Harga', 'Stok']],
+                                    body: tableData,
+                                    theme: 'grid',
+                                    headStyles: { fillColor: [41, 128, 185] },
+                                    styles: {
+                                        cellPadding: 5,
+                                        fontSize: 10
+                                    },
+                                    columnStyles: {
+                                        0: { cellWidth: 20 }, // No
+                                        1: { cellWidth: 30 }, // ID Produk
+                                        2: { cellWidth: 'auto' }, // Nama Produk
+                                        3: { cellWidth: 40, halign: 'right' }, // Harga
+                                        4: { cellWidth: 30, halign: 'right' } // Stok
+                                    }
+                                });
+
+                                // Add summary
+                                const totalProducts = productData.length;
+                                const totalValue = productData.reduce((sum, product) => {
+                                    const harga = product.harga_produk ? parseFloat(product.harga_produk) : 0;
+                                    const stok = product.stok_barang ? parseInt(product.stok_barang) : 0;
+                                    return sum + (harga * stok);
+                                }, 0);
+
+                                const y = doc.autoTable.previous.finalY + 10;
+                                doc.setFontSize(12);
+                                doc.text(`Total Produk: ${totalProducts}`, 20, y);
+                                // doc.text(`Total Nilai Inventori: ${formatCurrency(totalValue)}`, 20, y + 10);
+                            } else {
+                                doc.text('Tidak ada data produk', 20, 40);
+                            }
+
+                            doc.save(`laporan_produk_${new Date().toISOString().split('T')[0]}.pdf`);
+                        } catch (error) {
+                            console.error('Error membuat laporan produk:', error);
+                            alert('Gagal membuat laporan produk: ' + error.message);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error membuat PDF:', error);
+                    alert('Gagal membuat laporan: ' + error.message);
                 }
             });
-        } else {
-            console.error('Button with ID "generatePdf" not found.');
-        }
-    });
 
-    async function fetchProducts() {
-        const response = await fetch('http://localhost:8080/produk/getallproduk', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            // Set user info and initialize components
+            const username = localStorage.getItem('username');
+            if (username) {
+                document.getElementById('userDropdown').innerHTML = `
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">${username}</span>
+                    <img class="img-profile rounded-circle" src="../img/undraw_profile.svg">
+                `;
             }
+
+            // Initialize date inputs with current month
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('startDate').value = firstDayOfMonth.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+
+            // Handle report type change
+            document.getElementById('reportType').addEventListener('change', function() {
+                const dateRangeFields = document.querySelectorAll('.date-range');
+                dateRangeFields.forEach(field => {
+                    field.style.display = this.value === 'penjualan' ? 'block' : 'none';
+                });
+            });
+
+            // Set initial visibility of date range fields
+            const initialReportType = document.getElementById('reportType').value;
+            const dateRangeFields = document.querySelectorAll('.date-range');
+            dateRangeFields.forEach(field => {
+                field.style.display = initialReportType === 'penjualan' ? 'block' : 'none';
+            });
+
+            // Handle logout
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.clear();
+                window.location.href = '../login.html';
+            });
         });
-        if (!response.ok) {
-            throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
-        return data.data;
-    }
-
-    async function fetchSales() {
-        const response = await fetch('http://localhost:8080/penjualan/getall', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Failed to fetch sales');
-        }
-        const data = await response.json();
-        return data.data;
-    }
-
-    function showAlert(message, type) {
-        const alertPlaceholder = document.getElementById('alertPlaceholder');
-        if (alertPlaceholder) {
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            `;
-            alertPlaceholder.appendChild(wrapper);
-
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                const alert = wrapper.querySelector('. alert');
-                if (alert) {
-                    alert.classList.remove('show');
-                    alert.classList.add('fade');
-                    setTimeout(() => {
-                        alertPlaceholder.removeChild(wrapper);
-                    }, 150);
-                }
-            }, 5000);
-        }
-    }
-</script>
-
-    <!-- Include other necessary scripts -->
+    </script>
 </body>
 
 </html>
