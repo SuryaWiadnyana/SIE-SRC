@@ -90,8 +90,9 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 			}
 
 			totalJumlahProduk += p.JumlahProduk
-			Subtotal = p.SubTotal
-			Total += p.SubTotal
+			// Pastikan subtotal dihitung untuk setiap transaksi
+			Subtotal += p.SubTotal 
+			Total = Subtotal // Total adalah akumulasi dari semua subtotal
 		}
 
 		// Buat satu dokumen penjualan untuk semua produk

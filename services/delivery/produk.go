@@ -2,9 +2,9 @@ package delivery
 
 import (
 	"SIE-SRC/domain"
+	"SIE-SRC/middleware"
 	"context"
 	"encoding/csv"
-	"SIE-SRC/middleware"
 	"fmt"
 	"log"
 	"net/http"
@@ -43,15 +43,66 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
-	val, err := d.HTTP.GetAllProduk(context.Background())
+
+	// Ambil semua produk
+	products, err := d.HTTP.GetAllProduk(context.Background())
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Gagal untuk mendapatkan Data",
 		})
 	}
 
+	// Ambil frequent itemsets dengan minimum support 0.3 (30%)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.3)
+	if err != nil {
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"data": products,
+		})
+	}
+
+	// Buat map untuk menyimpan produk terkait untuk setiap produk
+	relatedProductsMap := make(map[string][]domain.Produk)
+
+	// Untuk setiap produk, cari produk terkait dari itemsets
+	for _, product := range products {
+		var relatedProducts []domain.Produk
+		for _, itemset := range itemsets {
+			for i, produkId := range itemset.Produk {
+				if produkId == product.IDProduk {
+					// Ambil ID produk lainnya dari itemset
+					otherProdukId := itemset.Produk[1-i]
+					// Ambil detail produk terkait
+					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+					if err == nil {
+						relatedProducts = append(relatedProducts, *relatedProduk)
+					}
+					break
+				}
+			}
+		}
+		if len(relatedProducts) > 0 {
+			relatedProductsMap[product.IDProduk] = relatedProducts
+		}
+	}
+
+	// Format response dengan produk dan produk terkaitnya
+	type ProductWithRelated struct {
+		Produk        domain.Produk   `json:"produk"`
+		ProdukTerkait []domain.Produk `json:"produk_terkait,omitempty"`
+	}
+
+	// Buat slice untuk menyimpan semua produk dengan produk terkaitnya
+	productsWithRelated := make([]ProductWithRelated, len(products))
+	for i, product := range products {
+		productsWithRelated[i] = ProductWithRelated{
+			Produk:        product,
+			ProdukTerkait: relatedProductsMap[product.IDProduk],
+		}
+	}
+
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"data": val,
+		"message": "Data produk berhasil diambil",
+		"data":    productsWithRelated,
 	})
 }
 
@@ -64,14 +115,13 @@ func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Logging untuk debugging
 	log.Printf("Received data: %+v", product)
 
 	createdProduct, err := d.HTTP.CreateProduk(context.Background(), &product)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error":   "Failed to create product",
-			"message": err.Error(), // Include error message for better debugging
+			"message": err.Error(),
 		})
 	}
 
@@ -91,7 +141,6 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ambil frequent itemsets dengan minimum support 0.3 (30%)
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.3)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -99,14 +148,11 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 		})
 	}
 
-	// Filter itemsets yang mengandung produk yang dicari
 	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
 		for i, produkId := range itemset.Produk {
 			if produkId == idProduk {
-				// Ambil ID produk lainnya dari itemset
-				otherProdukId := itemset.Produk[1-i] // Jika i=0 maka 1-i=1, jika i=1 maka 1-i=0
-				// Ambil detail produk terkait
+				otherProdukId := itemset.Produk[1-i]
 				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
 				if err == nil {
 					relatedProducts = append(relatedProducts, *relatedProduk)
@@ -119,7 +165,7 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Data produk berhasil diambil",
 		"data": map[string]interface{}{
-			"produk": produk,
+			"produk"		: produk,
 			"produk_terkait": relatedProducts,
 		},
 	})
@@ -135,7 +181,6 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ambil frequent itemsets dengan minimum support 0.3 (30%)
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.3)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -143,14 +188,11 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 		})
 	}
 
-	// Filter itemsets yang mengandung produk yang dicari
 	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
 		for i, item := range itemset.Produk {
 			if strings.Contains(strings.ToLower(item), strings.ToLower(namaProduk)) {
-				// Ambil ID produk lainnya dari itemset
-				otherProdukId := itemset.Produk[1-i] // Jika i=0 maka 1-i=1, jika i=1 maka 1-i=0
-				// Ambil detail produk terkait
+				otherProdukId := itemset.Produk[1-i]
 				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
 				if err == nil {
 					relatedProducts = append(relatedProducts, *relatedProduk)
@@ -163,7 +205,7 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Data produk berhasil diambil",
 		"data": map[string]interface{}{
-			"produk": produk,
+			"produk":         produk,
 			"produk_terkait": relatedProducts,
 		},
 	})
@@ -185,7 +227,6 @@ func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validasi request body
 	if valid, err := govalidator.ValidateStruct(body); !valid {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Validasi gagal: " + err.Error(),
@@ -228,7 +269,6 @@ func (d *HttpDeliveryProduk) DeleteProduk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
-	// Ambil file dari request
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -236,7 +276,6 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Buka file
 	file, err := fileHeader.Open()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -248,12 +287,10 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 	var produkList []domain.Produk
 	filename := strings.ToLower(fileHeader.Filename)
 
-	// Proses file berdasarkan ekstensi
 	switch {
 	case strings.HasSuffix(filename, ".csv"):
-		// Baca file CSV
 		reader := csv.NewReader(file)
-		reader.FieldsPerRecord = -1 // Izinkan jumlah kolom fleksibel
+		reader.FieldsPerRecord = -1
 
 		records, err := reader.ReadAll()
 		if err != nil {
@@ -262,19 +299,17 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 			})
 		}
 
-		// Skip header row
 		if len(records) > 1 {
 			records = records[1:]
 		}
 
 		produkList = make([]domain.Produk, 0, len(records))
 		for i, record := range records {
-			if len(record) < 6 { // Minimal harus ada 6 kolom
+			if len(record) < 6 {
 				log.Printf("Baris %d: jumlah kolom tidak valid", i+1)
 				continue
 			}
 
-			// Bersihkan dan konversi harga ke int
 			hargaStr := strings.TrimSpace(strings.ReplaceAll(record[4], ",", ""))
 			hargaFloat, err := strconv.ParseFloat(hargaStr, 64)
 			if err != nil {
@@ -301,7 +336,6 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 		}
 
 	case strings.HasSuffix(filename, ".xlsx"):
-		// Baca file Excel
 		xlsx, err := excelize.OpenReader(file)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -309,7 +343,6 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 			})
 		}
 
-		// Ambil sheet pertama
 		sheetName := xlsx.GetSheetName(0)
 		rows, err := xlsx.GetRows(sheetName)
 		if err != nil {
@@ -318,19 +351,17 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 			})
 		}
 
-		// Skip header row
 		if len(rows) > 1 {
 			rows = rows[1:]
 		}
 
 		produkList = make([]domain.Produk, 0, len(rows))
 		for i, row := range rows {
-			if len(row) < 6 { // Minimal harus ada 6 kolom
+			if len(row) < 6 {
 				log.Printf("Baris %d: jumlah kolom tidak valid", i+1)
 				continue
 			}
 
-			// Bersihkan dan konversi harga ke int
 			hargaStr := strings.TrimSpace(strings.ReplaceAll(row[4], ",", ""))
 			hargaFloat, err := strconv.ParseFloat(hargaStr, 64)
 			if err != nil {
@@ -362,14 +393,12 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validasi jumlah data
 	if len(produkList) == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Tidak ada data valid untuk diimpor",
 		})
 	}
 
-	// Import data ke database
 	err = d.HTTP.ImportData(c.Context(), produkList)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -396,7 +425,6 @@ func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validasi data produk
 	for i, produk := range req.Produk {
 		if produk.NamaProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -420,7 +448,6 @@ func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 		}
 	}
 
-	// Import data ke database
 	err := d.HTTP.ImportData(c.Context(), req.Produk)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -428,7 +455,6 @@ func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ambil data produk yang baru diimpor
 	importedProducts, err := d.HTTP.GetAllProduk(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -442,9 +468,7 @@ func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 	})
 }
 
-// GetFrequentItemsets mengembalikan itemset yang sering muncul dari data penjualan
 func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
-	// Validasi token
 	claims := c.Locals("claims")
 	if claims == nil {
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
@@ -452,7 +476,6 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		})
 	}
 
-	// Mengambil nilai minimum support dari parameter query, nilai default 0.1 (10%)
 	minSupport := 0.1
 	if supportStr := c.Query("min_support"); supportStr != "" {
 		support, err := strconv.ParseFloat(supportStr, 64)
@@ -469,7 +492,6 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		minSupport = support
 	}
 
-	// Memanggil fungsi GetFrequentItemsets dari usecase
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), minSupport)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -477,7 +499,6 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		})
 	}
 
-	// Format response
 	response := make([]map[string]interface{}, len(itemsets))
 	for i, itemset := range itemsets {
 		response[i] = map[string]interface{}{
@@ -489,7 +510,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		"message": "Berhasil mendapatkan itemset yang sering muncul",
 		"data": map[string]interface{}{
 			"min_support": minSupport,
-			"list_produk":    response,
+			"list_produk": response,
 		},
 	})
 }
