@@ -49,9 +49,9 @@ function setUserInfo() {
         
         const userDropdown = document.getElementById('userDropdown');
         if (userDropdown) {
-            const usernameSpan = userDropdown.querySelector('span');
-            if (usernameSpan && userData.username) {
-                usernameSpan.textContent = userData.username;
+            const usernameSpan = userDropdown.querySelector('#username');
+            if (usernameSpan) {
+                usernameSpan.textContent = userData.role === 'owner' ? 'OwnerSRC' : userData.username;
             }
         }
     } catch (error) {

@@ -58,6 +58,7 @@
                     <span>Penjualan SRC Sarin Jagir</span>
                 </a>
             </li>
+            
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -94,7 +95,7 @@
                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
+                                    Keluar
                                 </a>
                             </div>
                         </li>
@@ -110,28 +111,78 @@
                     </div>
 
                     <!-- Content Row -->
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="tabelPenjualan" class="table table-bordered" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>ID Penjualan</th>
-                                            <th>Nama Penjual</th>
-                                            <th>Total</th>
-                                            <th>Tanggal</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Data Penjualan</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="penjualanTable" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID Penjualan</th>
+                                                    <th>Nama Penjual</th>
+                                                    <th>Total</th>
+                                                    <th>Tanggal</th>
+                                                    <th>Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Modal Detail Penjualan -->
+                <div class="modal fade" id="modalDetailPenjualan">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Detail Penjualan</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <tr>
+                                                            <th style="width: 200px">ID Penjualan</th>
+                                                            <td id="detailIdPenjualan">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Nama Penjual</th>
+                                                            <td id="detailNamaPenjual">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Tanggal Penjualan</th>
+                                                            <td id="detailTanggalPenjualan">-</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->
 
@@ -160,15 +211,15 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Siap untuk Keluar?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-body">Apakah Anda yakin ingin keluar?</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="../login.html" id="logoutButton">Logout</a>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                    <a class="btn btn-primary" href="../login.html" id="logoutButton">Keluar</a>
                 </div>
             </div>
         </div>
@@ -199,12 +250,41 @@
     <script src="../vendor/moment/moment.min.js"></script>
 
     <!-- Page specific script -->
-    <script src="../js/login.js"></script>
-    <script src="../js/cari-penjualan.js"></script>
+    <script type="module">
+        async function initializePage() {
+            try {
+                // Check authentication before loading page
+                const token = localStorage.getItem('token');
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const userRole = localStorage.getItem('role');
 
-    <script>
-        document.getElementById('logoutButton').addEventListener('click', function () {
+                if (!token || !userData || !userRole || !['admin', 'owner'].includes(userRole.toLowerCase())) {
+                    console.error('Authentication check failed');
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                console.log('Authentication successful, loading page...');
+                
+                // Import and initialize penjualan.js
+                const { initializePenjualan } = await import('../js/cari-penjualan.js');
+                console.log('Penjualan module loaded');
+                initializePenjualan();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                alert('Error loading page. Please try again.');
+                window.location.href = '../login.html';
+            }
+        }
+
+        // Start initialization
+        initializePage();
+
+        // Handle logout
+        document.getElementById('logoutButton').addEventListener('click', function(e) {
+            e.preventDefault();
             localStorage.clear();
+            window.location.href = '../login.html';
         });
     </script>
 </body>

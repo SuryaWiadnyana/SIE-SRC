@@ -234,6 +234,31 @@ function showAlert(message, type = 'info') {
 document.addEventListener('DOMContentLoaded', () => {
     loadUsers();
     
+    // Setup password toggle functionality
+    const setupPasswordToggle = (toggleId, passwordId) => {
+        const toggleBtn = document.getElementById(toggleId);
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                const passwordInput = document.getElementById(passwordId);
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        }
+    };
+
+    // Setup toggle for both password fields
+    setupPasswordToggle('togglePassword', 'password');
+    setupPasswordToggle('toggleEditPassword', 'editPassword');
+
     // Check authentication
     const token = localStorage.getItem('token');
     if (!token) {

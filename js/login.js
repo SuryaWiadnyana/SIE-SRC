@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.style.display = 'none';
     }
 
-    // Clear any existing auth data
-    localStorage.clear();
+    // Only clear auth data if we're actually on the login page
+    if (window.location.pathname.includes('login.html')) {
+        localStorage.clear();
+    }
 
     // Add autocomplete attribute to password input
     const passwordInput = document.getElementById('password');
@@ -22,20 +24,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Toggle password visibility
-    document.getElementById('togglePassword').addEventListener('click', function() {
-        const passwordInput = document.getElementById('password');
-        const icon = this.querySelector('i');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    });
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    }
 
     if (loginForm) {
         loginForm.addEventListener('submit', async function(e) {

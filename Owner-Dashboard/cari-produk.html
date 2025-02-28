@@ -17,6 +17,9 @@
     <!-- Custom styles for this template-->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../css/owner-sidebar.css" rel="stylesheet">
+    
+    <!-- DataTables CSS -->
+    <link href="../vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -89,7 +92,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Owner</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">OwnerSRC</span>
                                 <img class="img-profile rounded-circle" src="../img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
@@ -97,7 +100,7 @@
                                 aria-labelledby="userDropdown">
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logout
+                                    Keluar
                                 </a>
                             </div>
                         </li>
@@ -122,7 +125,9 @@
                                 <input type="text" class="form-control" id="searchProduct" 
                                     placeholder="Cari produk...">
                                 <div class="input-group-append">
-                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <button class="btn btn-primary" type="button" id="searchButton">
+                                        <i class="fas fa-search"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +136,7 @@
                     <!-- Products Table -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h4 class="m-0 font-weight-bold text-primary">Daftar Produk</h4>
+                            <h6 class="m-0 font-weight-bold text-danger">Data Produk</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -149,6 +154,32 @@
                                     </thead>
                                     <tbody>
                                         <!-- Product data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rekomendasi Produk -->
+                    <div class="card shadow mb-4" id="recommendationCard" style="display: none;">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-danger">Rekomendasi Produk Terkait</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="recommendationTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>ID Produk</th>
+                                            <th>Nama Produk</th>
+                                            <th>Kategori</th>
+                                            <th>Sub Kategori</th>
+                                            <th>Kode Produk</th>
+                                            <th>Harga</th>
+                                            <th>Stok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recommendationTableBody">
                                     </tbody>
                                 </table>
                             </div>
@@ -228,6 +259,10 @@
     <!-- Bootstrap core JavaScript-->
     <script src="../vendor/jquery/jquery.min.js"></script>
     <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables JavaScript -->
+    <script src="../vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
     <!-- Core plugin JavaScript-->
     <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>

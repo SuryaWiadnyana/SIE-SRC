@@ -47,7 +47,7 @@ async function initializePage() {
         }
 
         // Set username if authentication is valid
-        const displayName = userData.username || userData.name || 'User';
+        const displayName = userData.role === 'owner' ? 'OwnerSRC' : (userData.username || userData.name || 'User');
         $('#username').text(displayName);
         $('#namaPenjual').val(displayName);
 
@@ -207,14 +207,12 @@ async function initializeDataTable() {
                             <button class="btn btn-info btn-sm detail-btn" data-id_details="${row.id_details || ''}" data-id_penjualan="${row.id_penjualan || ''}">
                                 <i class="fas fa-eye"></i> Detail
                             </button>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id_penjualan="${row.id_penjualan || ''}">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
+
                         `;
                     }
                 }
             ],
-            order: [[3, 'desc']], // Sort by date descending
+            order: [[0, 'asc']], // Sort by ID Penjualan ascending
             responsive: true,
             language: {
                 emptyTable: "Tidak Ada Data Penjualan",
@@ -264,20 +262,6 @@ async function initializeDataTable() {
             } else {
                 console.error('No identifiers found in button');
                 alert('ID Detail Penjualan tidak ditemukan');
-            }
-        });
-
-        $('#penjualanTable tbody').on('click', '.delete-btn', function() {
-            const id_penjualan = $(this).data('id_penjualan');
-            console.log('Delete button clicked for ID:', id_penjualan);
-            
-            if (id_penjualan) {
-                if (confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
-                    deletePenjualan(id_penjualan);
-                }
-            } else {
-                console.error('No id_penjualan found for delete button');
-                alert('ID Penjualan tidak ditemukan');
             }
         });
 
@@ -532,33 +516,6 @@ async function refreshDataTable() {
     } catch (error) {
         console.error('Error refreshing DataTable:', error);
         alert('Gagal memperbarui data penjualan');
-    }
-}
-
-async function deletePenjualan(id_penjualan) {
-    try {
-        const token = localStorage.getItem('token');
-        console.log('Deleting penjualan with ID:', id_penjualan);
-
-        const response = await fetch(`http://127.0.0.1:8080/penjualan/delete/${id_penjualan}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Delete response:', response.status, errorText);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Refresh the table after successful deletion
-        await refreshDataTable();
-        alert('Data penjualan berhasil dihapus');
-    } catch (error) {
-        console.error('Error deleting penjualan:', error);
-        alert('Gagal menghapus data penjualan: ' + error.message);
     }
 }
 

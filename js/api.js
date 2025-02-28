@@ -12,7 +12,52 @@ async function handleResponse(response) {
 }
 
 // Authentication API
-const auth = {
+async function auth() {
+    console.log('Starting penjualan page initialization...');
+    
+    try {
+        // Show loading indicator
+        $('.loading').show();
+        
+        // Check authentication
+        const token = localStorage.getItem('token');
+        let userData = null;
+        try {
+            userData = JSON.parse(localStorage.getItem('userData'));
+        } catch (error) {
+            console.error('Error parsing userData:', error);
+            throw new Error('Invalid user data');
+        }
+
+        if (!token || !userData) {
+            throw new Error('Missing authentication data');
+        }
+
+        // Set username if authentication is valid
+        const displayName = userData.role === 'owner' ? 'OwnerSRC' : (userData.username || userData.name || 'User');
+        $('#username').text(displayName);
+        $('#namaPenjual').val(displayName);
+
+        // Load products first
+        await loadProdukOptions();
+
+        // Initialize DataTable
+        await initializeDataTable();
+        await setupEventHandlers();
+        
+        console.log('Page initialization completed successfully');
+    } catch (error) {
+        console.error('Initialization Error:', error);
+        alert('Terjadi kesalahan saat memuat halaman: ' + error.message);
+        window.location.href = '../login.html';
+    } finally {
+        // Hide loading indicator
+        $('.loading').hide();
+    }
+}
+
+// Users API
+const users = {
     login: async (credentials) => {
         try {
             const response = await fetch(`${BASE_URL}/user/login`, {
@@ -28,11 +73,10 @@ const auth = {
                 localStorage.setItem('role', data.data.role);
                 localStorage.setItem('userData', JSON.stringify({
                     username: credentials.username,
-                    role: data.data.role
+                    role: data.data.role,
+                    name: data.data.name || credentials.username
                 }));
-                console.log('Token:', data.token);  // Debug
-                console.log('Role:', data.role);    // Debug
-                console.log('LocalStorage:', localStorage); // Debug
+                
                 // Check if role is admin or owner
                 if (['admin', 'owner'].includes(data.data.role)) {
                     return { success: true, data: data.data };
@@ -45,27 +89,14 @@ const auth = {
             return { success: false, error: error.message };
         }
     },
-    
+
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('userData');
-        window.location.href = '/SIE-SRC-frontend/login.html';
+        window.location.href = '../login.html';
     },
 
-    checkAuth: () => {
-        const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        if (!token || !role) {
-            window.location.href = '/SIE-SRC-frontend/login.html';
-            return false;
-        }
-        return true;
-    }
-};
-
-// Users API
-const users = {
     getAll: async () => {
         try {
             const token = localStorage.getItem('token');
@@ -229,18 +260,24 @@ const products = {
             }
 
             const response = await fetch(`${BASE_URL}/produk/by-id/${id}`, {
-                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                },
             });
 
-            const data = await handleResponse(response);
-            console.log('Product data from API:', data); // Debug log
-            return { success: true, data: data };
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.clear();
+                    window.location.href = '../login.html';
+                    return;
+                }
+                throw new Error('Gagal mengambil data produk');
+            }
+
+            const result = await response.json();
+            return { success: true, data: result.data };
         } catch (error) {
-            console.error('Get product by ID error:', error);
+            console.error('Get product error:', error);
             return { success: false, error: error.message };
         }
     },
@@ -521,33 +558,32 @@ export const api = {
     products,
     sales,
     users,
-    algoritma: {
-        getRekomendasiProduk: async (transactions, product, minSupport) => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('Tidak terautentikasi');
-                }
+    // algoritma: {
+    //     getRekomendasiProduk: async (transactions, product, minSupport) => {
+    //         try {
+    //             const token = localStorage.getItem('token');
+    //             if (!token) {
+    //                 throw new Error('Tidak terautentikasi');
+    //             }
 
-                const response = await fetch(`${BASE_URL}/algoritma/rekomendasi`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        transactions: transactions,
-                        product: product,
-                        minSupport: minSupport
-                    })
-                });
+    //             const response = await fetch(`${BASE_URL}/algoritma/rekomendasi`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Authorization': `Bearer ${token}`,
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     transactions: transactions,
+    //                     product: product,
+    //                     minSupport: minSupport
+    //                 })
+    //             });
 
-                const data = await handleResponse(response);
-                return { success: true, data };
-            } catch (error) {
-                console.error('Get recommendations error:', error);
-                return { success: false, error: error.message };
-            }
-        }
+    //             const data = await handleResponse(response);
+    //             return { success: true, data };
+    //         } catch (error) {
+    //             console.error('Get recommendations error:', error);
+    //             return { success: false, error: error.message };
+    //         }
+    //     }
     }
-};

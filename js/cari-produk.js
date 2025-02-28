@@ -53,6 +53,30 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
+// Debounce function to limit API calls
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Load product recommendations with debounce
+const debouncedLoadRecommendations = debounce(async (productId) => {
+    try {
+        const recommendations = await api.algoritma.getRekomendasiProduk([], productId, 0.3);
+        displayRecommendations(recommendations);
+    } catch (error) {
+        console.error('Error loading recommendations:', error);
+        // Don't show error to user, just silently fail
+    }
+}, 1000); // Wait 1 second before making another request
+
 // Display products function
 function displayProducts(products = []) {
     console.log('Displaying products:', products);
@@ -61,6 +85,9 @@ function displayProducts(products = []) {
 
     if (!Array.isArray(products) || products.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada produk ditemukan</td></tr>';
+        if (productTableElement) {
+            productTableElement.clear().draw();
+        }
         return;
     }
 
@@ -77,24 +104,41 @@ function displayProducts(products = []) {
         `;
         tbody.appendChild(row);
 
-        // Add "Sering Dibeli Dengan:" section
-        const recommendationRow = document.createElement('tr');
-        recommendationRow.classList.add('recommendation-row');
-        recommendationRow.innerHTML = `
-            <td colspan="7">
-                <div class="recommendation-section">
-                    <h6>Sering Dibeli Dengan:</h6>
-                    <ul class="recommendation-list" id="recommendations-${product.id_produk}">
-                        <li>Memuat rekomendasi...</li>
-                    </ul>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(recommendationRow);
-
-        // Load recommendations for this product
-        loadProductRecommendations(product.id_produk);
+        // Load recommendations with debounce
+        if (window.location.pathname.includes('owner-dashboard.html')) {
+            debouncedLoadRecommendations(product.id_produk);
+        }
     });
+
+    // Reinitialize DataTable if it exists
+    if (productTableElement) {
+        productTableElement.clear().rows.add($(tbody).find('tr')).draw();
+    }
+}
+
+// Display recommendations
+function displayRecommendations(recommendations) {
+    const recommendationsContainer = document.getElementById('recommendationsContainer');
+    if (!recommendationsContainer) return;
+
+    if (!recommendations || recommendations.length === 0) {
+        recommendationsContainer.innerHTML = '<p>Tidak ada rekomendasi produk saat ini.</p>';
+        return;
+    }
+
+    let html = '<h5>Rekomendasi Produk</h5><ul class="list-group">';
+    recommendations.forEach(rec => {
+        html += `
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${rec.nama_produk}</span>
+                    <span class="badge bg-primary rounded-pill">${(rec.support * 100).toFixed(1)}%</span>
+                </div>
+            </li>
+        `;
+    });
+    html += '</ul>';
+    recommendationsContainer.innerHTML = html;
 }
 
 // Load recommendations for a specific product
@@ -200,31 +244,118 @@ async function getTransactionData() {
     }
 }
 
+// Function to filter products based on search query
+function filterProducts(query) {
+    if (!query) {
+        displayProducts(allProducts);
+        return;
+    }
+
+    const searchTerm = query.toLowerCase();
+    const filteredProducts = allProducts.filter(product => {
+        return (
+            (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm)) ||
+            (product.kategori && product.kategori.toLowerCase().includes(searchTerm)) ||
+            (product.sub_kategori && product.sub_kategori.toLowerCase().includes(searchTerm)) ||
+            (product.kode_produk && product.kode_produk.toLowerCase().includes(searchTerm))
+        );
+    });
+    
+    displayProducts(filteredProducts);
+}
+
 // Initialize event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded');
     
-    if (!checkAuth()) {
-        console.log('Auth check failed');
-        return;
+    if (!checkAuth()) return;
+
+    // Set username from localStorage
+    try {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        if (userData) {
+            const usernameElement = document.getElementById('username');
+            if (usernameElement) {
+                const displayName = userData.role === 'owner' ? 'OwnerSRC' : (userData.username || userData.name || 'User');
+                usernameElement.textContent = displayName;
+            }
+        }
+    } catch (error) {
+        console.error('Error setting username:', error);
     }
-    console.log('Auth check passed');
 
-    // Initialize elements
-    const elements = {
-        productTable: document.getElementById('productTable'),
-        searchInput: document.getElementById('searchProduct'),
-    };
-    
-    console.log('Elements initialized:', {
-        hasProductTable: !!elements.productTable,
-        hasSearchInput: !!elements.searchInput,
-    });
+    // Initialize DataTable after the table is populated with data
+    async function initializeDataTable() {
+        if ($.fn.DataTable.isDataTable('#productTable')) {
+            $('#productTable').DataTable().destroy();
+        }
+        
+        productTableElement = $('#productTable').DataTable({
+            responsive: true,
+            searching: false, // Disable default DataTables search since we're implementing our own
+            processing: true,
+            language: {
+                emptyTable: "Tidak ada produk ditemukan",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ produk",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 produk",
+                infoFiltered: "(difilter dari _MAX_ total produk)",
+                lengthMenu: "Tampilkan _MENU_ produk",
+                loadingRecords: "Memuat...",
+                processing: "Memproses...",
+                zeroRecords: "Tidak ada produk yang cocok ditemukan",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            }
+        });
 
-    productTableElement = elements.productTable;
+        // Display all products initially
+        displayProducts(allProducts);
+    }
+
+    // Function to handle search
+    function handleSearch() {
+        const searchValue = searchInput.value.trim();
+        if (searchValue === '') {
+            // Jika kotak pencarian kosong, tampilkan semua produk
+            displayProducts(allProducts);
+        } else {
+            // Lakukan pencarian hanya saat tombol diklik
+            const searchTerm = searchValue.toLowerCase();
+            const filteredProducts = allProducts.filter(product => {
+                return (
+                    (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm)) ||
+                    (product.kategori && product.kategori.toLowerCase().includes(searchTerm)) ||
+                    (product.sub_kategori && product.sub_kategori.toLowerCase().includes(searchTerm)) ||
+                    (product.kode_produk && product.kode_produk.toLowerCase().includes(searchTerm))
+                );
+            });
+            displayProducts(filteredProducts);
+        }
+    }
+
+    // Add event listener for search button
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', handleSearch);
+    }
+
+    // Handle Enter key press in search input
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+    }
 
     // Load initial data
-    loadProducts();
+    loadProducts().then(() => {
+        initializeDataTable();
+    });
 });
 
 // Load all products
@@ -238,7 +369,6 @@ async function loadProducts() {
             allProducts = result.data.data;
             
             displayProducts(allProducts);
-            await loadRecommendations(); // Load recommendations after products
         } else {
             console.log('No products data found');
             displayProducts([]);
@@ -266,29 +396,54 @@ async function loadRecommendations() {
     }
 }
 
-// Display recommendations in table
-function displayRecommendations(recommendations = []) {
-    console.log('Displaying recommendations:', recommendations);
-    const tbody = recommendationsTable.querySelector('tbody');
-    tbody.innerHTML = '';
+// Menambahkan fungsi untuk menampilkan rekomendasi produk saat detail produk dibuka
+async function showProductDetails(productId) {
+    try {
+        const result = await api.products.getById(productId);
+        if (result.success && result.data) {
+            const product = result.data.produk;
+            const relatedProducts = result.data.produk_terkait;
 
-    if (!Array.isArray(recommendations) || recommendations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center">Tidak ada rekomendasi ditemukan</td></tr>';
-        return;
+            // Tampilkan detail produk di modal atau form
+            document.getElementById('productId').value = product.id_produk || '';
+            document.getElementById('productName').value = product.nama_produk || '';
+            document.getElementById('productCategory').value = product.kategori || '';
+            document.getElementById('productSubCategory').value = product.sub_kategori || '';
+            document.getElementById('productCode').value = product.kode_produk || '';
+            document.getElementById('productPrice').value = product.harga_produk || '';
+            document.getElementById('productStock').value = product.stok_barang || '';
+
+            // Tampilkan rekomendasi produk jika ada
+            const recommendationCard = document.getElementById('recommendationCard');
+            const recommendationTableBody = document.getElementById('recommendationTableBody');
+            
+            if (relatedProducts && relatedProducts.length > 0) {
+                recommendationTableBody.innerHTML = '';
+                relatedProducts.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.id_produk || '-'}</td>
+                        <td>${product.nama_produk || '-'}</td>
+                        <td>${product.kategori || '-'}</td>
+                        <td>${product.sub_kategori || '-'}</td>
+                        <td>${product.kode_produk || '-'}</td>
+                        <td>${formatCurrency(product.harga_produk) || '-'}</td>
+                        <td>${product.stok_barang || '0'}</td>
+                    `;
+                    recommendationTableBody.appendChild(row);
+                });
+                recommendationCard.style.display = 'block';
+            } else {
+                recommendationCard.style.display = 'none';
+            }
+
+            // Tampilkan modal
+            $('#editModal').modal('show');
+        } else {
+            showAlert('Gagal memuat detail produk', 'error');
+        }
+    } catch (error) {
+        console.error('Error showing product details:', error);
+        showAlert('Terjadi kesalahan saat memuat detail produk', 'error');
     }
-
-    recommendations.forEach(rec => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${rec.id_produk || '-'}</td>
-            <td>${rec.nama_produk || '-'}</td>
-            <td>${rec.support || '-'}</td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // Show recommendations section
-    document.getElementById('recommendationsSection').style.display = 'block';
 }
-
-// Remaining code...

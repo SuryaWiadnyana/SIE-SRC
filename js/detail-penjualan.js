@@ -12,9 +12,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         // Set username from localStorage
-        const username = localStorage.getItem('username');
-        if (username) {
-            document.getElementById('usernameDisplay').textContent = username;
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        if (userData && userData.username) {
+            const usernameElement = document.getElementById('navbarDropdown');
+            if (usernameElement) {
+                usernameElement.textContent = userData.role === 'owner' ? 'OwnerSRC' : userData.username;
+            }
         }
 
         // Initialize DataTable
