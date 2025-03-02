@@ -203,25 +203,32 @@ async function loadProducts() {
         console.log('Fetching products...');
         const result = await api.products.getAll();
         console.log('API response:', result);
-        if (result.success && result.data && result.data.data) {  
-            console.log('Products data:', result.data.data);      
-            allProducts = result.data.data;
+        
+        if (result.success && result.data) {  
+            console.log('Raw products data:', result.data);      
+            // Ambil data produk dari nested object
+            allProducts = result.data;
+            console.log('Processed products:', allProducts);
             
             // Mengumpulkan kategori dan sub-kategori unik
             uniqueCategories.clear();
             uniqueSubCategories.clear();
-            allProducts.forEach(product => {
-                if (product.kategori) uniqueCategories.add(product.kategori);
-                if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
+            allProducts.forEach(item => {
+                const product = item.produk;
+                if (product) {
+                    if (product.kategori) uniqueCategories.add(product.kategori);
+                    if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
+                }
             });
             
             // Update filter buttons
             updateFilterButtons();
             
-            // Apply current filters
-            applyFilters();
+            // Tampilkan semua produk
+            displayProducts(allProducts);
         } else {
-            console.log('No products data found');
+            console.log('No products data found or error:', result.error);
+            showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
             displayProducts([]);
         }
     } catch (error) {
@@ -287,15 +294,15 @@ function applyFilters() {
     
     // Apply category filter
     if (activeFilters.category !== 'all') {
-        filteredProducts = filteredProducts.filter(product => 
-            product.kategori === activeFilters.category
+        filteredProducts = filteredProducts.filter(item => 
+            item.produk.kategori === activeFilters.category
         );
     }
     
     // Apply sub-category filter
     if (activeFilters.subcategory !== 'all') {
-        filteredProducts = filteredProducts.filter(product => 
-            product.sub_kategori === activeFilters.subcategory
+        filteredProducts = filteredProducts.filter(item => 
+            item.produk.sub_kategori === activeFilters.subcategory
         );
     }
     
@@ -305,17 +312,17 @@ function applyFilters() {
 // Display products in table
 function displayProducts(products = []) {
     console.log('Displaying products:', products);
-    if (!productTableElement) {
+    if (!productTable) {
         console.log('Product table element not found');
         return;
     }
     
-    const tbody = productTableElement.querySelector('tbody');
+    const tbody = productTable.querySelector('tbody');
     if (!tbody) {
         console.error('tbody element not found in product table');
         return;
     }
-    console.log('Found tbody element:', tbody);
+    
     tbody.innerHTML = '';
     
     if (!Array.isArray(products) || products.length === 0) {
@@ -323,23 +330,32 @@ function displayProducts(products = []) {
         return;
     }
 
-    products.forEach(product => {
+    products.forEach(item => {
+        if (!item || !item.produk) {
+            console.warn('Invalid product item:', item);
+            return;
+        }
+
+        const product = item.produk;
         const row = document.createElement('tr');
+        
         row.innerHTML = `
             <td>${product.id_produk || '-'}</td>
             <td>${product.nama_produk || '-'}</td>
             <td>${product.kategori || '-'}</td>
             <td>${product.sub_kategori || '-'}</td>
             <td>${product.kode_produk || '-'}</td>
-            <td>${formatCurrency(product.harga_produk) || '-'}</td>
+            <td>${formatCurrency(parseFloat(product.harga_produk)) || 'Rp0'}</td>
             <td>${product.stok_barang || '0'}</td>
             <td>
-                <button class="btn btn-info btn-sm edit-product" data-id="${product.id_produk}">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger btn-sm delete-product" data-id="${product.id_produk}">
-                    <i class="fas fa-trash"></i> Hapus
-                </button>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-info btn-sm edit-product" data-id="${product.id_produk}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-product" data-id="${product.id_produk}">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
@@ -349,43 +365,25 @@ function displayProducts(products = []) {
 // Handle search with debounce
 let searchTimeout;
 function handleSearch(e) {
+    const searchQuery = e.target.value.toLowerCase();
+    
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(async () => {
-        const searchTerm = e.target.value.trim();
-        console.log('Searching for:', searchTerm);
+    searchTimeout = setTimeout(() => {
+        let filteredProducts = allProducts;
         
-        if (!productTableElement) return;
-        
-        if (searchTerm === '') {
-            await loadProducts();
-            return;
-        }
-
-        try {
-            console.log('Loading all products for search');
-            const result = await api.products.getAll();
-            
-            if (result.success && result.data && result.data.data) {
-                const allProducts = result.data.data;
-                // Filter produk berdasarkan ID, nama, kode prouk,kategori, atau sub kategori
-                const filteredProducts = allProducts.filter(product => 
-                    (product.id_produk && product.id_produk.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (product.kode_produk && product.kode_produk.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (product.kategori && product.kategori.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (product.sub_kategori && product.sub_kategori.toLowerCase().includes(searchTerm.toLowerCase()))
+        if (searchQuery) {
+            filteredProducts = filteredProducts.filter(item => {
+                const product = item.produk;
+                return (
+                    product.nama_produk.toLowerCase().includes(searchQuery) ||
+                    product.kategori.toLowerCase().includes(searchQuery) ||
+                    product.sub_kategori.toLowerCase().includes(searchQuery) ||
+                    product.kode_produk.toLowerCase().includes(searchQuery)
                 );
-                console.log('Filtered products:', filteredProducts);
-                return displayProducts(filteredProducts);
-            } else {
-                console.log('No products found');
-                displayProducts([]);
-            }
-        } catch (error) {
-            console.error('Error searching products:', error);
-            showAlert('Terjadi kesalahan saat mencari produk', 'danger');
-            displayProducts([]);
+            });
         }
+        
+        displayProducts(filteredProducts);
     }, 300);
 }
 

@@ -244,11 +244,39 @@ const products = {
                     'Content-Type': 'application/json'
                 }
             });
-            const data = await handleResponse(response);
-            return { success: true, data: data.data };
+
+            // Tangani error non-200 response
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server response:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    body: errorText
+                });
+                throw new Error(`Server error: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('Raw API Response:', result);
+
+            // Pastikan data memiliki struktur yang benar
+            if (!result || !result.data) {
+                console.warn('Invalid response format:', result);
+                return { success: false, error: 'Invalid response format', data: [] };
+            }
+
+            // Kembalikan data mentah dari API
+            return { 
+                success: true, 
+                data: result.data 
+            };
         } catch (error) {
             console.error('Get all products error:', error);
-            return { success: false, error: error.message };
+            return { 
+                success: false, 
+                error: error.message,
+                data: [] 
+            };
         }
     },
 
@@ -587,3 +615,4 @@ export const api = {
     //         }
     //     }
     }
+;

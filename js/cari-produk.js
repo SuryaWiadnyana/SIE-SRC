@@ -33,7 +33,6 @@ function showAlert(message, type) {
         `;
         alertPlaceholder.appendChild(wrapper);
 
-        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             const alert = wrapper.querySelector('.alert');
             if (alert) {
@@ -53,31 +52,28 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Debounce function to limit API calls
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Load all products
+async function loadProducts() {
+    try {
+        console.log('Fetching products...');
+        const result = await api.products.getAll();
+        console.log('API response:', result);
+        if (result.success && result.data && result.data.data) {  
+            console.log('Products data:', result.data.data);      
+            allProducts = result.data.data;
+            displayProducts(allProducts);
+        } else {
+            console.log('No products data found');
+            displayProducts([]);
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showAlert('Terjadi kesalahan saat memuat produk', 'danger');
+        displayProducts([]);
+    }
 }
 
-// Load product recommendations with debounce
-const debouncedLoadRecommendations = debounce(async (productId) => {
-    try {
-        const recommendations = await api.algoritma.getRekomendasiProduk([], productId, 0.3);
-        displayRecommendations(recommendations);
-    } catch (error) {
-        console.error('Error loading recommendations:', error);
-        // Don't show error to user, just silently fail
-    }
-}, 1000); // Wait 1 second before making another request
-
-// Display products function
+// Display products in table
 function displayProducts(products = []) {
     console.log('Displaying products:', products);
     const tbody = productTable.querySelector('tbody');
@@ -91,7 +87,11 @@ function displayProducts(products = []) {
         return;
     }
 
-    products.forEach(product => {
+    products.forEach(item => {
+        // Extract product data from the nested structure
+        const product = item.produk || item;
+        const relatedProducts = item.produk_terkait || [];
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${product.id_produk || '-'}</td>
@@ -102,12 +102,17 @@ function displayProducts(products = []) {
             <td>${formatCurrency(product.harga_produk) || '-'}</td>
             <td>${product.stok_barang || '0'}</td>  
         `;
-        tbody.appendChild(row);
-
-        // Load recommendations with debounce
-        if (window.location.pathname.includes('owner-dashboard.html')) {
-            debouncedLoadRecommendations(product.id_produk);
+        
+        // Add click event to show related products
+        if (window.location.pathname.includes('owner-dashboard.html') && relatedProducts.length > 0) {
+            row.style.cursor = 'pointer';
+            row.title = 'Klik untuk melihat produk terkait';
+            row.addEventListener('click', () => {
+                displayRecommendations(relatedProducts);
+            });
         }
+        
+        tbody.appendChild(row);
     });
 
     // Reinitialize DataTable if it exists
@@ -122,126 +127,38 @@ function displayRecommendations(recommendations) {
     if (!recommendationsContainer) return;
 
     if (!recommendations || recommendations.length === 0) {
-        recommendationsContainer.innerHTML = '<p>Tidak ada rekomendasi produk saat ini.</p>';
+        recommendationsContainer.innerHTML = '<p>Tidak ada produk terkait saat ini.</p>';
         return;
     }
 
-    let html = '<h5>Rekomendasi Produk</h5><ul class="list-group">';
-    recommendations.forEach(rec => {
+    let html = '<h5>Produk Terkait</h5><div class="table-responsive"><table class="table table-bordered">';
+    html += `
+        <thead>
+            <tr>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Sub Kategori</th>
+                <th>Harga</th>
+                <th>Stok</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    recommendations.forEach(product => {
         html += `
-            <li class="list-group-item">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span>${rec.nama_produk}</span>
-                    <span class="badge bg-primary rounded-pill">${(rec.support * 100).toFixed(1)}%</span>
-                </div>
-            </li>
+            <tr>
+                <td>${product.nama_produk || '-'}</td>
+                <td>${product.kategori || '-'}</td>
+                <td>${product.sub_kategori || '-'}</td>
+                <td>${formatCurrency(product.harga_produk) || '-'}</td>
+                <td>${product.stok_barang || '0'}</td>
+            </tr>
         `;
     });
-    html += '</ul>';
+    
+    html += '</tbody></table></div>';
     recommendationsContainer.innerHTML = html;
-}
-
-// Load recommendations for a specific product
-async function loadProductRecommendations(productId) {
-    try {
-        const minSupport = 0.3; // Minimum support threshold
-        const transactions = await getTransactionData(); // Get transaction data
-        
-        const result = await api.algoritma.getRekomendasiProduk(transactions, productId, minSupport);
-        
-        if (result.success && result.data && result.data.length > 0) {
-            const recommendationList = document.getElementById(`recommendations-${productId}`);
-            
-            // Get product details for recommendations
-            const productDetails = await Promise.all(
-                result.data.flatMap(rec => 
-                    rec.Items.map(async productId => {
-                        try {
-                            const productResult = await api.products.getById(productId);
-                            if (productResult.success) {
-                                return {
-                                    id: productId,
-                                    name: productResult.data.nama_produk,
-                                    support: rec.Support
-                                };
-                            }
-                        } catch (error) {
-                            console.error('Error fetching product details:', error);
-                        }
-                        return null;
-                    })
-                )
-            );
-
-            // Filter out null values and format recommendations
-            const validRecommendations = productDetails.filter(rec => rec !== null);
-            
-            if (validRecommendations.length > 0) {
-                recommendationList.innerHTML = validRecommendations.map(rec => `
-                    <li>
-                        ${rec.name} 
-                        <span class="text-muted">(${(rec.support * 100).toFixed(1)}%)</span>
-                    </li>
-                `).join('');
-            } else {
-                recommendationList.innerHTML = '<li>Tidak ada rekomendasi ditemukan</li>';
-            }
-        } else {
-            const recommendationList = document.getElementById(`recommendations-${productId}`);
-            recommendationList.innerHTML = '<li>Tidak ada rekomendasi ditemukan</li>';
-        }
-    } catch (error) {
-        console.error('Error loading recommendations:', error);
-        const recommendationList = document.getElementById(`recommendations-${productId}`);
-        recommendationList.innerHTML = '<li>Gagal memuat rekomendasi</li>';
-    }
-}
-
-// Get transaction data from API
-async function getTransactionData() {
-    try {
-        console.log('Fetching transaction data...');
-        const result = await api.sales.getAll();
-        console.log('Transaction data response:', result);
-        
-        if (!result.success) {
-            console.error('Failed to fetch transaction data:', result.error);
-            return [];
-        }
-        
-        // Handle different response structures
-        let salesData = [];
-        if (Array.isArray(result.data)) {
-            salesData = result.data;
-        } else if (result.data && Array.isArray(result.data.data)) {
-            salesData = result.data.data;
-        } else {
-            console.warn('Invalid transaction data structure:', result.data);
-            return [];
-        }
-        
-        console.log('Raw transaction data:', salesData);
-        
-        // Transform sales data into transaction format
-        const transactions = salesData.map(sale => {
-            if (!sale.produk || !Array.isArray(sale.produk)) {
-                console.warn('Sale without products:', sale);
-                return [];
-            }
-            
-            // Extract product IDs and remove duplicates
-            const productIds = [...new Set(sale.produk.map(item => item.id_produk))];
-            
-            // Filter out null/undefined IDs
-            return productIds.filter(id => id);
-        }).filter(transaction => transaction.length > 0); // Remove empty transactions
-        
-        console.log('Processed transactions:', transactions);
-        return transactions;
-    } catch (error) {
-        console.error('Error fetching transaction data:', error);
-        return [];
-    }
 }
 
 // Function to filter products based on search query
@@ -252,7 +169,8 @@ function filterProducts(query) {
     }
 
     const searchTerm = query.toLowerCase();
-    const filteredProducts = allProducts.filter(product => {
+    const filteredProducts = allProducts.filter(item => {
+        const product = item.produk || item;
         return (
             (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm)) ||
             (product.kategori && product.kategori.toLowerCase().includes(searchTerm)) ||
@@ -284,166 +202,52 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error setting username:', error);
     }
 
-    // Initialize DataTable after the table is populated with data
-    async function initializeDataTable() {
-        if ($.fn.DataTable.isDataTable('#productTable')) {
-            $('#productTable').DataTable().destroy();
-        }
-        
-        productTableElement = $('#productTable').DataTable({
-            responsive: true,
-            searching: false, // Disable default DataTables search since we're implementing our own
-            processing: true,
-            language: {
-                emptyTable: "Tidak ada produk ditemukan",
-                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ produk",
-                infoEmpty: "Menampilkan 0 sampai 0 dari 0 produk",
-                infoFiltered: "(difilter dari _MAX_ total produk)",
-                lengthMenu: "Tampilkan _MENU_ produk",
-                loadingRecords: "Memuat...",
-                processing: "Memproses...",
-                zeroRecords: "Tidak ada produk yang cocok ditemukan",
-                paginate: {
-                    first: "Pertama",
-                    last: "Terakhir",
-                    next: "Selanjutnya",
-                    previous: "Sebelumnya"
-                }
+    // Initialize DataTable
+    if ($.fn.DataTable.isDataTable('#productTable')) {
+        $('#productTable').DataTable().destroy();
+    }
+    
+    productTableElement = $('#productTable').DataTable({
+        responsive: true,
+        searching: false,
+        processing: true,
+        language: {
+            emptyTable: "Tidak ada produk ditemukan",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ produk",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 produk",
+            infoFiltered: "(difilter dari _MAX_ total produk)",
+            lengthMenu: "Tampilkan _MENU_ produk",
+            loadingRecords: "Memuat...",
+            processing: "Memproses...",
+            zeroRecords: "Tidak ada produk yang cocok ditemukan",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Selanjutnya",
+                previous: "Sebelumnya"
             }
-        });
-
-        // Display all products initially
-        displayProducts(allProducts);
-    }
-
-    // Function to handle search
-    function handleSearch() {
-        const searchValue = searchInput.value.trim();
-        if (searchValue === '') {
-            // Jika kotak pencarian kosong, tampilkan semua produk
-            displayProducts(allProducts);
-        } else {
-            // Lakukan pencarian hanya saat tombol diklik
-            const searchTerm = searchValue.toLowerCase();
-            const filteredProducts = allProducts.filter(product => {
-                return (
-                    (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm)) ||
-                    (product.kategori && product.kategori.toLowerCase().includes(searchTerm)) ||
-                    (product.sub_kategori && product.sub_kategori.toLowerCase().includes(searchTerm)) ||
-                    (product.kode_produk && product.kode_produk.toLowerCase().includes(searchTerm))
-                );
-            });
-            displayProducts(filteredProducts);
         }
-    }
+    });
 
     // Add event listener for search button
     const searchButton = document.getElementById('searchButton');
     if (searchButton) {
-        searchButton.addEventListener('click', handleSearch);
+        searchButton.addEventListener('click', () => {
+            const searchValue = searchInput.value.trim();
+            filterProducts(searchValue);
+        });
     }
 
     // Handle Enter key press in search input
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                handleSearch();
+                const searchValue = searchInput.value.trim();
+                filterProducts(searchValue);
             }
         });
     }
 
     // Load initial data
-    loadProducts().then(() => {
-        initializeDataTable();
-    });
+    loadProducts();
 });
-
-// Load all products
-async function loadProducts() {
-    try {
-        console.log('Fetching products...');
-        const result = await api.products.getAll();
-        console.log('API response:', result);
-        if (result.success && result.data && result.data.data) {  
-            console.log('Products data:', result.data.data);      
-            allProducts = result.data.data;
-            
-            displayProducts(allProducts);
-        } else {
-            console.log('No products data found');
-            displayProducts([]);
-        }
-    } catch (error) {
-        console.error('Error loading products:', error);
-        showAlert('Terjadi kesalahan saat memuat produk', 'danger');
-        displayProducts([]);
-    }
-}
-
-// Load recommendations
-async function loadRecommendations() {
-    const minSupport = 0.5; // Set your minimum support threshold
-    const selectedProduct = ''; // Get the selected product from the UI or context
-    const transactions = []; // Replace with actual transaction data
-
-    try {
-        const recommendations = await api.algoritma.getRekomendasiProduk(transactions, selectedProduct, minSupport);
-        console.log('Recommendations:', recommendations);
-        displayRecommendations(recommendations);
-    } catch (error) {
-        console.error('Error loading recommendations:', error);
-        showAlert('Terjadi kesalahan saat memuat rekomendasi', 'danger');
-    }
-}
-
-// Menambahkan fungsi untuk menampilkan rekomendasi produk saat detail produk dibuka
-async function showProductDetails(productId) {
-    try {
-        const result = await api.products.getById(productId);
-        if (result.success && result.data) {
-            const product = result.data.produk;
-            const relatedProducts = result.data.produk_terkait;
-
-            // Tampilkan detail produk di modal atau form
-            document.getElementById('productId').value = product.id_produk || '';
-            document.getElementById('productName').value = product.nama_produk || '';
-            document.getElementById('productCategory').value = product.kategori || '';
-            document.getElementById('productSubCategory').value = product.sub_kategori || '';
-            document.getElementById('productCode').value = product.kode_produk || '';
-            document.getElementById('productPrice').value = product.harga_produk || '';
-            document.getElementById('productStock').value = product.stok_barang || '';
-
-            // Tampilkan rekomendasi produk jika ada
-            const recommendationCard = document.getElementById('recommendationCard');
-            const recommendationTableBody = document.getElementById('recommendationTableBody');
-            
-            if (relatedProducts && relatedProducts.length > 0) {
-                recommendationTableBody.innerHTML = '';
-                relatedProducts.forEach(product => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${product.id_produk || '-'}</td>
-                        <td>${product.nama_produk || '-'}</td>
-                        <td>${product.kategori || '-'}</td>
-                        <td>${product.sub_kategori || '-'}</td>
-                        <td>${product.kode_produk || '-'}</td>
-                        <td>${formatCurrency(product.harga_produk) || '-'}</td>
-                        <td>${product.stok_barang || '0'}</td>
-                    `;
-                    recommendationTableBody.appendChild(row);
-                });
-                recommendationCard.style.display = 'block';
-            } else {
-                recommendationCard.style.display = 'none';
-            }
-
-            // Tampilkan modal
-            $('#editModal').modal('show');
-        } else {
-            showAlert('Gagal memuat detail produk', 'error');
-        }
-    } catch (error) {
-        console.error('Error showing product details:', error);
-        showAlert('Terjadi kesalahan saat memuat detail produk', 'error');
-    }
-}
