@@ -73,6 +73,11 @@ async function initializePage() {
 async function loadProdukOptions() {
     try {
         const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Token tidak ditemukan');
+        }
+
+        console.log('Fetching products with token:', token);
         const response = await fetch('http://127.0.0.1:8080/produk/getallproduk', {
             method: 'GET',
             headers: {
@@ -82,37 +87,78 @@ async function loadProdukOptions() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch products');
+            const errorText = await response.text();
+            console.error('Server response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
         const result = await response.json();
-        console.log('Fetched products:', result);
+        console.log('API Response:', result);
 
-        if (result.data) {
-            produkList = result.data.map(product => ({
-                ...product,
+        if (!result) {
+            throw new Error('Response kosong dari server');
+        }
+
+        if (!result.data) {
+            throw new Error('Data tidak ditemukan dalam response');
+        }
+
+        // Pastikan kita memiliki array produk
+        const products = Array.isArray(result.data) ? result.data : [];
+        console.log('Products array:', products);
+
+        // Map produk ke format yang dibutuhkan
+        produkList = products.map(item => {
+            if (!item || !item.produk) {
+                console.warn('Produk tidak valid:', item);
+                return null;
+            }
+
+            const product = item.produk;
+            return {
+                id_produk: product.id_produk || '',
+                nama_produk: product.nama_produk || '',
                 kategori: product.kategori || '',
                 sub_kategori: product.sub_kategori || '',
                 kode_produk: product.kode_produk || '',
                 harga_produk: parseInt(product.harga_produk) || 0,
                 stok_barang: parseInt(product.stok_barang) || 0
-            }));
+            };
+        }).filter(product => product !== null);
 
-            // Pisahkan nama produk dan harga dalam dropdown
-            const options = produkList.map(product => {
-                const hargaFormatted = formatRupiah(product.harga_produk).replace('IDR', 'Rp');
-                return `<option value="${product.id_produk}" 
-                    data-harga="${product.harga_produk}"
-                    data-nama="${product.nama_produk}">
-                    ${product.nama_produk} (${hargaFormatted})
-                </option>`;
-            }).join('');
+        console.log('Processed product list:', produkList);
 
-            $('.select-produk').html('<option value="">Pilih Produk</option>' + options);
+        if (produkList.length === 0) {
+            console.warn('Tidak ada produk yang valid ditemukan');
         }
+
+        // Generate options untuk dropdown
+        const options = produkList.map(product => {
+            const hargaFormatted = formatRupiah(product.harga_produk).replace('IDR', 'Rp');
+            return `<option value="${product.id_produk}" 
+                data-harga="${product.harga_produk}"
+                data-nama="${product.nama_produk}">
+                ${product.nama_produk} (${hargaFormatted})
+            </option>`;
+        }).join('');
+
+        // Update dropdown
+        const $selectProduk = $('.select-produk');
+        if ($selectProduk.length === 0) {
+            throw new Error('Element select-produk tidak ditemukan');
+        }
+        
+        $selectProduk.html('<option value="">Pilih Produk</option>' + options);
+        console.log('Dropdown updated successfully');
+
     } catch (error) {
-        console.error('Error loading products:', error);
-        throw new Error('Gagal memuat data produk: ' + error.message);
+        console.error('Error detail:', error);
+        console.error('Error stack:', error.stack);
+        throw new Error(`Gagal memuat data produk: ${error.message}`);
     }
 }
 
