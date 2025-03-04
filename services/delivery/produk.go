@@ -52,9 +52,17 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 		})
 	}
 
+	if len(products) == 0 {
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"message": "Tidak ada data produk",
+			"data":    []domain.Produk{},
+		})
+	}
+
 	// Ambil frequent itemsets dengan minimum support 0.3 (30%)
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.3)
 	if err != nil {
+		// Jika gagal mendapatkan itemsets, tetap kembalikan produk
 		return c.Status(http.StatusOK).JSON(fiber.Map{
 			"data": products,
 		})
@@ -94,6 +102,20 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 	// Buat slice untuk menyimpan semua produk dengan produk terkaitnya
 	productsWithRelated := make([]ProductWithRelated, len(products))
 	for i, product := range products {
+		var relatedProducts []domain.Produk
+		for _, itemset := range itemsets {
+			for j, produkId := range itemset.Produk {
+				if produkId == product.IDProduk {
+					otherProdukId := itemset.Produk[1-j]
+					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+					if err == nil {
+						relatedProducts = append(relatedProducts, *relatedProduk)
+					}
+					break
+				}
+			}
+		}
+
 		productsWithRelated[i] = ProductWithRelated{
 			Produk:        product,
 			ProdukTerkait: relatedProductsMap[product.IDProduk],
@@ -165,7 +187,7 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Data produk berhasil diambil",
 		"data": map[string]interface{}{
-			"produk"		: produk,
+			"produk":         produk,
 			"produk_terkait": relatedProducts,
 		},
 	})

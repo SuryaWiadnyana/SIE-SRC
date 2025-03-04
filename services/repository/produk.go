@@ -84,11 +84,14 @@ func (rp *mongoRepoProduk) CreateProduk(ctx context.Context, bd *domain.Produk) 
 func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
+	// Add sort options for id_produk
+	opts := options.Find().SetSort(bson.D{{Key: "id_produk", Value: 1}})
+
 	filter := bson.M{
 		"is_deleted": nil, // Only get non-deleted products
 	}
 
-	cursor, err := DataProduk.Find(ctx, filter)
+	cursor, err := DataProduk.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -455,7 +458,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 				itemPresent[idProduk] = true
 			}
 		}
-		
+
 		for _, item := range itemset {
 			if !itemPresent[item] {
 				return false
@@ -498,9 +501,9 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 			pairSupport := pairCount / totalTransactions
 			if pairSupport >= minSupport {
 				itemset := domain.FrequentItemset{
-					Produk:   []string{item1, item2},
-					Support:  pairSupport,
-					ProdukList:  []string{itemNames[item1], itemNames[item2]},
+					Produk:     []string{item1, item2},
+					Support:    pairSupport,
+					ProdukList: []string{itemNames[item1], itemNames[item2]},
 				}
 				result = append(result, itemset)
 			}
@@ -529,9 +532,9 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 				tripletSupport := tripletCount / totalTransactions
 				if tripletSupport >= minSupport {
 					itemset := domain.FrequentItemset{
-						Produk:   []string{item1, item2, item3},
-						Support:  tripletSupport,
-						ProdukList:  []string{itemNames[item1], itemNames[item2], itemNames[item3]},
+						Produk:     []string{item1, item2, item3},
+						Support:    tripletSupport,
+						ProdukList: []string{itemNames[item1], itemNames[item2], itemNames[item3]},
 					}
 					result = append(result, itemset)
 				}
