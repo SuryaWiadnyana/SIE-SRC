@@ -329,11 +329,6 @@
         document.getElementById('logoutBtn').addEventListener('click', () => {
             api.auth.logout();
         });
-
-        // Check authentication on page load
-        if (!api.auth.checkAuth()) {
-            window.location.href = '/SIE-SRC-frontend/login.html';
-        }
     </script>
 </body>
 

@@ -249,44 +249,8 @@
     <!-- Moment.js -->
     <script src="../vendor/moment/moment.min.js"></script>
 
-    <!-- Page specific script -->
-    <script type="module">
-        async function initializePage() {
-            try {
-                // Check authentication before loading page
-                const token = localStorage.getItem('token');
-                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                const userRole = localStorage.getItem('role');
-
-                if (!token || !userData || !userRole || !['admin', 'owner'].includes(userRole.toLowerCase())) {
-                    console.error('Authentication check failed');
-                    window.location.href = '../login.html';
-                    return;
-                }
-
-                console.log('Authentication successful, loading page...');
-                
-                // Import and initialize penjualan.js
-                const { initializePenjualan } = await import('../js/cari-penjualan.js');
-                console.log('Penjualan module loaded');
-                initializePenjualan();
-            } catch (error) {
-                console.error('Error initializing page:', error);
-                alert('Error loading page. Please try again.');
-                window.location.href = '../login.html';
-            }
-        }
-
-        // Start initialization
-        initializePage();
-
-        // Handle logout
-        document.getElementById('logoutButton').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.clear();
-            window.location.href = '../login.html';
-        });
-    </script>
+    <script type="module" src="../js/cari-penjualan.js"></script>
+    
 </body>
 
 </html>

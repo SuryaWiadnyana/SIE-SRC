@@ -1,3 +1,11 @@
+
+// Handle logout
+document.getElementById('logoutButton').addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.clear();
+    window.location.href = '../login.html';
+});
+
 // Format currency to Rupiah
 function formatRupiah(angka) {
     if (!angka) return 'Rp 0';
@@ -68,6 +76,10 @@ async function initializePage() {
         $('.loading').hide();
     }
 }
+
+
+// Start initialization
+initializePage();
 
 // Load product options
 async function loadProdukOptions() {

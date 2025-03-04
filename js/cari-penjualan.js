@@ -69,6 +69,9 @@ async function initializePage() {
     }
 }
 
+// Start initialization
+initializePage();
+
 // Load product options
 async function loadProdukOptions() {
     try {
