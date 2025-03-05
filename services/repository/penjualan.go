@@ -78,7 +78,6 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 			return fmt.Errorf("gagal generate ID: %v", err)
 		}
 
-		currentTime := time.Now()
 		var totalJumlahProduk int
 		var Total int
 		var Subtotal int
@@ -90,20 +89,25 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 			}
 
 			totalJumlahProduk += p.JumlahProduk
-			// Pastikan subtotal dihitung untuk setiap transaksi
-			Subtotal += p.SubTotal 
-			Total = Subtotal // Total adalah akumulasi dari semua subtotal
+			Subtotal += p.SubTotal
+			Total = Subtotal
+		}
+
+		// Parse tanggal dari string ke time.Time
+		parsedTime, err := time.Parse("2006-01-02", bd[0].Tanggal_Penjualan.Format("2006-01-02"))
+		if err != nil {
+			return fmt.Errorf("gagal parse tanggal: %v", err)
 		}
 
 		// Buat satu dokumen penjualan untuk semua produk
 		penjualanDoc := bson.M{
 			"id_penjualan":      nextID,
 			"user":              bd[0].User,
-			"tanggal_penjualan": currentTime,
+			"tanggal_penjualan": parsedTime,
 			"jumlah_produk":     totalJumlahProduk,
 			"subtotal":          Subtotal,
 			"total":             Total,
-			"updated_at":        currentTime,
+			"updated_at":        time.Now(),
 		}
 
 		// Insert satu dokumen penjualan
@@ -120,11 +124,11 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 		result := domain.Penjualan{
 			IDPenjualan:       nextID,
 			User:              bd[0].User,
-			Tanggal_Penjualan: currentTime,
+			Tanggal_Penjualan: parsedTime,
 			JumlahProduk:      totalJumlahProduk,
 			SubTotal:          Subtotal,
 			Total:             Total,
-			UpdatedAt:         currentTime,
+			UpdatedAt:         time.Now(),
 		}
 
 		// Update bd untuk response

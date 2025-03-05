@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,7 +21,8 @@ type HttpDeliveryPenjualan struct {
 
 type PenjualanRequest struct {
 	Penjualan struct {
-		ProdukTerjual int `json:"produk_terjual"`
+		ProdukTerjual     int    `json:"produk_terjual"`
+		Tanggal_Penjualan string `json:"tanggal_penjualan"`
 	} `json:"penjualan"`
 	Produk domain.Produk `json:"produk"`
 }
@@ -103,13 +105,33 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 			})
 		}
 
+		// Validasi tanggal
+		if req.Penjualan.Tanggal_Penjualan == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Tanggal penjualan tidak boleh kosong",
+			})
+		}
+
+		// Parse tanggal dari format DD-MM-YYYY
+		parsedTime, err := time.Parse("02-01-2006", req.Penjualan.Tanggal_Penjualan)
+		if err != nil {
+			log.Printf("Error parsing date: %v", err)
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Format tanggal tidak valid. Gunakan format DD-MM-YYYY",
+			})
+		}
+
+		// Set waktu ke 00:00:00
+		parsedTime = time.Date(parsedTime.Year(), parsedTime.Month(), parsedTime.Day(), 0, 0, 0, 0, time.UTC)
+
 		// Hitung subtotal
 		subtotal := req.Penjualan.ProdukTerjual * req.Produk.HargaProduk
 
 		penjualan := domain.Penjualan{
-			User:         *user,
-			JumlahProduk: req.Penjualan.ProdukTerjual,
-			SubTotal:     subtotal,
+			User:              *user,
+			Tanggal_Penjualan: parsedTime, // Ubah format tanggal ke time.Time
+			JumlahProduk:      req.Penjualan.ProdukTerjual,
+			SubTotal:          subtotal,
 		}
 		penjualanList = append(penjualanList, penjualan)
 	}
