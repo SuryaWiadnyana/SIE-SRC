@@ -2,23 +2,491 @@ import { api } from './api.js';
 
 // Get DOM elements
 const productTable = document.getElementById('productTable');
-const searchInput = document.getElementById('searchProduct');
-const recommendationsTable = document.getElementById('recommendationsTable');
+// const searchInput = document.getElementById('searchProduct');
+// const addProductForm = document.getElementById('addProductForm');
+// const updateProductForm = document.getElementById('updateProductForm');
 
 let productTableElement;
 let allProducts = []; // Menyimpan semua produk untuk filtering
+let uniqueCategories = new Set();
+let uniqueSubCategories = new Set();
+let activeFilters = {
+    category: 'all',
+    subcategory: 'all'
+};
 
-// Check authentication and redirect if not logged in
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '../login.html';
-        return false;
-    }
-    return true;
+// Global variables
+let currentPage = 1;
+const itemsPerPage = 15;
+let filteredProducts = [];
+
+// Predefined categories and sub-categories
+const PRODUCT_CATEGORIES = {
+    'Makanan': [
+        'Makanan Ringan', 
+        'Makanan Berat', 
+        'Makanan Instan', 
+        'Bumbu Dapur', 
+        'Bahan Masakan',
+        'Mie & Pasta',
+        'Biskuit & Kue',
+        'Coklat & Permen',
+        'Sereal & Sarapan'
+    ],
+    'Minuman': [
+        'Air Mineral', 
+        'Minuman Bersoda', 
+        'Minuman Kemasan', 
+        'Kopi & Teh',
+        'Susu & Krimer',
+        'Sirup & Sari Buah',
+        'Minuman Energi',
+        'Minuman Kesehatan'
+    ],
+    'Kebutuhan Rumah Tangga': [
+        'Pembersih', 
+        'Peralatan Rumah', 
+        'Perlengkapan Mandi', 
+        'Deterjen',
+        'Pengharum Ruangan',
+        'Tisu & Kertas',
+        'Plastik & Pembungkus',
+        'Peralatan Dapur',
+        'Perlengkapan Mencuci'
+    ],
+    'Kesehatan & Kecantikan': [
+        'Obat-obatan', 
+        'Perawatan Wajah', 
+        'Perawatan Tubuh', 
+        'Vitamin',
+        'Perawatan Rambut',
+        'Perawatan Gigi',
+        'Kosmetik',
+        'Parfum & Deodoran',
+        'Pembalut & Kapas',
+        'Masker & Hand Sanitizer'
+    ],
+    'Perlengkapan Bayi': [
+        'Susu Formula', 
+        'Popok', 
+        'Perlengkapan Mandi Bayi', 
+        'Makanan Bayi',
+        'Perawatan Bayi',
+        'Perlengkapan Makan Bayi',
+        'Mainan Bayi',
+        'Pakaian Bayi'
+    ],
+    'Makanan Segar': [
+        'Buah-buahan',
+        'Sayuran',
+        'Daging',
+        'Ikan & Seafood',
+        'Telur',
+        'Tahu & Tempe',
+        'Roti & Kue Segar'
+    ],
+    'Alat Tulis & Kantor': [
+        'Kertas',
+        'Alat Tulis',
+        'Buku & Notes',
+        'Perlengkapan Sekolah',
+        'Perlengkapan Kantor',
+        'Amplop & Packaging'
+    ],
+    'Elektronik & Gadget': [
+        'Baterai',
+        'Charger & Kabel',
+        'Lampu',
+        'Peralatan Elektronik',
+        'Aksesoris Gadget'
+    ]
+};
+
+// Update modal form when category is selected
+function updateSubCategories(selectedCategory) {
+    const subCategorySelect = document.getElementById('sub_kategori');
+    const subCategories = PRODUCT_CATEGORIES[selectedCategory] || [];
+    
+    // Clear current options
+    subCategorySelect.innerHTML = '<option value="">Pilih Sub Kategori</option>';
+    
+    // Add new options
+    subCategories.forEach(subCat => {
+        const option = document.createElement('option');
+        option.value = subCat;
+        option.textContent = subCat;
+        subCategorySelect.appendChild(option);
+    });
+    
+    // Enable/disable based on whether there are sub-categories
+    subCategorySelect.disabled = subCategories.length === 0;
 }
 
-// Show alert function
+// Initialize event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded');
+    
+    if (!checkAuth()) {
+        console.log('Auth check failed');
+        return;
+    }
+    console.log('Auth check passed');
+
+    // Initialize elements
+    const elements = {
+        productTable: document.getElementById('productTable'),
+        searchInput: document.getElementById('searchProduct'),
+        addProductForm: document.getElementById('addProductForm'),
+        updateProductForm: document.getElementById('updateProductForm')
+    };
+    
+    console.log('Elements initialized:', {
+        hasProductTable: !!elements.productTable,
+        hasSearchInput: !!elements.searchInput,
+        hasAddForm: !!elements.addProductForm,
+        hasUpdateForm: !!elements.updateProductForm
+    });
+
+    productTableElement = elements.productTable;
+
+    // Load initial data
+    loadProducts();
+
+    // Add form submit handlers
+    if (elements.addProductForm) {
+        elements.addProductForm.addEventListener('submit', handleAddProduct);
+    }
+
+    if (elements.updateProductForm) {
+        elements.updateProductForm.addEventListener('submit', handleUpdateProduct);
+    }
+
+    // Add search handler
+    if (elements.searchInput) {
+        elements.searchInput.addEventListener('input', handleSearch);
+    }
+
+    // Add table click handlers
+    if (elements.productTable) {
+        elements.productTable.addEventListener('click', async (e) => {
+            if (e.target.closest('.edit-product')) {
+                await handleEditClick(e);
+            } else if (e.target.closest('.delete-product')) {
+                await handleDeleteClick(e);
+            }
+        });
+    }
+
+    // Add category change listener
+    const categorySelect = document.getElementById('kategori');
+    if (categorySelect) {
+        // Populate categories
+        categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
+        Object.keys(PRODUCT_CATEGORIES).forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+        
+        // Add change listener
+        categorySelect.addEventListener('change', (e) => {
+            updateSubCategories(e.target.value);
+        });
+    }
+});
+
+// Load all products
+async function loadProducts() {
+    try {
+        console.log('Fetching products...');
+        const result = await api.products.getAll();
+        console.log('API response:', result);
+        
+        if (result.success && result.data) {  
+            console.log('Raw products data:', result.data);      
+            // Ambil data produk dari nested object
+            allProducts = result.data;
+            console.log('Processed products:', allProducts);
+            
+            // Mengumpulkan kategori dan sub-kategori unik
+            uniqueCategories.clear();
+            uniqueSubCategories.clear();
+            allProducts.forEach(item => {
+                const product = item.produk;
+                if (product) {
+                    if (product.kategori) uniqueCategories.add(product.kategori);
+                    if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
+                }
+            });
+            
+            // Update filter buttons
+            updateFilterButtons();
+            
+            // Tampilkan semua produk
+            displayProducts(allProducts);
+        } else {
+            console.log('No products data found or error:', result.error);
+            showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
+            displayProducts([]);
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showAlert('Terjadi kesalahan saat memuat produk', 'danger');
+        displayProducts([]);
+    }
+}
+
+// Update filter buttons
+function updateFilterButtons() {
+    const categoryContainer = document.getElementById('categoryFilters');
+    const subCategoryContainer = document.getElementById('subCategoryFilters');
+    
+    if (!categoryContainer || !subCategoryContainer) return;
+    
+    // Clear existing buttons
+    categoryContainer.innerHTML = '';
+    subCategoryContainer.innerHTML = '';
+    
+    // Add "All" buttons
+    addFilterButton(categoryContainer, 'all', 'Semua Kategori', 'category');
+    addFilterButton(subCategoryContainer, 'all', 'Semua Sub Kategori', 'subcategory');
+    
+    // Add category buttons
+    [...uniqueCategories].sort().forEach(category => {
+        addFilterButton(categoryContainer, category, category, 'category');
+    });
+    
+    // Add sub-category buttons
+    [...uniqueSubCategories].sort().forEach(subCategory => {
+        addFilterButton(subCategoryContainer, subCategory, subCategory, 'subcategory');
+    });
+}
+
+// Add filter button
+function addFilterButton(container, value, text, type) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `btn btn-outline-primary me-2 mb-2 ${activeFilters[type] === value ? 'active' : ''}`;
+    btn.textContent = text;
+    btn.onclick = () => filterProducts(type, value);
+    container.appendChild(btn);
+}
+
+// Filter products
+function filterProducts(type, value) {
+    activeFilters[type] = value;
+    currentPage = 1; // Reset to first page when filtering
+    applyFilters();
+    
+    // Update button states
+    const container = document.getElementById(`${type}Filters`);
+    if (container) {
+        container.querySelectorAll('button').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent === value || (value === 'all' && btn.textContent.includes('Semua')));
+        });
+    }
+}
+
+// Apply all active filters
+function applyFilters() {
+    let filteredProducts = allProducts;
+    
+    // Apply category filter
+    if (activeFilters.category !== 'all') {
+        filteredProducts = filteredProducts.filter(item => 
+            item.produk.kategori === activeFilters.category
+        );
+    }
+    
+    // Apply sub-category filter
+    if (activeFilters.subcategory !== 'all') {
+        filteredProducts = filteredProducts.filter(item => 
+            item.produk.sub_kategori === activeFilters.subcategory
+        );
+    }
+    
+    displayProducts(filteredProducts);
+}
+
+// Display products with pagination
+function displayProducts(products = []) {
+    console.log('Displaying products:', products);
+    if (!productTable) {
+        console.log('Product table element not found');
+        return;
+    }
+    
+    const tbody = productTable.querySelector('tbody');
+    if (!tbody) {
+        console.error('tbody element not found in product table');
+        return;
+    }
+    
+    // Create pagination container if it doesn't exist
+    let paginationContainer = document.getElementById('pagination');
+    if (!paginationContainer) {
+        paginationContainer = document.createElement('div');
+        paginationContainer.id = 'pagination';
+        paginationContainer.className = 'mt-3';
+        productTable.parentNode.insertBefore(paginationContainer, productTable.nextSibling);
+    }
+    
+    tbody.innerHTML = '';
+    filteredProducts = products;
+    
+    if (!Array.isArray(products) || products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada produk ditemukan</td></tr>';
+        updatePagination(0);
+        return;
+    }
+
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProducts = products.slice(startIndex, endIndex);
+
+    paginatedProducts.forEach(item => {
+        if (!item || !item.produk) {
+            console.warn('Invalid product item:', item);
+            return;
+        }
+
+        const product = item.produk;
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+            <td>${product.id_produk || '-'}</td>
+            <td>${product.nama_produk || '-'}</td>
+            <td>${product.kategori || '-'}</td>
+            <td>${product.sub_kategori || '-'}</td>
+            <td>${product.kode_produk || '-'}</td>
+            <td>${formatCurrency(parseFloat(product.harga_produk)) || 'Rp0'}</td>
+            <td>${product.stok_barang || '0'}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Remove any existing page info
+    const existingPageInfo = document.querySelector('.page-info');
+    if (existingPageInfo) {
+        existingPageInfo.remove();
+    }
+
+    // Add page info after the table
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const pageInfo = document.createElement('div');
+    pageInfo.className = 'page-info text-center mb-2';
+    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${products.length} produk)`;
+    productTable.parentNode.insertBefore(pageInfo, paginationContainer);
+
+    // Update pagination
+    updatePagination(products.length);
+}
+
+// Add pagination controls
+function updatePagination(totalItems) {
+    const paginationContainer = document.getElementById('pagination');
+    if (!paginationContainer) return;
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    let paginationHTML = '<ul class="pagination justify-content-center">';
+
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo; Previous</a>
+        </li>
+    `;
+
+    // First page
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'active' : ''}">
+            <a class="page-link" href="#" data-page="1">1</a>
+        </li>
+    `;
+
+    // Add ellipsis and pages around current page
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+
+    if (startPage > 2) {
+        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+            <li class="page-item ${currentPage === i ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
+        `;
+    }
+
+    if (endPage < totalPages - 1) {
+        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+    }
+
+    // Last page
+    if (totalPages > 1) {
+        paginationHTML += `
+            <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+            </li>
+        `;
+    }
+
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}">Next &raquo;</a>
+        </li>
+    `;
+
+    paginationHTML += '</ul>';
+    paginationContainer.innerHTML = paginationHTML;
+
+    // Add click handlers
+    paginationContainer.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newPage = parseInt(e.target.dataset.page);
+            if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayProducts(filteredProducts);
+                // Scroll to top of table
+                productTable.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+}
+
+// Handle search with debounce
+let searchTimeout;
+function handleSearch(e) {
+    const searchQuery = e.target.value.toLowerCase();
+    
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        currentPage = 1; // Reset to first page when searching
+        let searchResults = allProducts;
+        
+        if (searchQuery) {
+            searchResults = allProducts.filter(item => {
+                const product = item.produk;
+                return (
+                    product.nama_produk.toLowerCase().includes(searchQuery) ||
+                    product.kategori.toLowerCase().includes(searchQuery) ||
+                    product.sub_kategori.toLowerCase().includes(searchQuery) ||
+                    product.kode_produk.toLowerCase().includes(searchQuery)
+                );
+            });
+        }
+        
+        displayProducts(searchResults);
+    }, 300);
+}
+
+// Helper functions
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('alertPlaceholder');
     if (alertPlaceholder) {
@@ -33,6 +501,7 @@ function showAlert(message, type) {
         `;
         alertPlaceholder.appendChild(wrapper);
 
+        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             const alert = wrapper.querySelector('.alert');
             if (alert) {
@@ -42,7 +511,6 @@ function showAlert(message, type) {
     }
 }
 
-// Format currency function
 function formatCurrency(amount) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -52,202 +520,12 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Load all products
-async function loadProducts() {
-    try {
-        console.log('Fetching products...');
-        const result = await api.products.getAll();
-        console.log('API response:', result);
-        if (result.success && result.data && result.data.data) {  
-            console.log('Products data:', result.data.data);      
-            allProducts = result.data.data;
-            displayProducts(allProducts);
-        } else {
-            console.log('No products data found');
-            displayProducts([]);
-        }
-    } catch (error) {
-        console.error('Error loading products:', error);
-        showAlert('Terjadi kesalahan saat memuat produk', 'danger');
-        displayProducts([]);
+// Check authentication and redirect if not logged in
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '../login.html';
+        return false;
     }
+    return true;
 }
-
-// Display products in table
-function displayProducts(products = []) {
-    console.log('Displaying products:', products);
-    const tbody = productTable.querySelector('tbody');
-    tbody.innerHTML = '';
-
-    if (!Array.isArray(products) || products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada produk ditemukan</td></tr>';
-        if (productTableElement) {
-            productTableElement.clear().draw();
-        }
-        return;
-    }
-
-    products.forEach(item => {
-        // Extract product data from the nested structure
-        const product = item.produk || item;
-        const relatedProducts = item.produk_terkait || [];
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${product.id_produk || '-'}</td>
-            <td>${product.nama_produk || '-'}</td>
-            <td>${product.kategori || '-'}</td>
-            <td>${product.sub_kategori || '-'}</td>
-            <td>${product.kode_produk || '-'}</td>
-            <td>${formatCurrency(product.harga_produk) || '-'}</td>
-            <td>${product.stok_barang || '0'}</td>  
-        `;
-        
-        // Add click event to show related products
-        if (window.location.pathname.includes('owner-dashboard.html') && relatedProducts.length > 0) {
-            row.style.cursor = 'pointer';
-            row.title = 'Klik untuk melihat produk terkait';
-            row.addEventListener('click', () => {
-                displayRecommendations(relatedProducts);
-            });
-        }
-        
-        tbody.appendChild(row);
-    });
-
-    // Reinitialize DataTable if it exists
-    if (productTableElement) {
-        productTableElement.clear().rows.add($(tbody).find('tr')).draw();
-    }
-}
-
-// Display recommendations
-function displayRecommendations(recommendations) {
-    const recommendationsContainer = document.getElementById('recommendationsContainer');
-    if (!recommendationsContainer) return;
-
-    if (!recommendations || recommendations.length === 0) {
-        recommendationsContainer.innerHTML = '<p>Tidak ada produk terkait saat ini.</p>';
-        return;
-    }
-
-    let html = '<h5>Produk Terkait</h5><div class="table-responsive"><table class="table table-bordered">';
-    html += `
-        <thead>
-            <tr>
-                <th>Nama Produk</th>
-                <th>Kategori</th>
-                <th>Sub Kategori</th>
-                <th>Harga</th>
-                <th>Stok</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
-    
-    recommendations.forEach(product => {
-        html += `
-            <tr>
-                <td>${product.nama_produk || '-'}</td>
-                <td>${product.kategori || '-'}</td>
-                <td>${product.sub_kategori || '-'}</td>
-                <td>${formatCurrency(product.harga_produk) || '-'}</td>
-                <td>${product.stok_barang || '0'}</td>
-            </tr>
-        `;
-    });
-    
-    html += '</tbody></table></div>';
-    recommendationsContainer.innerHTML = html;
-}
-
-// Function to filter products based on search query
-function filterProducts(query) {
-    if (!query) {
-        displayProducts(allProducts);
-        return;
-    }
-
-    const searchTerm = query.toLowerCase();
-    const filteredProducts = allProducts.filter(item => {
-        const product = item.produk || item;
-        return (
-            (product.nama_produk && product.nama_produk.toLowerCase().includes(searchTerm)) ||
-            (product.kategori && product.kategori.toLowerCase().includes(searchTerm)) ||
-            (product.sub_kategori && product.sub_kategori.toLowerCase().includes(searchTerm)) ||
-            (product.kode_produk && product.kode_produk.toLowerCase().includes(searchTerm))
-        );
-    });
-    
-    displayProducts(filteredProducts);
-}
-
-// Initialize event listeners when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded');
-    
-    if (!checkAuth()) return;
-
-    // Set username from localStorage
-    try {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        if (userData) {
-            const usernameElement = document.getElementById('username');
-            if (usernameElement) {
-                const displayName = userData.role === 'owner' ? 'OwnerSRC' : (userData.username || userData.name || 'User');
-                usernameElement.textContent = displayName;
-            }
-        }
-    } catch (error) {
-        console.error('Error setting username:', error);
-    }
-
-    // Initialize DataTable
-    if ($.fn.DataTable.isDataTable('#productTable')) {
-        $('#productTable').DataTable().destroy();
-    }
-    
-    productTableElement = $('#productTable').DataTable({
-        responsive: true,
-        searching: false,
-        processing: true,
-        language: {
-            emptyTable: "Tidak ada produk ditemukan",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ produk",
-            infoEmpty: "Menampilkan 0 sampai 0 dari 0 produk",
-            infoFiltered: "(difilter dari _MAX_ total produk)",
-            lengthMenu: "Tampilkan _MENU_ produk",
-            loadingRecords: "Memuat...",
-            processing: "Memproses...",
-            zeroRecords: "Tidak ada produk yang cocok ditemukan",
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Selanjutnya",
-                previous: "Sebelumnya"
-            }
-        }
-    });
-
-    // Add event listener for search button
-    const searchButton = document.getElementById('searchButton');
-    if (searchButton) {
-        searchButton.addEventListener('click', () => {
-            const searchValue = searchInput.value.trim();
-            filterProducts(searchValue);
-        });
-    }
-
-    // Handle Enter key press in search input
-    if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const searchValue = searchInput.value.trim();
-                filterProducts(searchValue);
-            }
-        });
-    }
-
-    // Load initial data
-    loadProducts();
-});

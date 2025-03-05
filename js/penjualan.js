@@ -1,4 +1,3 @@
-
 // Handle logout
 document.getElementById('logoutButton').addEventListener('click', function(e) {
     e.preventDefault();
@@ -394,6 +393,86 @@ function addProductRow() {
 }
 
 async function setupEventHandlers() {
+    // Set max date untuk input tanggal ke hari ini
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('tanggalPenjualan').max = today;
+
+    // Event handler untuk form submit
+    $('#formTambahPenjualan').on('submit', async function(e) {
+        e.preventDefault();
+        console.log('Form submitted');
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            // Collect all product data
+            const penjualanData = [];
+            $('.produk-item').each(function() {
+                const $row = $(this);
+                const $select = $row.find('.select-produk');
+                const $quantity = $row.find('.produk-terjual');
+                
+                if ($select.val() && $quantity.val()) {
+                    const selectedProduct = produkList.find(p => p.id_produk === $select.val());
+                    if (selectedProduct) {
+                        // Get tanggal value
+                        const tanggalInput = document.getElementById('tanggalPenjualan').value;
+                        // Convert YYYY-MM-DD to DD-MM-YYYY
+                        const [year, month, day] = tanggalInput.split('-');
+                        const formattedDate = `${day}-${month}-${year}`;
+                        
+                        penjualanData.push({
+                            penjualan: {
+                                produk_terjual: parseInt($quantity.val()),
+                                tanggal_penjualan: formattedDate
+                            },
+                            produk: selectedProduct
+                        });
+                    }
+                }
+            });
+
+            if (penjualanData.length === 0) {
+                throw new Error('Tidak ada produk yang dipilih');
+            }
+
+            console.log('Sending data:', penjualanData);
+
+            const response = await fetch('http://127.0.0.1:8080/penjualan/create', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(penjualanData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server error: ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('Server response:', result);
+
+            // Reset form and close modal
+            $('#formTambahPenjualan')[0].reset();
+            $('#modal-tambah-penjualan').modal('hide');
+            
+            // Refresh table
+            await refreshDataTable();
+
+            alert('Penjualan berhasil ditambahkan');
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Gagal menambahkan penjualan: ' + error.message);
+        }
+    });
+
     // Event handler untuk perubahan jumlah produk
     $(document).on('input', '.produk-terjual', function() {
         const row = $(this).closest('.produk-item');
@@ -443,91 +522,6 @@ async function setupEventHandlers() {
             updateTotal();
         } else {
             alert('Minimal harus ada satu produk!');
-        }
-    });
-
-    // Handle form submission
-    $('#formTambahPenjualan').on('submit', async function(e) {
-        e.preventDefault();
-        
-        try {
-            const token = localStorage.getItem('token');
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            
-            const penjualanItems = [];
-            let totalProdukTerjual = 0;
-            let totalHarga = 0;
-            const currentTime = new Date().toISOString();
-
-            $('.produk-item').each(function() {
-                const row = $(this);
-                const produkId = row.find('.select-produk').val();
-                const quantity = parseInt(row.find('.produk-terjual').val()) || 0;
-                
-                if (produkId && quantity > 0) {
-                    const selectedProduct = produkList.find(p => p.id_produk === produkId);
-                    if (selectedProduct) {
-                        const subtotal = quantity * selectedProduct.harga_produk;
-                        totalProdukTerjual += quantity;
-                        totalHarga += subtotal;
-
-                        penjualanItems.push({
-                            penjualan: {
-                                id_user: userData.id_user,
-                                produk_terjual: quantity,
-                                subtotal: subtotal,
-                                total: subtotal,
-                                tanggal_penjualan: currentTime,
-                                created_at: currentTime,
-                                updated_at: currentTime,
-                                is_deleted: false
-                            },
-                            produk: selectedProduct
-                        });
-                    }
-                }
-            });
-
-            if (penjualanItems.length === 0) {
-                throw new Error('Minimal satu produk harus dipilih!');
-            }
-
-            // Update total di setiap item penjualan
-            penjualanItems.forEach(item => {
-                item.penjualan.total = totalHarga;
-            });
-
-            console.log('Creating new penjualan:', penjualanItems);
-            const response = await fetch('http://127.0.0.1:8080/penjualan/create', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(penjualanItems)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            console.log('Create penjualan result:', result);
-
-            // Refresh DataTable
-            await refreshDataTable();
-            
-            // Close modal and reset form
-            $('#modal-tambah-penjualan').modal('hide');
-            this.reset();
-            $('#produkContainer').empty();
-            addProductRow();
-            
-            alert('Data penjualan berhasil ditambahkan');
-        } catch (error) {
-            console.error('Error creating penjualan:', error);
-            alert('Gagal menambahkan data penjualan: ' + error.message);
         }
     });
 }

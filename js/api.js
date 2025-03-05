@@ -61,7 +61,7 @@ async function auth() {
       const token = localStorage.getItem("token");
       const role = localStorage.getItem("role");
 
-      if (!token || !role || role !== "admin") {
+      if (!token || !role || role !== "admin" && role !== "owner") {
         window.location.href = "../login.html";
         return false;
       }
@@ -697,39 +697,365 @@ const sales = {
     },
 };
 
+// Dashboard API
+const dashboard = {
+    // Fetch all dashboard data
+    async getDashboardData() {
+        try {
+            const [productsData, salesData] = await Promise.all([
+                products.getAll(),
+                sales.getAll()
+            ]);
+
+            console.log('Products Data:', productsData);
+            console.log('Sales Data:', salesData);
+
+            if (!productsData.success || !salesData.success) {
+                throw new Error('Failed to fetch data');
+            }
+
+            // Calculate dashboard metrics
+            const productsList = Array.isArray(productsData.data) ? productsData.data : 
+                               Array.isArray(productsData.data?.data) ? productsData.data.data : [];
+            const salesList = Array.isArray(salesData.data) ? salesData.data : 
+                            Array.isArray(salesData.data?.data) ? salesData.data.data : [];
+
+            console.log('Processed Products List:', productsList);
+            console.log('Processed Sales List:', salesList);
+
+            // Calculate total sales
+            const totalSales = salesList.reduce((total, sale) => total + (Number(sale.total) || 0), 0);
+
+            // Calculate total products and remaining stock
+            const totalProducts = productsList.length;
+            const remainingStock = productsList.reduce((total, product) => total + (Number(product.stok) || 0), 0);
+
+            // Calculate total products sold
+            const totalProductsSold = salesList.reduce((total, sale) => {
+                const detailPenjualan = Array.isArray(sale.detail_penjualan) ? sale.detail_penjualan : [];
+                return total + detailPenjualan.reduce((subtotal, detail) => subtotal + (Number(detail.jumlah) || 0), 0);
+            }, 0);
+
+            return {
+                success: true,
+                data: {
+                    totalSales,
+                    totalProducts,
+                    remainingStock,
+                    totalProductsSold
+                }
+            };
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Get monthly and weekly sales data for chart
+    async getMonthlySales() {
+        try {
+            const salesData = await sales.getAll();
+            console.log('Monthly Sales Data:', salesData);
+
+            if (!salesData.success) {
+                throw new Error('Failed to fetch sales data');
+            }
+
+            const salesList = Array.isArray(salesData.data) ? salesData.data : 
+                            Array.isArray(salesData.data?.data) ? salesData.data.data : [];
+
+            console.log('Processed Monthly Sales List:', salesList);
+            const monthlyData = new Map();
+            const weeklyData = new Map();
+
+            // Group sales by month and week
+            salesList.forEach(sale => {
+                if (!sale.tanggal_penjualan) return;
+                
+                const date = new Date(sale.tanggal_penjualan);
+                const total = Number(sale.total) || 0;
+
+                // Monthly data
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const currentMonthTotal = monthlyData.get(monthKey) || 0;
+                monthlyData.set(monthKey, currentMonthTotal + total);
+
+                // Weekly data
+                const weekKey = getWeekKey(date);
+                const currentWeekTotal = weeklyData.get(weekKey) || 0;
+                weeklyData.set(weekKey, currentWeekTotal + total);
+            });
+
+            // Convert to array and sort by date
+            const monthlyChartData = Array.from(monthlyData.entries())
+                .sort()
+                .map(([month, total]) => ({
+                    month: month,
+                    total: total
+                }));
+
+            const weeklyChartData = Array.from(weeklyData.entries())
+                .sort()
+                .map(([week, total]) => ({
+                    week: week,
+                    total: total
+                }));
+
+            return { 
+                success: true, 
+                data: {
+                    monthly: monthlyChartData,
+                    weekly: weeklyChartData
+                }
+            };
+        } catch (error) {
+            console.error('Error fetching sales data:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Get top selling products
+    async getTopProducts() {
+        try {
+            const [productsData, salesData] = await Promise.all([
+                products.getAll(),
+                sales.getAll()
+            ]);
+
+            console.log('Top Products - Products Data:', productsData);
+            console.log('Top Products - Sales Data:', salesData);
+
+            if (!productsData.success || !salesData.success) {
+                throw new Error('Failed to fetch data');
+            }
+
+            const productsList = Array.isArray(productsData.data) ? productsData.data : 
+                               Array.isArray(productsData.data?.data) ? productsData.data.data : [];
+            const salesList = Array.isArray(salesData.data) ? salesData.data : 
+                            Array.isArray(salesData.data?.data) ? salesData.data.data : [];
+
+            console.log('Processed Products List:', productsList);
+            console.log('Processed Sales List:', salesList);
+
+            // Create map of product sales
+            const productSales = new Map();
+
+            // Calculate total sales for each product
+            salesList.forEach(sale => {
+                const detailPenjualan = Array.isArray(sale.detail_penjualan) ? sale.detail_penjualan : [];
+                detailPenjualan.forEach(detail => {
+                    if (!detail.id_produk) return;
+                    
+                    const productId = detail.id_produk;
+                    const currentStats = productSales.get(productId) || { total_terjual: 0, total_penjualan: 0 };
+                    productSales.set(productId, {
+                        total_terjual: currentStats.total_terjual + (Number(detail.jumlah) || 0),
+                        total_penjualan: currentStats.total_penjualan + (Number(detail.subtotal) || 0)
+                    });
+                });
+            });
+
+            // Combine with product data and sort by total sold
+            const topProducts = productsList
+                .map(product => {
+                    const stats = productSales.get(product.id_produk) || { total_terjual: 0, total_penjualan: 0 };
+                    return {
+                        nama_produk: product.nama_produk,
+                        total_terjual: stats.total_terjual,
+                        total_penjualan: stats.total_penjualan
+                    };
+                })
+                .sort((a, b) => b.total_terjual - a.total_terjual)
+                .slice(0, 10); // Get top 10 products
+
+            return { success: true, data: topProducts };
+        } catch (error) {
+            console.error('Error fetching top products:', error);
+            return { success: false, error: error.message };
+        }
+    }
+};
+
+// Get week number key for grouping
+function getWeekKey(date) {
+    const startDate = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000));
+    const weekNumber = Math.ceil((days + startDate.getDay() + 1) / 7);
+    return `${date.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+}
+
+// Update dashboard when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('index-owner.html')) {
+        updateDashboardData();
+        // Update dashboard every 5 minutes
+        setInterval(updateDashboardData, 300000);
+    }
+});
+
+// Update sales chart
+function updateSalesChart(data) {
+    const ctx = document.getElementById('salesChart');
+    if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    if (window.salesChart instanceof Chart) {
+        window.salesChart.destroy();
+    }
+
+    const months = data.monthly.map(item => item.month);
+    const monthlySales = data.monthly.map(item => item.total);
+    const weeks = data.weekly.map(item => item.week);
+    const weeklySales = data.weekly.map(item => item.total);
+
+    window.salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Penjualan Bulanan',
+                    data: monthlySales,
+                    borderColor: '#e74a3b',
+                    backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                    borderWidth: 2,
+                    fill: true
+                },
+                {
+                    label: 'Penjualan Mingguan',
+                    data: weeklySales,
+                    labels: weeks,
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    hidden: true // Default hidden, can be toggled
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatRupiah(value);
+                        },
+                        stepSize: 50000 // Set step size to 50000
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    onClick: function(e, legendItem, legend) {
+                        const index = legendItem.datasetIndex;
+                        const ci = legend.chart;
+                        const meta = ci.getDatasetMeta(index);
+
+                        // Toggle visibility
+                        meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+
+                        // Update labels if switching between weekly/monthly
+                        if (index === 1) { // Weekly dataset
+                            ci.data.labels = meta.hidden ? months : weeks;
+                        } else { // Monthly dataset
+                            ci.data.labels = months;
+                        }
+
+                        ci.update();
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${formatRupiah(context.parsed.y)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update top products table
+function updateTopProductsTable(products) {
+    const tableBody = document.querySelector('#topProductsTable tbody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+    products.forEach((product, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${product.nama_produk}</td>
+            <td>${product.total_terjual}</td>
+            <td>${formatRupiah(product.total_penjualan)}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Update dashboard data
+async function updateDashboardData() {
+    if (!checkAuth()) return;
+
+    try {
+        // Fetch dashboard summary
+        const dashboardData = await dashboard.getDashboardData();
+        if (dashboardData.success) {
+            // Update total sales
+            const totalSalesElement = document.getElementById('totalSales');
+            if (totalSalesElement) {
+                totalSalesElement.textContent = formatRupiah(dashboardData.data.totalSales || 0);
+            }
+
+            // Update total products
+            const totalProductsElement = document.getElementById('totalProducts');
+            if (totalProductsElement) {
+                totalProductsElement.textContent = dashboardData.data.totalProducts || 0;
+            }
+
+            // Update products sold
+            const totalProductsSalesElement = document.getElementById('totalProductsSales');
+            if (totalProductsSalesElement) {
+                totalProductsSalesElement.textContent = dashboardData.data.totalProductsSold || 0;
+            }
+
+            // Update remaining stock
+            const remainingStockElement = document.getElementById('stok_barang');
+            if (remainingStockElement) {
+                remainingStockElement.textContent = dashboardData.data.remainingStock || 0;
+            }
+        }
+
+        // Fetch and update monthly sales chart
+        const monthlySalesData = await dashboard.getMonthlySales();
+        if (monthlySalesData.success) {
+            updateSalesChart(monthlySalesData.data);
+        }
+
+        // Fetch and update top products
+        const topProductsData = await dashboard.getTopProducts();
+        if (topProductsData.success) {
+            updateTopProductsTable(topProductsData.data);
+        }
+
+    } catch (error) {
+        console.error('Error updating dashboard:', error);
+    }
+}
+
 // Export the API modules
 export const api = {
     auth,
+    checkAuth,
+    users,
     products,
     sales,
-    users,
-    // algoritma: {
-    //     getRekomendasiProduk: async (transactions, product, minSupport) => {
-    //         try {
-    //             const token = localStorage.getItem('token');
-    //             if (!token) {
-    //                 throw new Error('Tidak terautentikasi');
-    //             }
-
-    //             const response = await fetch(`${BASE_URL}/algoritma/rekomendasi`, {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Authorization': `Bearer ${token}`,
-    //                     'Content-Type': 'application/json'
-    //                 },
-    //                 body: JSON.stringify({
-    //                     transactions: transactions,
-    //                     product: product,
-    //                     minSupport: minSupport
-    //                 })
-    //             });
-
-    //             const data = await handleResponse(response);
-    //             return { success: true, data };
-    //         } catch (error) {
-    //             console.error('Get recommendations error:', error);
-    //             return { success: false, error: error.message };
-    //         }
-    //     }
-    }
-;
+    dashboard,
+    formatRupiah
+};

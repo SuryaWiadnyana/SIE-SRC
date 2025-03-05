@@ -309,7 +309,12 @@ function applyFilters() {
     displayProducts(filteredProducts);
 }
 
-// Display products in table
+// Global variables
+let currentPage = 1;
+const itemsPerPage = 15;
+let filteredProducts = [];
+
+// Display products with pagination
 function displayProducts(products = []) {
     console.log('Displaying products:', products);
     if (!productTable) {
@@ -323,14 +328,30 @@ function displayProducts(products = []) {
         return;
     }
     
+    // Create pagination container if it doesn't exist
+    let paginationContainer = document.getElementById('pagination');
+    if (!paginationContainer) {
+        paginationContainer = document.createElement('div');
+        paginationContainer.id = 'pagination';
+        paginationContainer.className = 'mt-3';
+        productTable.parentNode.insertBefore(paginationContainer, productTable.nextSibling);
+    }
+    
     tbody.innerHTML = '';
+    filteredProducts = products; // Update filtered products
     
     if (!Array.isArray(products) || products.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada produk ditemukan</td></tr>';
+        updatePagination(0);
         return;
     }
 
-    products.forEach(item => {
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProducts = products.slice(startIndex, endIndex);
+
+    paginatedProducts.forEach(item => {
         if (!item || !item.produk) {
             console.warn('Invalid product item:', item);
             return;
@@ -359,6 +380,98 @@ function displayProducts(products = []) {
             </td>
         `;
         tbody.appendChild(row);
+    });
+
+    // Remove any existing page info
+    const existingPageInfo = document.querySelector('.page-info');
+    if (existingPageInfo) {
+        existingPageInfo.remove();
+    }
+
+    // Add page info after the table
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const pageInfo = document.createElement('div');
+    pageInfo.className = 'page-info text-center mb-2';
+    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${products.length} produk)`;
+    productTable.parentNode.insertBefore(pageInfo, paginationContainer);
+
+    // Update pagination
+    updatePagination(products.length);
+}
+
+// Add pagination controls
+function updatePagination(totalItems) {
+    const paginationContainer = document.getElementById('pagination');
+    if (!paginationContainer) return;
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    let paginationHTML = '<ul class="pagination justify-content-center">';
+
+    // Previous button
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo; Previous</a>
+        </li>
+    `;
+
+    // First page
+    paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'active' : ''}">
+            <a class="page-link" href="#" data-page="1">1</a>
+        </li>
+    `;
+
+    // Add ellipsis and pages around current page
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+
+    if (startPage > 2) {
+        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+            <li class="page-item ${currentPage === i ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
+        `;
+    }
+
+    if (endPage < totalPages - 1) {
+        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+    }
+
+    // Last page
+    if (totalPages > 1) {
+        paginationHTML += `
+            <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+            </li>
+        `;
+    }
+
+    // Next button
+    paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}">Next &raquo;</a>
+        </li>
+    `;
+
+    paginationHTML += '</ul>';
+    paginationContainer.innerHTML = paginationHTML;
+
+    // Add click handlers
+    paginationContainer.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newPage = parseInt(e.target.dataset.page);
+            if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayProducts(filteredProducts);
+                // Scroll to top of table
+                productTable.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
     });
 }
 
