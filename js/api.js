@@ -1049,7 +1049,46 @@ async function updateDashboardData() {
     }
 }
 
-// Export the API modules
+// Fungsi untuk mendapatkan produk terlaris
+const getBestSellingProducts = async (limit = 10) => {
+    try {
+        // Gunakan endpoint baru untuk mendapatkan produk terlaris
+        const response = await fetch(`${BASE_URL}/produk/getbestselling?limit=${limit}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await handleResponse(response);
+        console.log('Best Selling Products Response:', result);
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Gagal mengambil data produk terlaris');
+        }
+        
+        // Periksa struktur data yang diterima
+        // Data bisa berada di result.data atau result.data.data
+        const productsData = result.data && Array.isArray(result.data) 
+            ? result.data 
+            : (result.data && result.data.data && Array.isArray(result.data.data)) 
+                ? result.data.data 
+                : [];
+                
+        console.log('Processed Products Data:', productsData);
+        
+        return { 
+            success: true, 
+            data: productsData
+        };
+    } catch (error) {
+        console.error('Error fetching best selling products:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Export the new function
 export const api = {
     auth,
     checkAuth,
@@ -1057,5 +1096,6 @@ export const api = {
     products,
     sales,
     dashboard,
+    getBestSellingProducts,
     formatRupiah
 };
