@@ -40,6 +40,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	group.Post("/importdata", handler.ImportProduk)
 	group.Post("/importJSON", handler.ImportProdukJSON)
 	group.Get("/getfrequentitemsets", handler.GetFrequentItemsets)
+	group.Get("/getbestselling", handler.GetBestSellingProducts)
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
@@ -534,5 +535,30 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 			"min_support": minSupport,
 			"list_produk": response,
 		},
+	})
+}
+
+func (d *HttpDeliveryProduk) GetBestSellingProducts(c *fiber.Ctx) error {
+	// Ambil parameter limit dari query, default 10 jika tidak ada
+	limitStr := c.Query("limit", "10")
+	limitProduk, err := strconv.Atoi(limitStr)
+	if err != nil || limitProduk <= 0 {
+		limitProduk = 10 // Default limit jika parameter tidak valid
+	}
+
+	// Panggil use case untuk mendapatkan produk terlaris
+	bestSellingProducts, err := d.HTTP.GetBestSellingProducts(c.Context(), limitProduk)
+	if err != nil {
+		log.Printf("Error getting best selling products: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"error":   "Gagal mendapatkan data produk terlaris",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success": true,
+		"message": "Data produk terlaris berhasil diambil",
+		"data":    bestSellingProducts,
 	})
 }

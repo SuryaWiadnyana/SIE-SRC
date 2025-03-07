@@ -7,7 +7,7 @@ import (
 )
 
 type ProdukUseCase struct {
-	ProdukRepository    domain.ProdukRepository
+	ProdukRepository domain.ProdukRepository
 	// AlgoritmaRepository domain.AlgoritmaRepository
 	PenjualanRepository domain.PenjualanRepository
 	contextTimeout      time.Duration
@@ -15,14 +15,12 @@ type ProdukUseCase struct {
 
 func NewUseCaseProduk(PR domain.ProdukRepository, PJR domain.PenjualanRepository, T time.Duration) domain.ProdukUseCase {
 	return &ProdukUseCase{
-		ProdukRepository:    PR,
+		ProdukRepository: PR,
 		// AlgoritmaRepository: AR,
 		PenjualanRepository: PJR,
 		contextTimeout:      T,
 	}
 }
-
-
 
 func (uc *ProdukUseCase) GetAllProduk(Ctx context.Context) ([]domain.Produk, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
@@ -85,4 +83,11 @@ func (uc *ProdukUseCase) GetFrequentItemsets(ctx context.Context, minSupport flo
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 	return uc.ProdukRepository.GetFrequentItemsets(ctx, minSupport)
+}
+
+// GetBestSellingProducts mendapatkan daftar produk terlaris berdasarkan jumlah terjual
+func (uc *ProdukUseCase) GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+	defer cancel()
+	return uc.ProdukRepository.GetBestSellingProducts(ctx, limitProduk)
 }

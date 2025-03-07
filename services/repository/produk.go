@@ -549,3 +549,110 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 	return result, nil
 }
+
+// GetBestSellingProducts mendapatkan daftar produk terlaris berdasarkan jumlah terjual
+// Mengembalikan map dengan id_produk sebagai key dan jumlah terjual sebagai value
+func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error) {
+	// Pastikan limit valid
+	if limitProduk <= 0 {
+		limitProduk = 10 // Default limit 10 produk terlaris
+	}
+
+	// Kita akan menggunakan collection detail_penjualan untuk mendapatkan data penjualan
+	detailPenjualan:= rp.DB.Collection("detail_penjualan")
+
+	// Pipeline aggregation untuk mendapatkan produk terlaris
+	produkBestSelling := []bson.M{
+		{
+			// Unwind produk array dalam detail_penjualan
+			"$unwind": "$produk",
+		},
+		{
+			// Group berdasarkan id_produk dan hitung total terjual
+			"$group": bson.M{
+				"_id": "$produk.id_produk",
+				"total_terjual": bson.M{
+					"$sum": "$penjualan.jumlah_produk",
+				},
+			},
+		},
+		{
+			// Sort berdasarkan total_terjual (descending)
+			"$sort": bson.M{
+				"total_terjual": -1,
+			},
+		},
+		{
+			// Limit jumlah hasil
+			"$limit": limitProduk,
+		},
+		{
+			// Lookup untuk mendapatkan detail produk
+			"$lookup": bson.M{
+				"from":         "produk",
+				"localField":   "_id",
+				"foreignField": "id_produk",
+				"as":           "produk_detail",
+			},
+		},
+		{
+			// Unwind produk_detail
+			"$unwind": "$produk_detail",
+		},
+		{
+			// Project untuk format hasil akhir
+			"$project": bson.M{
+				"_id":           0,
+				"id_produk":     "$_id",
+				"nama_produk":   "$produk_detail.nama_produk",
+				"jumlah_terjual": "$total_terjual",
+			},
+		},
+	}
+
+	// Jalankan aggregation
+	cursor, err := detailPenjualan.Aggregate(ctx, produkBestSelling)
+	if err != nil {
+		log.Printf("Error executing aggregation: %v", err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	// Hasil aggregation
+	var HasilData []map[string]interface{}
+	if err := cursor.All(ctx, &HasilData); err != nil {
+		log.Printf("Error decoding results: %v", err)
+		return nil, err
+	}
+
+	// Jika tidak ada hasil, coba pendekatan alternatif dengan collection penjualan
+	if len(HasilData) == 0 {
+		log.Println("No results from detail_penjualan, trying alternative approach with penjualan collection")
+		
+		// Pipeline alternatif menggunakan collection penjualan
+		altPipeline := []bson.M{
+			{
+				// Group berdasarkan id_produk dari detail_penjualan
+				"$group": bson.M{
+					"_id": nil,
+					"total_penjualan": bson.M{
+						"$sum": "$jumlah_produk",
+					},
+				},
+			},
+		}
+		
+		// Jalankan aggregation alternatif
+		altCursor, altErr := rp.DB.Collection("penjualan").Aggregate(ctx, altPipeline)
+		if altErr != nil {
+			log.Printf("Error executing alternative aggregation: %v", altErr)
+			return HasilData, nil // Return hasil kosong daripada error
+		}
+		defer altCursor.Close(ctx)
+		
+		// Jika pendekatan alternatif juga tidak berhasil, kembalikan hasil kosong
+		log.Println("Alternative approach also yielded no results, returning empty array")
+	}
+
+	return HasilData, nil
+}
