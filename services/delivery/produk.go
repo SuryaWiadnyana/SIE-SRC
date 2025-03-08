@@ -437,58 +437,42 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 
 func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 	var req ImportRequest
-	if err := c.BodyParser(&req); err != nil {
+	err := c.BodyParser(&req)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Format request tidak valid",
+			"error": "Invalid request body",
 		})
 	}
 
-	if len(req.Produk) == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Tidak ada data produk untuk diimpor",
-		})
-	}
-
+	// Validasi data
 	for i, produk := range req.Produk {
 		if produk.NamaProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d: nama produk tidak boleh kosong", i+1),
-			})
-		}
-		if produk.KodeProduk == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d: kode produk tidak boleh kosong", i+1),
-			})
-		}
-		if produk.HargaProduk <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d: harga produk harus lebih dari 0", i+1),
+				"error": fmt.Sprintf("Produk #%d tidak memiliki nama", i+1),
 			})
 		}
 		if produk.Stok < 0 {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d: stok tidak boleh negatif", i+1),
+				"error": fmt.Sprintf("Produk #%d memiliki stok negatif", i+1),
+			})
+		}
+		if produk.HargaProduk <= 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Produk #%d memiliki harga produk tidak valid", i+1),
 			})
 		}
 	}
 
-	err := d.HTTP.ImportData(c.Context(), req.Produk)
+	// Import data
+	err = d.HTTP.ImportData(c.Context(), req.Produk)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Gagal mengimpor data: %v", err),
-		})
-	}
-
-	importedProducts, err := d.HTTP.GetAllProduk(c.Context())
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Berhasil mengimpor tapi gagal mengambil data: %v", err),
+			"error": fmt.Sprintf("Gagal import data: %v", err),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": fmt.Sprintf("Berhasil mengimpor %d produk", len(req.Produk)),
-		"data":    importedProducts,
+		"message": fmt.Sprintf("Berhasil import %d produk", len(req.Produk)),
 	})
 }
 

@@ -49,7 +49,6 @@ type ProdukUseCase interface {
 	DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	ImportData(ctx context.Context, produkList []Produk) error
-	ImportProduk(ctx context.Context, produk []Produk) error
 	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 	GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error)
 	GetProdukWithLowestStock(ctx context.Context) ([]Produk, error)
