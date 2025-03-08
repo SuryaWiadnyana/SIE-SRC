@@ -41,6 +41,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase) {
 	group.Post("/importJSON", handler.ImportProdukJSON)
 	group.Get("/getfrequentitemsets", handler.GetFrequentItemsets)
 	group.Get("/getbestselling", handler.GetBestSellingProducts)
+	group.Get("/getloweststock", handler.GetProdukWithLowestStock)
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
@@ -560,5 +561,19 @@ func (d *HttpDeliveryProduk) GetBestSellingProducts(c *fiber.Ctx) error {
 		"success": true,
 		"message": "Data produk terlaris berhasil diambil",
 		"data":    bestSellingProducts,
+	})
+}
+
+func (d *HttpDeliveryProduk) GetProdukWithLowestStock(c *fiber.Ctx) error {
+	produk, err := d.HTTP.GetProdukWithLowestStock(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal mendapatkan produk dengan stok terendah",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Data produk dengan stok terendah berhasil diambil",
+		"data":    produk,
 	})
 }

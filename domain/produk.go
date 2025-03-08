@@ -36,6 +36,7 @@ type ProdukRepository interface {
 	GenerateNextID(ctx context.Context) (string, error)
 	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 	GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error)
+	GetProdukWithLowestStock(ctx context.Context, limit int) ([]Produk, error)
 }
 
 type ProdukUseCase interface {
@@ -43,11 +44,13 @@ type ProdukUseCase interface {
 	GetAllProduk(ctx context.Context) ([]Produk, error)
 	GetProdukById(ctx context.Context, id string) (*Produk, error)
 	GetProdukByName(ctx context.Context, nama string) (*Produk, error)
-	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 	UpdateProduk(ctx context.Context, bd *Produk) error
 	DeleteProduk(ctx context.Context, id string) error
 	DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	ImportData(ctx context.Context, produkList []Produk) error
+	ImportProduk(ctx context.Context, produk []Produk) error
+	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 	GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error)
+	GetProdukWithLowestStock(ctx context.Context) ([]Produk, error)
 }

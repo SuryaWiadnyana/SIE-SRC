@@ -137,6 +137,41 @@ func (rp *mongoRepoProduk) GetProdukByName(ctx context.Context, nama string) (*d
 	return &product, nil
 }
 
+// Mendapatkan produk dengan stok paling sedikit
+func (rp *mongoRepoProduk) GetProdukWithLowestStock(ctx context.Context, StokProduk int) ([]domain.Produk, error) {
+	DataProduk := rp.DB.Collection(_Produk)
+
+	// Jika StokProduk tidak ditentukan atau 0, gunakan default 10
+	if StokProduk <= 0 {
+		StokProduk = 10
+	}
+
+	// Buat options untuk sorting berdasarkan stok_barang (ascending) dan StokProduk
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{Key: "stok_barang", Value: 1}}) // 1 untuk ascending (dari kecil ke besar)
+	findOptions.SetLimit(int64(StokProduk))
+
+	// Query untuk mendapatkan produk yang tidak dihapus
+	cursor, err := DataProduk.Find(ctx, bson.M{"is_deleted": nil}, findOptions)
+	if err != nil {
+		return nil, fmt.Errorf("gagal untuk mendapatkan produk dengan stok terendah: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	// Decode hasil query ke slice domain.Produk
+	var products []domain.Produk
+	if err := cursor.All(ctx, &products); err != nil {
+		return nil, fmt.Errorf("gagal untuk decode produk: %v", err)
+	}
+
+	// Jika tidak ada produk yang ditemukan
+	if len(products) == 0 {
+		return []domain.Produk{}, nil
+	}
+
+	return products, nil
+}
+
 // Memperbarui Data Produk
 func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) error {
 	DataProduk := rp.DB.Collection(_Produk)

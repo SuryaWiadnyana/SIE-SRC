@@ -68,6 +68,14 @@ func (uc *ProdukUseCase) ImportData(ctx context.Context, produkList []domain.Pro
 	return uc.ProdukRepository.ImportData(ctx, produkList)
 }
 
+// ImportProduk mengimpor data produk
+func (uc *ProdukUseCase) ImportProduk(ctx context.Context, produk []domain.Produk) error {
+	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+	defer cancel()
+	
+	return uc.ProdukRepository.ImportData(ctx, produk)
+}
+
 // DecreaseProdukStock mengurangi stok produk
 func (uc *ProdukUseCase) DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error {
 	return uc.ProdukRepository.DecreaseProdukStock(ctx, id, kuantitas)
@@ -90,4 +98,13 @@ func (uc *ProdukUseCase) GetBestSellingProducts(ctx context.Context, limitProduk
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 	return uc.ProdukRepository.GetBestSellingProducts(ctx, limitProduk)
+}
+
+// GetProdukWithLowestStock mendapatkan daftar produk dengan stok paling sedikit
+func (uc *ProdukUseCase) GetProdukWithLowestStock(ctx context.Context) ([]domain.Produk, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+	defer cancel()
+
+	// Default limit 5 produk dengan stok terendah
+	return uc.ProdukRepository.GetProdukWithLowestStock(ctx, 5)
 }
