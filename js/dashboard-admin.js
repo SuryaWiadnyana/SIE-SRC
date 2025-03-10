@@ -91,7 +91,7 @@ async function fetchDashboardData() {
 
   try {
     // Fetch products
-    const productsResponse = await api.products.getAll();
+    const productsResponse = await products.getAll();
     const productCountElement = document.getElementById("totalProducts");
 
     if (productsResponse.success && productsResponse.data) {
@@ -112,7 +112,7 @@ async function fetchDashboardData() {
     }
 
     // Fetch users
-    const usersResponse = await api.users.getAll();
+    const usersResponse = await users.getAll();
     const userCountElement = document.getElementById("activeUsers");
 
     if (usersResponse.success && usersResponse.data) {
@@ -133,8 +133,7 @@ async function fetchDashboardData() {
     }
 
     /// Fetch sales
-    const salesResponse = await api.sales.getAll();
-    console.log("Sales Response:", salesResponse); // Log respon
+    const salesResponse = await sales.getAll();
 
     const salesElement = document.getElementById("totalSales");
 
@@ -145,11 +144,9 @@ async function fetchDashboardData() {
         ? salesResponse.data.data
         : [];
 
-      console.log("Sales Data:", sales); // Log data penjualan
-
       // Calculate total sales
       const totalSales = sales.reduce((total, sale) => {
-        console.log("Current Sale:", sale); // Log setiap penjualan
+        // console.log("Current Sale:", sale); // Log setiap penjualan
         return total + (sale.total || 0); // Pastikan menggunakan field yang benar
       }, 0);
 
@@ -393,7 +390,7 @@ const products = {
       }
 
       const result = await response.json();
-      console.log("Raw API Response:", result);
+      // console.log("Raw API Response:", result);
 
       // Pastikan data memiliki struktur yang benar
       if (!result || !result.data) {
@@ -775,9 +772,6 @@ const dashboard = {
         ? salesData.data.data
         : [];
 
-      console.log("Processed Products List:", productsList);
-      console.log("Processed Sales List:", salesList);
-
       // Calculate total sales
       const totalSales = salesList.reduce(
         (total, sale) => total + (Number(sale.total) || 0),
@@ -896,9 +890,6 @@ const dashboard = {
         sales.getAll(),
       ]);
 
-      console.log("Top Products - Products Data:", productsData);
-      console.log("Top Products - Sales Data:", salesData);
-
       if (!productsData.success || !salesData.success) {
         throw new Error("Failed to fetch data");
       }
@@ -913,9 +904,6 @@ const dashboard = {
         : Array.isArray(salesData.data?.data)
         ? salesData.data.data
         : [];
-
-      console.log("Processed Products List:", productsList);
-      console.log("Processed Sales List:", salesList);
 
       // Create map of product sales
       const productSales = new Map();
@@ -1099,6 +1087,9 @@ async function updateDashboardData() {
   if (!checkAuth()) return;
 
   try {
+    // Gunakan fungsi displayTotalSalesAndStock yang sudah terbukti berhasil
+    const salesStats = await displayTotalSalesAndStock();
+    
     // Fetch dashboard summary
     const dashboardData = await dashboard.getDashboardData();
     if (dashboardData.success) {
@@ -1110,27 +1101,7 @@ async function updateDashboardData() {
         );
       }
 
-      // Update total products
-      const totalProductsElement = document.getElementById("totalProducts");
-      if (totalProductsElement) {
-        totalProductsElement.textContent =
-          dashboardData.data.totalProducts || 0;
-      }
-
-      // Update products sold
-      const totalProductsSalesElement =
-        document.getElementById("totalProductsSales");
-      if (totalProductsSalesElement) {
-        totalProductsSalesElement.textContent =
-          dashboardData.data.totalProductsSold || 0;
-      }
-
-      // Update remaining stock
-      const remainingStockElement = document.getElementById("stok_barang");
-      if (remainingStockElement) {
-        remainingStockElement.textContent =
-          dashboardData.data.remainingStock || 0;
-      }
+      // Total products dan total products sales sudah diupdate oleh displayTotalSalesAndStock
     }
 
     // Fetch and update monthly sales chart
@@ -1195,18 +1166,12 @@ const getBestSellingProducts = async (limit = 10) => {
 // Fungsi untuk memperbarui data produk terjual dan sisa stok
 async function updateProductStats() {
   try {
-    console.log("Memperbarui data produk terjual dan sisa stok...");
-
-    // Periksa autentikasi terlebih dahulu
-    if (!(await api.checkAuth())) {
-      console.log("Autentikasi gagal");
-      return;
-    }
-
+    console.log("Memperbarui statistik produk...");
+    
     // Ambil data produk dan penjualan
     const [productsData, salesData] = await Promise.all([
-      api.products.getAll(),
-      api.sales.getAll(),
+      products.getAll(),
+      sales.getAll(),
     ]);
 
     if (!productsData.success || !salesData.success) {
@@ -1227,123 +1192,81 @@ async function updateProductStats() {
       ? salesData.data.data
       : [];
 
-    // Hitung total stok barang
-    const totalStock = productsList.reduce((total, product) => {
-      const stok = Number(product.stok) || 0;
-      return total + stok;
-    }, 0);
-
-    console.log("Total Stok Barang:", totalStock);
-
     // Hitung total produk terjual
     let totalSold = 0;
     salesList.forEach((sale) => {
-      if (!sale.detail_penjualan) return;
-
-      const detailPenjualan = Array.isArray(sale.detail_penjualan)
-        ? sale.detail_penjualan
-        : [];
-      detailPenjualan.forEach((detail) => {
-        const jumlah = Number(detail.jumlah) || 0;
+      if (sale && sale.jumlah_produk) {
+        const jumlah = Number(sale.jumlah_produk || 0);
         totalSold += jumlah;
-      });
+      }
     });
 
     console.log("Total Produk Terjual:", totalSold);
 
     // Perbarui elemen di dashboard
-    const totalProductsSalesElement =
-      document.getElementById("totalProductsSales");
-    const remainingStockElement = document.getElementById("stok_barang");
-    const totalProductsElement = document.getElementById("jumlah_terjual");
-
-    if (totalProductsSalesElement) {
-      console.log("Memperbarui elemen totalProductsSales dengan nilai:", totalSold);
-      totalProductsSalesElement.textContent = totalSold;
-    } else {
-      console.log("Elemen totalProductsSales tidak ditemukan");
-    }
-
-    if (remainingStockElement) {
-      console.log("Memperbarui elemen stok_barang dengan nilai:", totalStock);
-      remainingStockElement.textContent = totalStock;
-    } else {
-      console.log("Elemen stok_barang tidak ditemukan");
-    }
+    const totalProductsElement = document.getElementById("totalProducts");
+    const totalProductsSalesElement = document.getElementById("totalProductsSales");
     
     if (totalProductsElement) {
-      console.log("Memperbarui elemen totalProducts dengan nilai:", productsList.length);
       totalProductsElement.textContent = productsList.length;
-    } else {
-      console.log("Elemen totalProducts tidak ditemukan");
     }
     
-    return { totalSold, totalStock, totalProducts: productsList.length };
+    if (totalProductsSalesElement) {
+      totalProductsSalesElement.textContent = totalSold;
+    }
+    
+    return { totalProducts: productsList.length, totalSold };
   } catch (error) {
-    console.error("Error updating product stats:", error);
-    return { totalSold: 0, totalStock: 0, totalProducts: 0 };
+    console.error("Error dalam updateProductStats:", error);
+    return { totalProducts: 0, totalSold: 0 };
   }
 };
 
 // Fungsi sederhana untuk menampilkan total produk terjual dan total sisa stok
 const displayTotalSalesAndStock = async () => {
   try {
-    console.log("Menjalankan displayTotalSalesAndStock (versi simpel)...");
     
-    // Ambil data produk
-    const productsData = await api.products.getAll();
+    // Ambil data produk untuk stok
+    const productsData = await products.getAll();
+    // Ambil data penjualan untuk menghitung produk terjual
+    const salesData = await sales.getAll();
 
     if (!productsData.success) {
       throw new Error("Gagal mengambil data produk");
     }
 
-    // Log data mentah untuk debugging
-    console.log("Raw Products Data:", productsData);
+    if (!salesData.success) {
+      throw new Error("Gagal mengambil data penjualan");
+    }
     
     // Inisialisasi total
     let totalStock = 0;
     let totalSold = 0;
     
-    // Cek apakah data ada dalam format yang diharapkan
+    // Hitung total stok dari data produk
     if (productsData.data && Array.isArray(productsData.data)) {
-      // Iterasi melalui setiap item dalam array
       for (const item of productsData.data) {
-        // Cek apakah item memiliki properti 'produk'
         if (item && item.produk) {
-          // Ambil nilai stok_barang dan jumlah_terjual dari objek produk
           const stok = parseInt(item.produk.stok_barang || 0);
-          const terjual = parseInt(item.produk.jumlah_terjual || 0);
-          
-          // Tambahkan ke total
           totalStock += stok;
-          totalSold += terjual;
-          
-          console.log(`Produk: ${item.produk.nama_produk}, Stok: ${stok}, Terjual: ${terjual}`);
         }
       }
     }
     
-    console.log("Total Stok:", totalStock);
-    console.log("Total Terjual:", totalSold);
+    // Hitung total produk terjual dari data penjualan
+    if (salesData.data && Array.isArray(salesData.data)) {
+      for (const sale of salesData.data) {
+        if (sale && sale.jumlah_produk) {
+          const terjual = parseInt(sale.jumlah_produk || 0);
+          totalSold += terjual;
+          console.log(`Penjualan ID: ${sale.id_penjualan}, Jumlah Terjual: ${terjual}`);
+        }
+      }
+    }
 
     // Perbarui elemen di dashboard
+    const totalProductsElement = document.getElementById("totalProducts");
     const totalProductsSalesElement = document.getElementById("totalProductsSales");
-    const remainingStockElement = document.getElementById("stok_barang");
-    const totalProductsElement = document.getElementById("jumlah_terjual");
-
-    if (totalProductsSalesElement) {
-      console.log("Memperbarui elemen totalProductsSales dengan nilai:", totalSold);
-      totalProductsSalesElement.textContent = totalSold;
-    } else {
-      console.log("Elemen totalProductsSales tidak ditemukan");
-    }
-
-    if (remainingStockElement) {
-      console.log("Memperbarui elemen stok_barang dengan nilai:", totalStock);
-      remainingStockElement.textContent = totalStock;
-    } else {
-      console.log("Elemen stok_barang tidak ditemukan");
-    }
     
     if (totalProductsElement) {
       console.log("Memperbarui elemen totalProducts dengan nilai:", productsData.data.length);
@@ -1355,20 +1278,19 @@ const displayTotalSalesAndStock = async () => {
     // Panggil fungsi untuk menampilkan produk dengan stok terendah
     displayLowestStockProduct();
     
-    return { totalSold, totalStock, totalProducts: productsData.data.length };
+    return { totalStock, totalSold, totalProducts: productsData.data.length };
   } catch (error) {
     console.error("Error dalam displayTotalSalesAndStock:", error);
-    return { totalSold: 0, totalStock: 0, totalProducts: 0 };
+    return { totalStock: 0, totalSold: 0, totalProducts: 0 };
   }
 };
 
 // Fungsi untuk menampilkan produk dengan stok paling sedikit
 const displayLowestStockProduct = async () => {
   try {
-    console.log("Menjalankan displayLowestStockProduct...");
     
     // Ambil data produk dengan stok terendah
-    const lowestStockProducts = await api.products.getLowestStock();
+    const lowestStockProducts = await products.getLowestStock();
     
     console.log("Produk dengan stok terendah:", lowestStockProducts);
     
@@ -1412,136 +1334,36 @@ const displayLowestStockProduct = async () => {
   }
 };
 
-// Fungsi untuk memperbarui tabel produk terlaris
-async function updateBestSellingProductsTable() {
-  try {
-    // Periksa autentikasi terlebih dahulu
-    if (!(await api.checkAuth())) {
-      return;
-    }
-
-    // Ambil data produk terlaris dengan limit 10
-    const response = await api.getBestSellingProducts(10);
-    console.log("Response from getBestSellingProducts:", response);
-
-    if (!response.success) {
-      throw new Error(response.error);
-    }
-
-    // Perbarui tabel produk terlaris
-    const tableBody = document.getElementById("produkTerlarisBody");
-    if (!tableBody) {
-      throw new Error("Tabel produk terlaris tidak ditemukan");
-    }
-
-    // Kosongkan tabel terlebih dahulu
-    tableBody.innerHTML = "";
-
-    // Debug: Periksa data yang diterima
-    console.log("Data untuk tabel Produk Terlaris:", response.data);
-    console.log(
-      "Tipe data:",
-      Array.isArray(response.data) ? "Array" : typeof response.data
-    );
-    console.log(
-      "Panjang data:",
-      Array.isArray(response.data) ? response.data.length : "bukan array"
-    );
-
-    // Tambahkan data ke tabel
-    if (
-      response.data &&
-      Array.isArray(response.data) &&
-      response.data.length > 0
-    ) {
-      console.log("Memperbarui tabel dengan data yang diterima");
-      response.data.forEach((product, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${
-                              product.nama_produk || "Nama Tidak Tersedia"
-                            }</td>
-                            <td>${product.jumlah_terjual || 0}</td>
-                        `;
-        tableBody.appendChild(row);
-      });
-    } else {
-      // Jika tidak ada data, tampilkan pesan
-      console.log("Tidak ada data untuk ditampilkan");
-      const row = document.createElement("tr");
-      row.innerHTML = `
-                        <td colspan="3" class="text-center">Tidak ada data produk terlaris</td>
-                    `;
-      tableBody.appendChild(row);
-    }
-
-    console.log("Tabel produk terlaris berhasil diperbarui");
-  } catch (error) {
-    console.error("Error updating best selling products table:", error);
-    // Tampilkan pesan error di tabel
-    const tableBody = document.getElementById("produkTerlarisBody");
-    if (tableBody) {
-      tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="3" class="text-center text-danger">
-                                Gagal memuat data: ${error.message}
-                            </td>
-                        </tr>
-                    `;
-    }
-  }
-}
-
 // Jalankan fungsi saat halaman dimuat
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     console.log("Halaman dimuat, memperbarui dashboard...");
     // Periksa autentikasi terlebih dahulu
-    if (!(await api.checkAuth())) {
+    if (!(await checkAuth())) {
       console.log("Autentikasi gagal");
       return;
     }
 
     console.log("Autentikasi berhasil, memperbarui data dashboard");
     // Perbarui data dashboard
-    await api.dashboard.getDashboardData();
+    await dashboard.getDashboardData();
 
-    console.log("Memperbarui statistik produk");
     // Perbarui statistik produk
     await updateProductStats();
 
-    console.log("Memperbarui tabel produk terlaris");
-    // Perbarui tabel produk terlaris
-    await updateBestSellingProductsTable();
-
     console.log("Memanggil displayTotalSalesAndStock");
-    // Perbarui total produk terjual dan sisa stok
-    await api.displayTotalSalesAndStock();
+
+    await displayTotalSalesAndStock();
 
     console.log("Setup interval untuk pembaruan data");
     // Perbarui data setiap 5 menit
     setInterval(async () => {
       console.log("Memperbarui data dashboard (interval)");
-      await api.dashboard.getDashboardData();
+      await dashboard.getDashboardData();
       await updateProductStats();
-      await updateBestSellingProductsTable();
-      await api.displayTotalSalesAndStock();
+      await displayTotalSalesAndStock();
     }, 5 * 60 * 1000);
   } catch (error) {
     console.error("Error initializing dashboard:", error);
   }
 });
-
-// Export the new function
-export const api = {
-  auth,
-  checkAuth,
-  users,
-  products,
-  sales,
-  dashboard,
-  getBestSellingProducts,
-  formatRupiah,
-  displayTotalSalesAndStock,
-};

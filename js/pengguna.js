@@ -1,5 +1,67 @@
-// Import API service
-import { api } from './api.js';
+// API Base URL
+const BASE_URL = "http://localhost:8080"; // Adjust this to match your backend URL
+
+// Handle API Response
+async function handleResponse(response) {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(
+      errorData?.message ||
+        errorData?.error ||
+        `HTTP error! status: ${response.status}`
+    );
+  }
+  const data = await response.json();
+  return { success: true, data };
+}
+
+// Authentication API
+async function auth() {
+  console.log("Starting penjualan page initialization...");
+
+  try {
+    // Show loading indicator
+    $(".loading").show();
+
+    // Check authentication
+    const token = localStorage.getItem("token");
+    let userData = null;
+    try {
+      userData = JSON.parse(localStorage.getItem("userData"));
+    } catch (error) {
+      console.error("Error parsing userData:", error);
+      throw new Error("Invalid user data");
+    }
+
+    if (!token || !userData) {
+      throw new Error("Missing authentication data");
+    }
+
+    // Set username if authentication is valid
+    const displayName =
+      userData.role === "owner"
+        ? "OwnerSRC"
+        : userData.username || userData.name || "User";
+    $("#username").text(displayName);
+    $("#namaPenjual").val(displayName);
+
+    // Load products first
+    await loadProdukOptions();
+
+    // Initialize DataTable
+    await initializeDataTable();
+    await setupEventHandlers();
+
+    console.log("Page initialization completed successfully");
+  } catch (error) {
+    console.error("Initialization Error:", error);
+    alert("Terjadi kesalahan saat memuat halaman: " + error.message);
+    window.location.href = "../login.html";
+  } finally {
+    // Hide loading indicator
+    $(".loading").hide();
+  }
+}
 
 // DOM Elements
 const userTable = document.querySelector('#userTable tbody');
@@ -9,10 +71,193 @@ const searchInput = document.querySelector('#searchUser');
 const deleteUserModal = document.querySelector('#deleteUserModal');
 let userToDelete = null;
 
+// Users API
+const users = {
+    login: async (credentials) => {
+      try {
+        const response = await fetch(`${BASE_URL}/user/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+        });
+        const data = await handleResponse(response);
+        if (data.success && data.data.token) {
+          localStorage.setItem("token", data.data.token);
+          localStorage.setItem("role", data.data.role);
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({
+              username: credentials.username,
+              role: data.data.role,
+              name: data.data.name || credentials.username,
+            })
+          );
+  
+          // Check if role is admin or owner
+          if (["admin", "owner"].includes(data.data.role)) {
+            return { success: true, data: data.data };
+          }
+          return { success: false, error: "Unauthorized role" };
+        }
+        return { success: false, error: "Invalid response from server" };
+      } catch (error) {
+        console.error("Login error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    logout: () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("userData");
+      window.location.href = "../login.html";
+    },
+  
+    getAll: async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/user/getall`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await handleResponse(response);
+        return { success: true, data: data.data };
+      } catch (error) {
+        console.error("Get users error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    getByUsername: async (username) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/user/by-username/${username}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await handleResponse(response);
+        return { success: true, data: data.data };
+      } catch (error) {
+        console.error("Get user error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    getAllUsers: async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/user/getall`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return handleResponse(response);
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+  
+    create: async (userData) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/user/admin/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(userData),
+        });
+        return handleResponse(response);
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+  
+    updateUser: async (username, userData) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        console.log("Sending request with token:", token); // Debug log
+  
+        const response = await fetch(
+          `${BASE_URL}/user/admin/update/${username}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(userData),
+          }
+        );
+  
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || `HTTP error! status: ${response.status}`
+          );
+        }
+  
+        const data = await response.json();
+        return { success: true, data: data.data };
+      } catch (error) {
+        console.error("Update user error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    delete: async (id_user) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(
+          `${BASE_URL}/user/admin/delete-user/${id_user}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        return handleResponse(response);
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+  };
+
 // Load all users
 async function loadUsers() {
     try {
-        const result = await api.users.getAll();
+        const result = await users.getAll();
         if (result.success) {
             displayUsers(result.data.data || []);
         } else {
@@ -82,7 +327,7 @@ if (addUserForm) {
         const formData = new FormData(addUserForm);
         
         try {
-            const result = await api.users.create({
+            const result = await users.create({
                 username: formData.get('username'),
                 password: formData.get('password'),
                 role: formData.get('role')
@@ -137,7 +382,7 @@ if (editUserForm) {
                 userData.password = password;
             }
 
-            const result = await api.users.updateUser(username, userData);
+            const result = await users.updateUser(username, userData);
 
             if (result.success) {
                 showAlert('Pengguna berhasil diperbarui', 'success');
@@ -182,7 +427,7 @@ if (deleteUserModal) {
         }
 
         try {
-            const result = await api.users.delete(userToDelete);
+            const result = await users.delete(userToDelete);
             if (result.success) {
                 showAlert('Pengguna berhasil dihapus', 'success');
                 $('#deleteUserModal').modal('hide');

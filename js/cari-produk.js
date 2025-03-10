@@ -1,4 +1,80 @@
-import { api } from './api.js';
+// import { api } from './api.js';
+
+const BASE_URL = "http://localhost:8080";
+
+// Handle API Response
+async function handleResponse(response) {
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(
+        errorData?.message ||
+          errorData?.error ||
+          `HTTP error! status: ${response.status}`
+      );
+    }
+    const data = await response.json();
+    return { success: true, data };
+  }
+  
+  // Authentication API
+  async function auth() {
+    console.log("Starting penjualan page initialization...");
+  
+    try {
+      // Show loading indicator
+      $(".loading").show();
+  
+      // Check authentication
+      const token = localStorage.getItem("token");
+      let userData = null;
+      try {
+        userData = JSON.parse(localStorage.getItem("userData"));
+      } catch (error) {
+        console.error("Error parsing userData:", error);
+        throw new Error("Invalid user data");
+      }
+  
+      if (!token || !userData) {
+        throw new Error("Missing authentication data");
+      }
+  
+      // Set username if authentication is valid
+      const displayName =
+        userData.role === "owner"
+          ? "OwnerSRC"
+          : userData.username || userData.name || "User";
+      $("#username").text(displayName);
+      $("#namaPenjual").val(displayName);
+  
+      // Load products first
+      await loadProdukOptions();
+  
+      // Initialize DataTable
+      await initializeDataTable();
+      await setupEventHandlers();
+  
+      console.log("Page initialization completed successfully");
+    } catch (error) {
+      console.error("Initialization Error:", error);
+      alert("Terjadi kesalahan saat memuat halaman: " + error.message);
+      window.location.href = "../login.html";
+    } finally {
+      // Hide loading indicator
+      $(".loading").hide();
+    }
+  }
+  
+  // Check authentication
+  function checkAuth() {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+  
+    if (!token || !role || (role !== "admin" && role !== "owner")) {
+      window.location.href = "../login.html";
+      return false;
+    }
+    return true;
+  }
 
 // Get DOM elements
 const productTable = document.getElementById('productTable');
@@ -19,6 +95,62 @@ let activeFilters = {
 let currentPage = 1;
 const itemsPerPage = 15;
 let filteredProducts = [];
+  
+// Products API
+const products = {
+  async getAll() {
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Tidak terautentikasi");
+      }
+
+      const response = await fetch(`${BASE_URL}/produk/getallproduk`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return await handleResponse(response);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return { success: false, error: error.message };
+    }
+  }
+};
+
+async function fetchProductsData() {
+  if (!checkAuth()) return;
+
+  try {
+    // Fetch products
+    const productsResponse = await products.getAll();
+    const productCountElement = document.getElementById("totalProducts");
+
+    if (productsResponse.success && productsResponse.data) {
+      const productsData = Array.isArray(productsResponse.data)
+        ? productsResponse.data
+        : Array.isArray(productsResponse.data.data)
+        ? productsResponse.data.data
+        : [];
+
+      if (productCountElement) {
+        productCountElement.textContent = productsData.length.toString();
+      }
+    } else {
+      if (productCountElement) {
+        productCountElement.textContent = "0";
+      }
+      console.error("Failed to fetch products:", productsResponse.error);
+    }
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    showAlert('Gagal memuat data produk: ' + (error.message || 'Terjadi kesalahan'), 'danger');
+  }
+}
 
 // Predefined categories and sub-categories
 const PRODUCT_CATEGORIES = {
@@ -198,43 +330,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load all products
 async function loadProducts() {
-    try {
-        console.log('Fetching products...');
-        const result = await api.products.getAll();
-        console.log('API response:', result);
-        
-        if (result.success && result.data) {  
-            console.log('Raw products data:', result.data);      
-            // Ambil data produk dari nested object
-            allProducts = result.data;
-            console.log('Processed products:', allProducts);
-            
-            // Mengumpulkan kategori dan sub-kategori unik
-            uniqueCategories.clear();
-            uniqueSubCategories.clear();
-            allProducts.forEach(item => {
-                const product = item.produk;
-                if (product) {
-                    if (product.kategori) uniqueCategories.add(product.kategori);
-                    if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
-                }
-            });
-            
-            // Update filter buttons
-            updateFilterButtons();
-            
-            // Tampilkan semua produk
-            displayProducts(allProducts);
-        } else {
-            console.log('No products data found or error:', result.error);
-            showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
-            displayProducts([]);
-        }
-    } catch (error) {
-        console.error('Error loading products:', error);
-        showAlert('Terjadi kesalahan saat memuat produk', 'danger');
-        displayProducts([]);
+  try {
+    console.log('Fetching products...');
+    const result = await products.getAll();
+    console.log('API response:', result);
+    
+    if (result.success && result.data) {  
+      console.log('Raw products data:', result.data);      
+      
+      // Pastikan allProducts adalah array
+      if (Array.isArray(result.data)) {
+        allProducts = result.data;
+      } else if (result.data.data && Array.isArray(result.data.data)) {
+        allProducts = result.data.data;
+      } else if (typeof result.data === 'object') {
+        // Jika data adalah objek, konversi ke array
+        console.log('Converting object to array:', result.data);
+        allProducts = Object.values(result.data);
+      } else {
+        // Fallback jika semua kondisi di atas tidak terpenuhi
+        console.error('Unexpected data format:', result.data);
+        allProducts = [];
+      }
+      
+      console.log('Processed products:', allProducts);
+      
+      // Mengumpulkan kategori dan sub-kategori unik
+      uniqueCategories.clear();
+      uniqueSubCategories.clear();
+      
+      // Pastikan allProducts adalah array sebelum menggunakan forEach
+      if (Array.isArray(allProducts)) {
+        allProducts.forEach(item => {
+          const product = item.produk;
+          if (product) {
+            if (product.kategori) uniqueCategories.add(product.kategori);
+            if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
+          }
+        });
+      } else {
+        console.error('allProducts is not an array after processing:', allProducts);
+      }
+      
+      // Update filter buttons
+      updateFilterButtons();
+      
+      // Tampilkan semua produk
+      displayProducts(allProducts);
+    } else {
+      console.log('No products data found or error:', result.error);
+      showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
+      displayProducts([]);
     }
+  } catch (error) {
+    console.error('Error loading products:', error);
+    showAlert('Terjadi kesalahan saat memuat produk', 'danger');
+    displayProducts([]);
+  }
 }
 
 // Update filter buttons
@@ -290,20 +442,27 @@ function filterProducts(type, value) {
 
 // Apply all active filters
 function applyFilters() {
-    let filteredProducts = allProducts;
+    // Pastikan allProducts adalah array
+    if (!Array.isArray(allProducts)) {
+        console.error('allProducts is not an array in applyFilters:', allProducts);
+        displayProducts([]);
+        return;
+    }
+    
+    let filteredProducts = [...allProducts];
     
     // Apply category filter
     if (activeFilters.category !== 'all') {
-        filteredProducts = filteredProducts.filter(item => 
-            item.produk.kategori === activeFilters.category
-        );
+        filteredProducts = filteredProducts.filter(item => {
+            return item && item.produk && item.produk.kategori === activeFilters.category;
+        });
     }
     
     // Apply sub-category filter
     if (activeFilters.subcategory !== 'all') {
-        filteredProducts = filteredProducts.filter(item => 
-            item.produk.sub_kategori === activeFilters.subcategory
-        );
+        filteredProducts = filteredProducts.filter(item => {
+            return item && item.produk && item.produk.sub_kategori === activeFilters.subcategory;
+        });
     }
     
     displayProducts(filteredProducts);
@@ -333,9 +492,9 @@ function displayProducts(products = []) {
     }
     
     tbody.innerHTML = '';
-    filteredProducts = products;
+    filteredProducts = Array.isArray(products) ? products : [];
     
-    if (!Array.isArray(products) || products.length === 0) {
+    if (filteredProducts.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada produk ditemukan</td></tr>';
         updatePagination(0);
         return;
@@ -344,15 +503,27 @@ function displayProducts(products = []) {
     // Calculate pagination
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedProducts = products.slice(startIndex, endIndex);
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
     paginatedProducts.forEach(item => {
-        if (!item || !item.produk) {
-            console.warn('Invalid product item:', item);
+        if (!item) {
+            console.warn('Invalid product item (null or undefined)');
             return;
         }
-
-        const product = item.produk;
+        
+        // Handle different product data structures
+        let product;
+        if (item.produk) {
+            // Format: { produk: { ... } }
+            product = item.produk;
+        } else if (item.id_produk || item.nama_produk) {
+            // Format: { id_produk: ..., nama_produk: ..., ... }
+            product = item;
+        } else {
+            console.warn('Unknown product format:', item);
+            return;
+        }
+        
         const row = document.createElement('tr');
         
         row.innerHTML = `
@@ -374,14 +545,14 @@ function displayProducts(products = []) {
     }
 
     // Add page info after the table
-    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const pageInfo = document.createElement('div');
     pageInfo.className = 'page-info text-center mb-2';
-    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${products.length} produk)`;
+    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${filteredProducts.length} produk)`;
     productTable.parentNode.insertBefore(pageInfo, paginationContainer);
 
     // Update pagination
-    updatePagination(products.length);
+    updatePagination(filteredProducts.length);
 }
 
 // Add pagination controls
@@ -521,11 +692,11 @@ function formatCurrency(amount) {
 }
 
 // Check authentication and redirect if not logged in
-function checkAuth() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '../login.html';
-        return false;
-    }
-    return true;
-}
+// function checkAuth() {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//         window.location.href = '../login.html';
+//         return false;
+//     }
+//     return true;
+// }

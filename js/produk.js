@@ -1,4 +1,67 @@
-import { api } from './api.js';
+// API Base URL
+const BASE_URL = "http://localhost:8080"; // Adjust this to match your backend URL
+
+// Handle API Response
+async function handleResponse(response) {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(
+      errorData?.message ||
+        errorData?.error ||
+        `HTTP error! status: ${response.status}`
+    );
+  }
+  const data = await response.json();
+  return { success: true, data };
+}
+
+// Authentication API
+async function auth() {
+  console.log("Starting penjualan page initialization...");
+
+  try {
+    // Show loading indicator
+    $(".loading").show();
+
+    // Check authentication
+    const token = localStorage.getItem("token");
+    let userData = null;
+    try {
+      userData = JSON.parse(localStorage.getItem("userData"));
+    } catch (error) {
+      console.error("Error parsing userData:", error);
+      throw new Error("Invalid user data");
+    }
+
+    if (!token || !userData) {
+      throw new Error("Missing authentication data");
+    }
+
+    // Set username if authentication is valid
+    const displayName =
+      userData.role === "owner"
+        ? "OwnerSRC"
+        : userData.username || userData.name || "User";
+    $("#username").text(displayName);
+    $("#namaPenjual").val(displayName);
+
+    // Load products first
+    await loadProdukOptions();
+
+    // Initialize DataTable
+    await initializeDataTable();
+    await setupEventHandlers();
+
+    console.log("Page initialization completed successfully");
+  } catch (error) {
+    console.error("Initialization Error:", error);
+    alert("Terjadi kesalahan saat memuat halaman: " + error.message);
+    window.location.href = "../login.html";
+  } finally {
+    // Hide loading indicator
+    $(".loading").hide();
+  }
+}
 
 // Get DOM elements
 const productTable = document.getElementById('productTable');
@@ -14,6 +77,303 @@ let activeFilters = {
     category: 'all',
     subcategory: 'all'
 };
+
+// Products API
+const products = {
+    getAll: async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/produk/getallproduk`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        // Tangani error non-200 response
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Server response:", {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText,
+          });
+          throw new Error(
+            `Server error: ${response.status} ${response.statusText}`
+          );
+        }
+  
+        const result = await response.json();
+        console.log("Raw API Response:", result);
+  
+        // Pastikan data memiliki struktur yang benar
+        if (!result || !result.data) {
+          console.warn("Invalid response format:", result);
+          return { success: false, error: "Invalid response format", data: [] };
+        }
+  
+        // Kembalikan data mentah dari API
+        return {
+          success: true,
+          data: result.data,
+        };
+      } catch (error) {
+        console.error("Get all products error:", error);
+        return {
+          success: false,
+          error: error.message,
+          data: [],
+        };
+      }
+    },
+  
+    getById: async (id) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/produk/by-id/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "../login.html";
+            return;
+          }
+          throw new Error("Gagal mengambil data produk");
+        }
+  
+        const result = await response.json();
+        return { success: true, data: result.data };
+      } catch (error) {
+        console.error("Get product error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    getByName: async (name) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(
+          `${BASE_URL}/produk/by-name/${encodeURIComponent(name)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await handleResponse(response);
+        return { success: true, data };
+      } catch (error) {
+        console.error("Get product by name error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    create: async (productData) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/produk/createproduk`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(productData),
+        });
+        const data = await handleResponse(response);
+        return { success: true, data };
+      } catch (error) {
+        let errorMessage = "Gagal membuat produk: ";
+        if (error.message.includes("duplicate key error")) {
+          const match = error.message.match(/\{ id_produk: "(.+?)" \}/);
+          const id = match ? match[1] : "unknown";
+          errorMessage += `ID ${id} sudah digunakan`;
+        } else {
+          errorMessage += error.message;
+        }
+        console.error(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+    },
+  
+    update: async (id, productData) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        // Remove id_produk from body since it's in the URL
+        const { id_produk, ...dataToSend } = productData;
+  
+        console.log("Sending update request:", {
+          url: `${BASE_URL}/produk/update/${id}`,
+          data: dataToSend,
+        });
+  
+        const response = await fetch(`${BASE_URL}/produk/update/${id}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSend),
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Gagal untuk memperbarui data");
+        }
+  
+        const data = await response.json();
+        return { success: true, data };
+      } catch (error) {
+        console.error("Update product error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    delete: async (id) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/produk/delete/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        await handleResponse(response);
+        return { success: true };
+      } catch (error) {
+        console.error("Delete product error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    search: async (query) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(
+          `${BASE_URL}/produk/by-name/${encodeURIComponent(query)}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await handleResponse(response);
+        return { success: true, data };
+      } catch (error) {
+        console.error("Search products error:", error);
+        return { success: false, error: error.message };
+      }
+    },
+  
+    importData: async (formData) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+  
+        const response = await fetch(`${BASE_URL}/produk/importdata`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+  
+        const data = await response.json();
+  
+        if (!response.ok) {
+          const errorMsg = data.error || data.message || "Gagal mengimpor data";
+          throw new Error(errorMsg);
+        }
+  
+        if (data.skipped && data.skipped.length > 0) {
+          return {
+            success: true,
+            message: `Berhasil mengimpor ${data.count || 0} produk. ${
+              data.skipped.length
+            } produk dilewati.`,
+            count: data.count || 0,
+            skipped: data.skipped,
+            warnings: data.warnings || [],
+          };
+        }
+  
+        return {
+          success: true,
+          message: data.message || `Berhasil mengimpor ${data.count || 0} produk`,
+          count: data.count || 0,
+        };
+      } catch (error) {
+        console.error("Import data error:", error);
+        return {
+          success: false,
+          message: error.message,
+          error: error.message,
+        };
+      }
+    },
+  
+    getLowestStock: async function () {
+      try {
+        const response = await fetch(`${BASE_URL}/produk/getloweststock`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to fetch lowest stock products");
+        }
+  
+        const data = await response.json();
+        return data.data;
+      } catch (error) {
+        console.error("Error fetching lowest stock products:", error);
+        return [];
+      }
+    },
+  };
 
 // Predefined categories and sub-categories
 const PRODUCT_CATEGORIES = {
@@ -201,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadProducts() {
     try {
         console.log('Fetching products...');
-        const result = await api.products.getAll();
+        const result = await products.getAll();
         console.log('API response:', result);
         
         if (result.success && result.data) {  
@@ -516,7 +876,7 @@ async function handleAddProduct(e) {
             stok_barang: parseInt(formData.get('stok_barang'))
         };
         
-        const result = await api.products.create(productData);
+        const result = await products.create(productData);
         if (result.success) {
             showAlert('Produk berhasil ditambahkan', 'success');
             await loadProducts();
@@ -571,7 +931,7 @@ async function handleUpdateProduct(e) {
             return;
         }
         
-        const result = await api.products.update(productData.id_produk, productData);
+        const result = await products.update(productData.id_produk, productData);
         if (result.success) {
             showAlert('Produk berhasil diperbarui', 'success');
             await loadProducts();
@@ -730,7 +1090,7 @@ async function handleDeleteClick(event) {
     
     if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
         try {
-            const result = await api.products.delete(id);
+            const result = await products.delete(id);
             console.log('Delete result:', result);
             
             if (result.success) {
@@ -783,7 +1143,7 @@ async function handleImportData(e) {
     importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengimpor...';
 
     try {
-        const result = await api.products.importData(formData);
+        const result = await products.importData(formData);
         if (result.success) {
             let message = `Berhasil mengimpor ${result.count || 0} produk`;
             if (result.skipped && result.skipped.length > 0) {
