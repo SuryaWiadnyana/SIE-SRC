@@ -18,9 +18,9 @@ type Produk struct {
 }
 
 type FrequentItemset struct {
-	Produk   []string `json:"produk"`
-	Support float64  `json:"support"`
-	ProdukList  []string   `json:"list_produk"`
+	Produk     []string `json:"produk"`
+	Support    float64  `json:"support"`
+	ProdukList []string `json:"list_produk"`
 }
 
 type ProdukRepository interface {
