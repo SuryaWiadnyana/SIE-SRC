@@ -99,7 +99,6 @@ let filteredProducts = [];
 // Products API
 const products = {
   async getAll() {
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -114,7 +113,32 @@ const products = {
         },
       });
 
-      return await handleResponse(response);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        });
+        throw new Error(
+          `Server error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("Raw API Response:", result);
+
+      // Pastikan data memiliki struktur yang benar
+      if (!result || !result.data) {
+        console.warn("Invalid response format:", result);
+        return { success: false, error: "Invalid response format", data: [] };
+      }
+
+      // Kembalikan data mentah dari API
+      return {
+        success: true,
+        data: result.data,
+      };
     } catch (error) {
       console.error("Error fetching products:", error);
       return { success: false, error: error.message };
@@ -330,63 +354,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load all products
 async function loadProducts() {
-  try {
-    console.log('Fetching products...');
-    const result = await products.getAll();
-    console.log('API response:', result);
-    
-    if (result.success && result.data) {  
-      console.log('Raw products data:', result.data);      
-      
-      // Pastikan allProducts adalah array
-      if (Array.isArray(result.data)) {
-        allProducts = result.data;
-      } else if (result.data.data && Array.isArray(result.data.data)) {
-        allProducts = result.data.data;
-      } else if (typeof result.data === 'object') {
-        // Jika data adalah objek, konversi ke array
-        console.log('Converting object to array:', result.data);
-        allProducts = Object.values(result.data);
-      } else {
-        // Fallback jika semua kondisi di atas tidak terpenuhi
-        console.error('Unexpected data format:', result.data);
-        allProducts = [];
-      }
-      
-      console.log('Processed products:', allProducts);
-      
-      // Mengumpulkan kategori dan sub-kategori unik
-      uniqueCategories.clear();
-      uniqueSubCategories.clear();
-      
-      // Pastikan allProducts adalah array sebelum menggunakan forEach
-      if (Array.isArray(allProducts)) {
-        allProducts.forEach(item => {
-          const product = item.produk;
-          if (product) {
-            if (product.kategori) uniqueCategories.add(product.kategori);
-            if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
-          }
-        });
-      } else {
-        console.error('allProducts is not an array after processing:', allProducts);
-      }
-      
-      // Update filter buttons
-      updateFilterButtons();
-      
-      // Tampilkan semua produk
-      displayProducts(allProducts);
-    } else {
-      console.log('No products data found or error:', result.error);
-      showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
-      displayProducts([]);
+    if (!checkAuth()) return;
+
+    try {
+        const result = await products.getAll();
+        console.log('API response:', result);
+        
+        if (result.success && result.data) {  
+            console.log('Raw products data:', result.data);
+            
+            // Pastikan allProducts adalah array
+            if (Array.isArray(result.data)) {
+                allProducts = result.data;
+            } else if (result.data.data && Array.isArray(result.data.data)) {
+                allProducts = result.data.data;
+            } else {
+                console.error('Unexpected data format:', result.data);
+                allProducts = [];
+            }
+            
+            console.log('Processed products:', allProducts);
+            
+            // Mengumpulkan kategori dan sub-kategori unik
+            uniqueCategories.clear();
+            uniqueSubCategories.clear();
+            
+            // Pastikan allProducts adalah array sebelum menggunakan forEach
+            if (Array.isArray(allProducts)) {
+                allProducts.forEach(item => {
+                    const product = item.produk;
+                    if (product) {
+                        if (product.kategori) uniqueCategories.add(product.kategori);
+                        if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
+                    }
+                });
+                
+                // Update filter buttons
+                updateFilterButtons();
+                
+                // Tampilkan semua produk
+                displayProducts(allProducts);
+            } else {
+                console.error('allProducts is not an array after processing:', allProducts);
+                displayProducts([]);
+            }
+        } else {
+            console.log('No products data found or error:', result.error);
+            showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
+            displayProducts([]);
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showAlert('Gagal memuat data produk: ' + error.message, 'danger');
+        displayProducts([]);
     }
-  } catch (error) {
-    console.error('Error loading products:', error);
-    showAlert('Terjadi kesalahan saat memuat produk', 'danger');
-    displayProducts([]);
-  }
 }
 
 // Update filter buttons
@@ -454,14 +475,16 @@ function applyFilters() {
     // Apply category filter
     if (activeFilters.category !== 'all') {
         filteredProducts = filteredProducts.filter(item => {
-            return item && item.produk && item.produk.kategori === activeFilters.category;
+            if (!item || !item.produk) return false;
+            return item.produk.kategori === activeFilters.category;
         });
     }
     
     // Apply sub-category filter
     if (activeFilters.subcategory !== 'all') {
         filteredProducts = filteredProducts.filter(item => {
-            return item && item.produk && item.produk.sub_kategori === activeFilters.subcategory;
+            if (!item || !item.produk) return false;
+            return item.produk.sub_kategori === activeFilters.subcategory;
         });
     }
     
@@ -492,49 +515,75 @@ function displayProducts(products = []) {
     }
     
     tbody.innerHTML = '';
-    filteredProducts = Array.isArray(products) ? products : [];
+    filteredProducts = products; // Update filtered products
     
-    if (filteredProducts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada produk ditemukan</td></tr>';
+    if (!Array.isArray(products) || products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada produk ditemukan</td></tr>';
         updatePagination(0);
+        
+        // Sembunyikan kartu rekomendasi jika tidak ada produk
+        const recommendationCard = document.getElementById('recommendationCard');
+        if (recommendationCard) {
+            recommendationCard.style.display = 'none';
+        }
         return;
     }
 
     // Calculate pagination
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+    const paginatedProducts = products.slice(startIndex, endIndex);
 
     paginatedProducts.forEach(item => {
-        if (!item) {
-            console.warn('Invalid product item (null or undefined)');
+        if (!item || !item.produk) {
+            console.warn('Invalid product item:', item);
             return;
         }
+
+        const product = item.produk;
         
-        // Handle different product data structures
-        let product;
-        if (item.produk) {
-            // Format: { produk: { ... } }
-            product = item.produk;
-        } else if (item.id_produk || item.nama_produk) {
-            // Format: { id_produk: ..., nama_produk: ..., ... }
-            product = item;
-        } else {
-            console.warn('Unknown product format:', item);
-            return;
-        }
-        
+        // Buat baris utama untuk produk
         const row = document.createElement('tr');
+        
+        // Tambahkan kelas untuk menandai produk yang memiliki rekomendasi
+        if (item.produk_terkait && item.produk_terkait.length > 0) {
+            row.classList.add('has-recommendations');
+            row.style.cursor = 'pointer';
+        }
         
         row.innerHTML = `
             <td>${product.id_produk || '-'}</td>
-            <td>${product.nama_produk || '-'}</td>
+            <td>
+                <div class="font-weight-bold">${product.nama_produk || '-'}</div>
+                ${item.produk_terkait && item.produk_terkait.length > 0 ? 
+                    `<div class="text-primary mt-2 font-weight-bold" style="font-size: 14px;">
+                        <i class="fas fa-link mr-1"></i>Sering dibeli dengan: 
+                        ${item.produk_terkait.map(related => 
+                            `<span class="badge badge-info" style="font-size: 13px; padding: 5px 8px; margin: 2px;">${related.nama_produk}</span>`
+                        ).join(' ')}
+                    </div>` : ''}
+            </td>
             <td>${product.kategori || '-'}</td>
             <td>${product.sub_kategori || '-'}</td>
             <td>${product.kode_produk || '-'}</td>
             <td>${formatCurrency(parseFloat(product.harga_produk)) || 'Rp0'}</td>
             <td>${product.stok_barang || '0'}</td>
         `;
+        
+        // Tambahkan event listener untuk menampilkan produk terkait
+        if (item.produk_terkait && item.produk_terkait.length > 0) {
+            row.addEventListener('click', () => {
+                displayRelatedProducts(item);
+                
+                // Hapus kelas aktif dari semua baris
+                const allRows = tbody.querySelectorAll('tr');
+                allRows.forEach(r => r.classList.remove('table-primary'));
+                
+                // Tambahkan kelas aktif ke baris yang diklik
+                row.classList.add('table-primary');
+            });
+        }
+        
         tbody.appendChild(row);
     });
 
@@ -545,14 +594,60 @@ function displayProducts(products = []) {
     }
 
     // Add page info after the table
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const totalPages = Math.ceil(products.length / itemsPerPage);
     const pageInfo = document.createElement('div');
     pageInfo.className = 'page-info text-center mb-2';
-    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${filteredProducts.length} produk)`;
+    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${products.length} produk)`;
     productTable.parentNode.insertBefore(pageInfo, paginationContainer);
 
     // Update pagination
-    updatePagination(filteredProducts.length);
+    updatePagination(products.length);
+}
+
+// Display related products
+function displayRelatedProducts(item) {
+    console.log('Displaying related products for:', item);
+    
+    const recommendationCard = document.getElementById('recommendationCard');
+    const recommendationTableBody = document.getElementById('recommendationTableBody');
+    
+    if (!recommendationCard || !recommendationTableBody) {
+        console.error('Recommendation card or table body not found');
+        return;
+    }
+    
+    // Tampilkan kartu rekomendasi
+    recommendationCard.style.display = 'block';
+    
+    // Kosongkan tabel
+    recommendationTableBody.innerHTML = '';
+    
+    // Judul kartu
+    const cardTitle = recommendationCard.querySelector('.card-header h6');
+    if (cardTitle) {
+        cardTitle.textContent = `Produk yang Sering Dibeli dengan ${item.produk.nama_produk}`;
+    }
+    
+    // Periksa apakah produk memiliki produk terkait
+    if (!item.produk_terkait || !Array.isArray(item.produk_terkait) || item.produk_terkait.length === 0) {
+        recommendationTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada produk terkait</td></tr>';
+        return;
+    }
+    
+    // Tampilkan produk terkait
+    item.produk_terkait.forEach(relatedProduct => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${relatedProduct.id_produk || '-'}</td>
+            <td>${relatedProduct.nama_produk || '-'}</td>
+            <td>${relatedProduct.kategori || '-'}</td>
+            <td>${relatedProduct.sub_kategori || '-'}</td>
+            <td>${relatedProduct.kode_produk || '-'}</td>
+            <td>${formatCurrency(parseFloat(relatedProduct.harga_produk)) || 'Rp0'}</td>
+            <td>${relatedProduct.stok_barang || '0'}</td>
+        `;
+        recommendationTableBody.appendChild(row);
+    });
 }
 
 // Add pagination controls
@@ -634,27 +729,54 @@ function updatePagination(totalItems) {
 // Handle search with debounce
 let searchTimeout;
 function handleSearch(e) {
-    const searchQuery = e.target.value.toLowerCase();
+    const searchQuery = e.target.value.toLowerCase().trim();
     
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        currentPage = 1; // Reset to first page when searching
-        let searchResults = allProducts;
+        // Pastikan allProducts adalah array
+        if (!Array.isArray(allProducts)) {
+            console.error('allProducts is not an array in handleSearch:', allProducts);
+            displayProducts([]);
+            return;
+        }
+        
+        let filteredProducts = [...allProducts];
         
         if (searchQuery) {
-            searchResults = allProducts.filter(item => {
+            filteredProducts = filteredProducts.filter(item => {
+                if (!item || !item.produk) return false;
+                
                 const product = item.produk;
                 return (
                     product.nama_produk.toLowerCase().includes(searchQuery) ||
                     product.kategori.toLowerCase().includes(searchQuery) ||
                     product.sub_kategori.toLowerCase().includes(searchQuery) ||
-                    product.kode_produk.toLowerCase().includes(searchQuery)
+                    product.kode_produk.toLowerCase().includes(searchQuery) ||
+                    product.id_produk.toLowerCase().includes(searchQuery)
                 );
             });
         }
         
-        displayProducts(searchResults);
-    }, 300);
+        // Reset active filters when searching
+        activeFilters.category = 'all';
+        activeFilters.subcategory = 'all';
+        
+        // Update UI to show all categories are selected
+        const categoryButtons = document.querySelectorAll('#categoryFilters button');
+        const subCategoryButtons = document.querySelectorAll('#subCategoryFilters button');
+        
+        categoryButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.includes('Semua Kategori'));
+        });
+        
+        subCategoryButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.includes('Semua Sub Kategori'));
+        });
+        
+        // Display filtered products
+        currentPage = 1; // Reset to first page
+        displayProducts(filteredProducts);
+    }, 300); // Debounce for 300ms
 }
 
 // Helper functions
