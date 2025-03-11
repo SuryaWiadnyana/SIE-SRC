@@ -545,19 +545,15 @@ function displayProducts(products = []) {
         // Buat baris utama untuk produk
         const row = document.createElement('tr');
         
-        // Tambahkan kelas untuk menandai produk yang memiliki rekomendasi
-        if (item.produk_terkait && item.produk_terkait.length > 0) {
-            row.classList.add('has-recommendations');
-            row.style.cursor = 'pointer';
-        }
-        
         row.innerHTML = `
             <td>${product.id_produk || '-'}</td>
             <td>
                 <div class="font-weight-bold">${product.nama_produk || '-'}</div>
                 ${item.produk_terkait && item.produk_terkait.length > 0 ? 
-                    `<div class="text-primary mt-2 font-weight-bold" style="font-size: 14px;">
-                        <i class="fas fa-link mr-1"></i>Sering dibeli dengan: 
+                    `<div class="text-danger mt-2 font-weight-bold" style="font-size: 14px;">
+                        Sering dibeli dengan:
+                    </div>
+                    <div class="mt-1">
                         ${item.produk_terkait.map(related => 
                             `<span class="badge badge-info" style="font-size: 13px; padding: 5px 8px; margin: 2px;">${related.nama_produk}</span>`
                         ).join(' ')}
@@ -569,20 +565,6 @@ function displayProducts(products = []) {
             <td>${formatCurrency(parseFloat(product.harga_produk)) || 'Rp0'}</td>
             <td>${product.stok_barang || '0'}</td>
         `;
-        
-        // Tambahkan event listener untuk menampilkan produk terkait
-        if (item.produk_terkait && item.produk_terkait.length > 0) {
-            row.addEventListener('click', () => {
-                displayRelatedProducts(item);
-                
-                // Hapus kelas aktif dari semua baris
-                const allRows = tbody.querySelectorAll('tr');
-                allRows.forEach(r => r.classList.remove('table-primary'));
-                
-                // Tambahkan kelas aktif ke baris yang diklik
-                row.classList.add('table-primary');
-            });
-        }
         
         tbody.appendChild(row);
     });
@@ -602,52 +584,6 @@ function displayProducts(products = []) {
 
     // Update pagination
     updatePagination(products.length);
-}
-
-// Display related products
-function displayRelatedProducts(item) {
-    console.log('Displaying related products for:', item);
-    
-    const recommendationCard = document.getElementById('recommendationCard');
-    const recommendationTableBody = document.getElementById('recommendationTableBody');
-    
-    if (!recommendationCard || !recommendationTableBody) {
-        console.error('Recommendation card or table body not found');
-        return;
-    }
-    
-    // Tampilkan kartu rekomendasi
-    recommendationCard.style.display = 'block';
-    
-    // Kosongkan tabel
-    recommendationTableBody.innerHTML = '';
-    
-    // Judul kartu
-    const cardTitle = recommendationCard.querySelector('.card-header h6');
-    if (cardTitle) {
-        cardTitle.textContent = `Produk yang Sering Dibeli dengan ${item.produk.nama_produk}`;
-    }
-    
-    // Periksa apakah produk memiliki produk terkait
-    if (!item.produk_terkait || !Array.isArray(item.produk_terkait) || item.produk_terkait.length === 0) {
-        recommendationTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada produk terkait</td></tr>';
-        return;
-    }
-    
-    // Tampilkan produk terkait
-    item.produk_terkait.forEach(relatedProduct => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${relatedProduct.id_produk || '-'}</td>
-            <td>${relatedProduct.nama_produk || '-'}</td>
-            <td>${relatedProduct.kategori || '-'}</td>
-            <td>${relatedProduct.sub_kategori || '-'}</td>
-            <td>${relatedProduct.kode_produk || '-'}</td>
-            <td>${formatCurrency(parseFloat(relatedProduct.harga_produk)) || 'Rp0'}</td>
-            <td>${relatedProduct.stok_barang || '0'}</td>
-        `;
-        recommendationTableBody.appendChild(row);
-    });
 }
 
 // Add pagination controls
