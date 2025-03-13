@@ -1,6 +1,6 @@
 // Configuration
 const API_URL = 'http://127.0.0.1:8080';
-const FRONTEND_URL = 'http://127.0.0.1:5501/SIE-SRC-frontend';
+const FRONTEND_URL = 'http://127.0.0.1:5502/SIE-SRC-frontend';
 
 // Handle login functionality
 document.addEventListener('DOMContentLoaded', function() {

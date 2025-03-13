@@ -966,8 +966,8 @@ function getWeekKey(date) {
 document.addEventListener("DOMContentLoaded", () => {
   if (window.location.pathname.includes("index-owner.html")) {
     updateDashboardData();
-    // Update dashboard every 5 minutes
-    setInterval(updateDashboardData, 300000);
+    // Update dashboard every 1 hour (3600 seconds)
+    setInterval(updateDashboardData, 3600 * 1000);
   }
 });
 
@@ -1433,14 +1433,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     await displayTotalSalesAndStock();
 
     console.log("Setup interval untuk pembaruan data");
-    // Perbarui data setiap 5 menit
+    // Perbarui data setiap 1 jam (3600 detik)
     setInterval(async () => {
       console.log("Memperbarui data dashboard (interval)");
       await dashboard.getDashboardData();
       await updateProductStats();
       await updateBestSellingProductsTable();
       await displayTotalSalesAndStock();
-    }, 5 * 60 * 1000);
+    }, 3600 * 1000);
   } catch (error) {
     console.error("Error initializing dashboard:", error);
   }
