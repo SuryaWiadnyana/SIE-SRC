@@ -62,7 +62,7 @@ func startHTTPServer() {
 	// Middleware setup
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://127.0.0.1:5501",
+		AllowOrigins:     "http://127.0.0.1:5502",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowCredentials: true,

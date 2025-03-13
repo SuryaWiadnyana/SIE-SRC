@@ -71,27 +71,55 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 	}
 
 	// Buat map untuk menyimpan produk terkait untuk setiap produk
-	relatedProductsMap := make(map[string][]domain.Produk)
+	productRelatedMap := make(map[string][]domain.Produk)
 
 	// Untuk setiap produk, cari produk terkait dari itemsets
 	for _, product := range products {
 		var relatedProducts []domain.Produk
+		// Map untuk melacak produk terkait yang sudah ditambahkan (mencegah duplikasi)
+		relatedProductsMap := make(map[string]bool)
+		
 		for _, itemset := range itemsets {
+			// Pastikan itemset memiliki setidaknya 2 produk
+			if len(itemset.Produk) < 2 {
+				continue
+			}
+			
+			// Cari indeks produk saat ini dalam itemset
+			currentProductIndex := -1
 			for i, produkId := range itemset.Produk {
 				if produkId == product.IDProduk {
-					// Ambil ID produk lainnya dari itemset
-					otherProdukId := itemset.Produk[1-i]
+					currentProductIndex = i
+					break
+				}
+			}
+			
+			// Jika produk ditemukan dalam itemset
+			if currentProductIndex != -1 {
+				// Ambil semua produk lain dari itemset
+				for i, produkId := range itemset.Produk {
+					// Lewati produk saat ini
+					if i == currentProductIndex {
+						continue
+					}
+					
+					// Lewati jika produk ini sudah ditambahkan sebelumnya
+					if _, exists := relatedProductsMap[produkId]; exists {
+						continue
+					}
+					
 					// Ambil detail produk terkait
-					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), produkId)
 					if err == nil {
 						relatedProducts = append(relatedProducts, *relatedProduk)
+						// Tandai produk ini sebagai sudah ditambahkan
+						relatedProductsMap[produkId] = true
 					}
-					break
 				}
 			}
 		}
 		if len(relatedProducts) > 0 {
-			relatedProductsMap[product.IDProduk] = relatedProducts
+			productRelatedMap[product.IDProduk] = relatedProducts
 		}
 	}
 
@@ -106,21 +134,41 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 	for i, product := range products {
 		var relatedProducts []domain.Produk
 		for _, itemset := range itemsets {
-			for j, produkId := range itemset.Produk {
+			// Pastikan itemset memiliki setidaknya 2 produk
+			if len(itemset.Produk) < 2 {
+				continue
+			}
+			
+			// Cari indeks produk saat ini dalam itemset
+			currentProductIndex := -1
+			for i, produkId := range itemset.Produk {
 				if produkId == product.IDProduk {
-					otherProdukId := itemset.Produk[1-j]
-					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+					currentProductIndex = i
+					break
+				}
+			}
+			
+			// Jika produk ditemukan dalam itemset
+			if currentProductIndex != -1 {
+				// Ambil semua produk lain dari itemset
+				for i, produkId := range itemset.Produk {
+					// Lewati produk saat ini
+					if i == currentProductIndex {
+						continue
+					}
+					
+					// Ambil detail produk terkait
+					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), produkId)
 					if err == nil {
 						relatedProducts = append(relatedProducts, *relatedProduk)
 					}
-					break
 				}
 			}
 		}
 
 		productsWithRelated[i] = ProductWithRelated{
 			Produk:        product,
-			ProdukTerkait: relatedProductsMap[product.IDProduk],
+			ProdukTerkait: productRelatedMap[product.IDProduk],
 		}
 	}
 
@@ -174,14 +222,34 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 
 	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
+		// Pastikan itemset memiliki setidaknya 2 produk
+		if len(itemset.Produk) < 2 {
+			continue
+		}
+		
+		// Cari indeks produk saat ini dalam itemset
+		currentProductIndex := -1
 		for i, produkId := range itemset.Produk {
 			if produkId == idProduk {
-				otherProdukId := itemset.Produk[1-i]
-				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+				currentProductIndex = i
+				break
+			}
+		}
+		
+		// Jika produk ditemukan dalam itemset
+		if currentProductIndex != -1 {
+			// Ambil semua produk lain dari itemset
+			for i, produkId := range itemset.Produk {
+				// Lewati produk saat ini
+				if i == currentProductIndex {
+					continue
+				}
+				
+				// Ambil detail produk terkait
+				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), produkId)
 				if err == nil {
 					relatedProducts = append(relatedProducts, *relatedProduk)
 				}
-				break
 			}
 		}
 	}
@@ -214,14 +282,34 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 
 	var relatedProducts []domain.Produk
 	for _, itemset := range itemsets {
+		// Pastikan itemset memiliki setidaknya 2 produk
+		if len(itemset.Produk) < 2 {
+			continue
+		}
+		
+		// Cari indeks produk saat ini dalam itemset
+		currentProductIndex := -1
 		for i, item := range itemset.Produk {
 			if strings.Contains(strings.ToLower(item), strings.ToLower(namaProduk)) {
-				otherProdukId := itemset.Produk[1-i]
-				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), otherProdukId)
+				currentProductIndex = i
+				break
+			}
+		}
+		
+		// Jika produk ditemukan dalam itemset
+		if currentProductIndex != -1 {
+			// Ambil semua produk lain dari itemset
+			for i, produkId := range itemset.Produk {
+				// Lewati produk saat ini
+				if i == currentProductIndex {
+					continue
+				}
+				
+				// Ambil detail produk terkait
+				relatedProduk, err := d.HTTP.GetProdukById(c.Context(), produkId)
 				if err == nil {
 					relatedProducts = append(relatedProducts, *relatedProduk)
 				}
-				break
 			}
 		}
 	}
