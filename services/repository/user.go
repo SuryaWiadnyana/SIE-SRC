@@ -78,6 +78,11 @@ func (rp *mongoRepoUser) RegisterUser(ctx context.Context, user *domain.User) (d
         }
         user.IDUser = nextID
     }
+    
+    // Set default status to "Aktif" if not specified
+    if user.Status == "" {
+        user.Status = "Aktif"
+    }
 
     _, err = collection.InsertOne(ctx, user)
     if err != nil {
@@ -194,16 +199,23 @@ func (rp *mongoRepoUser) GetAll(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
-func (rp *mongoRepoUser) DeleteUser(ctx context.Context, id string) error {
+func (rp *mongoRepoUser) StatusUser(ctx context.Context, id string, status string) error {
 	collection := rp.DB.Collection(_UserCollection)
 
-	result, err := collection.DeleteOne(ctx, bson.M{"id_user": id})
-	if err != nil {
-		return fmt.Errorf("error deleting user: %v", err)
+	// Validate status value
+	if status != "Aktif" && status != "Tidak Aktif" {
+		return fmt.Errorf("status harus 'Aktif' atau 'Tidak Aktif'")
 	}
 
-	if result.DeletedCount == 0 {
-		return fmt.Errorf("user with id %s not found", id)
+	// Update the user's status
+	update := bson.M{"$set": bson.M{"status": status}}
+	result, err := collection.UpdateOne(ctx, bson.M{"id_user": id}, update)
+	if err != nil {
+		return fmt.Errorf("error mengubah status user: %v", err)
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("user dengan id %s tidak ditemukan", id)
 	}
 
 	return nil
@@ -224,6 +236,10 @@ func (rp *mongoRepoUser) UpdateUser(ctx context.Context, username string, update
 	}
 	if updateData.Role != "" {
 		update["role"] = updateData.Role
+	}
+	// Tambahkan update status jika ada
+	if updateData.Status != "" {
+		update["status"] = updateData.Status
 	}
 
 	// Jika tidak ada yang diupdate

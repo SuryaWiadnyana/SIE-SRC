@@ -3,6 +3,7 @@ package usecase
 import (
 	"SIE-SRC/domain"
 	"context"
+	"errors"
 	"time"
 )
 
@@ -33,6 +34,15 @@ func (uc *ProdukUseCase) CreateProduk(Ctx context.Context, bd *domain.Produk) (d
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 
+	// Validasi harga dan stok tidak boleh negatif
+	if bd.HargaProduk < 0 {
+		return domain.Produk{}, errors.New("harga produk tidak boleh negatif")
+	}
+
+	if bd.Stok < 0 {
+		return domain.Produk{}, errors.New("stok produk tidak boleh negatif")
+	}
+
 	return uc.ProdukRepository.CreateProduk(ctx, bd)
 }
 
@@ -53,6 +63,15 @@ func (uc *ProdukUseCase) GetProdukByName(Ctx context.Context, nama string) (*dom
 func (uc *ProdukUseCase) UpdateProduk(Ctx context.Context, bd *domain.Produk) error {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
+
+	// Validasi harga dan stok tidak boleh negatif
+	if bd.HargaProduk < 0 {
+		return errors.New("harga produk tidak boleh negatif")
+	}
+
+	if bd.Stok < 0 {
+		return errors.New("stok produk tidak boleh negatif")
+	}
 
 	return uc.ProdukRepository.UpdateProduk(ctx, bd)
 }
@@ -93,10 +112,64 @@ func (uc *ProdukUseCase) GetBestSellingProducts(ctx context.Context, limitProduk
 }
 
 // GetProdukWithLowestStock mendapatkan daftar produk dengan stok paling sedikit
-func (uc *ProdukUseCase) GetProdukWithLowestStock(ctx context.Context) ([]domain.Produk, error) {
+func (uc *ProdukUseCase) GetProdukWithLowestStock(ctx context.Context, limit int) ([]domain.Produk, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 
-	// Default limit 5 produk dengan stok terendah
-	return uc.ProdukRepository.GetProdukWithLowestStock(ctx, 5)
+	return uc.ProdukRepository.GetProdukWithLowestStock(ctx, limit)
+}
+
+// GenerateNextID menghasilkan ID produk berikutnya
+func (uc *ProdukUseCase) GenerateNextID(ctx context.Context) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+	defer cancel()
+
+	return uc.ProdukRepository.GenerateNextID(ctx)
+}
+
+// GetProductsNearExpiry mengembalikan daftar produk yang mendekati tanggal kadaluarsa
+// daysThreshold adalah jumlah hari sebelum kadaluarsa untuk memberikan peringatan
+func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshold int) ([]domain.ProdukExpiry, error) {
+	ctx, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+
+	// Ambil semua produk
+	allProducts, err := uc.ProdukRepository.GetAllProduk(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter produk yang mendekati kadaluarsa
+	var nearExpiryProducts []domain.ProdukExpiry
+	now := time.Now()
+	thresholdDate := now.AddDate(0, 0, daysThreshold)
+
+	for _, product := range allProducts {
+		// Lewati produk yang tidak memiliki tanggal kadaluarsa (zero time)
+		if product.TanggalKadaluarsa.IsZero() {
+			continue
+		}
+
+		// Buat objek ProdukExpiry
+		produkExpiry := domain.ProdukExpiry{
+			Produk: product,
+		}
+
+		// Jika produk sudah kadaluarsa, tambahkan ke daftar
+		if product.TanggalKadaluarsa.Before(now) {
+			produkExpiry.IsExpired = true
+			produkExpiry.DaysUntilExpiry = 0
+			nearExpiryProducts = append(nearExpiryProducts, produkExpiry)
+			continue
+		}
+
+		// Jika produk mendekati kadaluarsa (dalam threshold hari), tambahkan ke daftar
+		if product.TanggalKadaluarsa.Before(thresholdDate) {
+			daysUntil := int(product.TanggalKadaluarsa.Sub(now).Hours() / 24)
+			produkExpiry.DaysUntilExpiry = daysUntil
+			nearExpiryProducts = append(nearExpiryProducts, produkExpiry)
+		}
+	}
+
+	return nearExpiryProducts, nil
 }

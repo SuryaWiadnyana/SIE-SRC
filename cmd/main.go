@@ -83,13 +83,6 @@ func startHTTPServer() {
 	userUseCase := usecase.NewMongoUseCaseUser(userRepo, 10*time.Second)
 	delivery.NewHttpDeliveryUser(app, userUseCase)
 
-	// // Algoritma Repository Route
-	// algoritmaData := domain.Algoritma{
-	// 	Items:   []string{},
-	// 	Support: 0,
-	// }
-	// algoritmaRepo := repository.NewMongoAlgoritmaRepo(algoritmaData, 10*time.Second) // Tambahkan argumen sesuai definisi
-
 	// Produk Repository
 	produkRepo := repository.NewMongoRepoProduk(db)
 
@@ -111,8 +104,18 @@ func startHTTPServer() {
 	delivery.NewHttpDeliveryDetailPenjualan(app, detailPenjualanUC)
 	log.Printf("Detail penjualan handler initialized")
 
+	// Kategori Repository, Use Case, dan Delivery
+	kategoriRepo := repository.NewMongoRepoKategori(db)
+	kategoriUseCase := usecase.NewKategoriUseCase(kategoriRepo, 10*time.Second)
+	delivery.NewHttpDeliveryKategori(app, kategoriUseCase)
+
+	// SubKategori Repository, Use Case, dan Delivery
+	subKategoriRepo := repository.NewMongoRepoSubKategori(db)
+	subKategoriUseCase := usecase.NewSubKategoriUseCase(subKategoriRepo, 10*time.Second)
+	delivery.NewHttpDeliverySubKategori(app, subKategoriUseCase, kategoriUseCase)
+
 	// Produk Use Case route
-	delivery.NewHttpDeliveryProduk(app, produkUseCase)
+	delivery.NewHttpDeliveryProduk(app, produkUseCase, kategoriUseCase, subKategoriUseCase)
 
 	// Algoritma Use Case and Handler
 	// algoritmaUseCase := usecase.NewAlgoritmaUsecase(algoritmaRepo)

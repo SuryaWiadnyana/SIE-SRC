@@ -6,21 +6,28 @@ import (
 )
 
 type Produk struct {
-	IDProduk    string     `json:"id_produk" bson:"id_produk"`
-	NamaProduk  string     `json:"nama_produk" bson:"nama_produk"`
-	Kategori    string     `json:"kategori" bson:"kategori"`
-	SubKategori string     `json:"sub_kategori" bson:"sub_kategori"`
-	KodeProduk  string     `json:"kode_produk" bson:"kode_produk"`
-	HargaProduk int        `json:"harga_produk" bson:"harga_produk"`
-	Stok        int        `json:"stok_barang" bson:"stok_barang"`
-	UpdatedAt   time.Time  `json:"updated_at" bson:"updated_at"`
-	IsDeleted   *time.Time `json:"is_deleted" bson:"is_deleted"`
+	IDProduk          string      `json:"id_produk" bson:"id_produk"`
+	NamaProduk        string      `json:"nama_produk" bson:"nama_produk"`
+	Kategori          Kategori    `json:"kategori" bson:"kategori"`
+	SubKategori       SubKategori `json:"subkategori" bson:"subkategori"`
+	KodeProduk        string      `json:"kode_produk" bson:"kode_produk"`
+	HargaProduk       int         `json:"harga_produk" bson:"harga_produk"`
+	TanggalKadaluarsa time.Time   `json:"tanggal_kadaluarsa" bson:"tanggal_kadaluarsa"`
+	Stok              int         `json:"stok_barang" bson:"stok_barang"`
+	UpdatedAt         time.Time   `json:"updated_at" bson:"updated_at"`
+	IsDeleted         *time.Time  `json:"is_deleted" bson:"is_deleted"`
 }
 
 type FrequentItemset struct {
 	Produk     []string `json:"produk"`
 	Support    float64  `json:"support"`
 	ProdukList []string `json:"list_produk"`
+}
+
+type ProdukExpiry struct {
+	Produk          Produk `json:"produk"`
+	IsExpired       bool   `json:"is_expired"`
+	DaysUntilExpiry int    `json:"days_until_expiry"`
 }
 
 type ProdukRepository interface {
@@ -49,7 +56,9 @@ type ProdukUseCase interface {
 	DecreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	IncreaseProdukStock(ctx context.Context, id string, kuantitas int) error
 	ImportData(ctx context.Context, produkList []Produk) error
+	GenerateNextID(ctx context.Context) (string, error)
 	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemset, error)
 	GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error)
-	GetProdukWithLowestStock(ctx context.Context) ([]Produk, error)
+	GetProdukWithLowestStock(ctx context.Context, limit int) ([]Produk, error)
+	GetProductsNearExpiry(ctx context.Context, daysThreshold int) ([]ProdukExpiry, error)
 }

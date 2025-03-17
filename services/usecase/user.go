@@ -40,10 +40,20 @@ func (uc *UserUseCase) AuthenticateUser(ctx context.Context, username, password 
 		return nil, fmt.Errorf("username tidak ditemukan")
 	}
 
+	// Periksa status user
+	if user.Status == "Tidak Aktif" {
+		return nil, fmt.Errorf("akun tidak aktif, silahkan hubungi administrator")
+	}
+
 	// Verifikasi password yang dimasukkan dengan password yang disimpan (ter-hash)
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return nil, fmt.Errorf("password tidak valid")
+	}
+
+	// Tambahkan pemeriksaan status
+	if user.Status == "Tidak Aktif" {
+		return nil, fmt.Errorf("akun tidak aktif, silahkan hubungi administrator")
 	}
 
 	return user, nil
@@ -61,8 +71,8 @@ func (uc *UserUseCase) GetAll(ctx context.Context) ([]domain.User, error) {
 	return uc.UserRepository.GetAll(ctx)
 }
 
-func (uc *UserUseCase) DeleteUser(ctx context.Context, id string) error {
-	return uc.UserRepository.DeleteUser(ctx, id)
+func (uc *UserUseCase) StatusUser(ctx context.Context, id string, status string) error {
+	return uc.UserRepository.StatusUser(ctx, id, status)
 }
 
 // UpdateUser updates user data

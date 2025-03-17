@@ -176,18 +176,20 @@ func (rp *mongoRepoProduk) GetProdukWithLowestStock(ctx context.Context, StokPro
 func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
+	// Set current time for UpdatedAt
 	bd.UpdatedAt = time.Now()
 
+	// Update document
 	filter := bson.M{"id_produk": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
-			"nama_produk":  bd.NamaProduk,
-			"kategori":     bd.Kategori,
-			"sub_kategori": bd.SubKategori,
-			"kode_produk":  bd.KodeProduk,
-			"harga_produk": bd.HargaProduk,
-			"stok_barang":  bd.Stok,
-			"updated_at":   bd.UpdatedAt,
+			"nama_produk":     bd.NamaProduk,
+			"nama_kategori":     bd.Kategori,
+			"nama_subkategori": bd.SubKategori,
+			"kode_produk":     bd.KodeProduk,
+			"harga_produk":    bd.HargaProduk,
+			"stok_barang":     bd.Stok,
+			"updated_at":      bd.UpdatedAt,
 		},
 	}
 
@@ -197,7 +199,7 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 	}
 
 	if result.MatchedCount == 0 {
-		return fmt.Errorf("produk dengan ID %s tidak ditemukan", bd.IDProduk)
+		return fmt.Errorf("product with ID %s not found", bd.IDProduk)
 	}
 
 	return nil
@@ -221,7 +223,7 @@ func (rp *mongoRepoProduk) DeleteProduk(ctx context.Context, id string) error {
 	}
 
 	if result.MatchedCount == 0 {
-		return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
+		return fmt.Errorf("product with ID %s not found", id)
 	}
 
 	return nil
@@ -381,8 +383,8 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		doc := bson.D{
 			{Key: "id_produk", Value: idStr},
 			{Key: "nama_produk", Value: produk.NamaProduk},
-			{Key: "kategori", Value: produk.Kategori},
-			{Key: "sub_kategori", Value: produk.SubKategori},
+			{Key: "nama_kategori", Value: produk.Kategori},
+			{Key: "nama_subkategori", Value: produk.SubKategori},
 			{Key: "kode_produk", Value: produk.KodeProduk},
 			{Key: "harga_produk", Value: produk.HargaProduk},
 			{Key: "stok_barang", Value: produk.Stok},

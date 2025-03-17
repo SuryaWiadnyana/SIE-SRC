@@ -45,7 +45,9 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 	adminOnly.Use(middleware.AuthMiddleware("admin"))
 	adminOnly.Post("/register", handler.RegisterUser)
 	adminOnly.Put("/update/:username", handler.UpdateUser)
-	adminOnly.Delete("/delete-user/:id_user", handler.DeleteUser)
+	adminOnly.Put("/status/:id_user", handler.StatusUser)
+	adminOnly.Get("/by-username/:username", handler.GetUserByUsername)
+	adminOnly.Get("/by-id/:id_user", handler.GetUserById)
 }
 
 func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
@@ -200,9 +202,25 @@ func (d *HttpDeliveryUser) LoginUser(c *fiber.Ctx) error {
 
 // Mencari user berdasarkan username
 func (d *HttpDeliveryUser) GetUserByUsername(c *fiber.Ctx) error {
-	id := c.Params("username")
+	username := c.Params("username")
 
-	user, err := d.HTTP.GetUserByUsername(context.Background(), id)
+	user, err := d.HTTP.GetUserByUsername(context.Background(), username)
+	if err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "Pengguna tidak ditemukan",
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status": "success",
+		"data": user,
+	})
+}
+
+func (d *HttpDeliveryUser) GetUserById(c *fiber.Ctx) error {
+	id := c.Params("id_user")
+
+	user, err := d.HTTP.GetUserById(context.Background(), id)
 	if err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{
 			"error": "Pengguna tidak ditemukan",
@@ -225,19 +243,37 @@ func (d *HttpDeliveryUser) GetAll(c *fiber.Ctx) error {
 	})
 }
 
-// DeleteUser handles deleting a user by ID.
-func (d *HttpDeliveryUser) DeleteUser(c *fiber.Ctx) error {
+// StatusUser handles changing a user's status (Aktif/Tidak Aktif)
+func (d *HttpDeliveryUser) StatusUser(c *fiber.Ctx) error {
 	id := c.Params("id_user")
+	
+	// Parse request body to get status
+	var requestBody struct {
+		Status string `json:"status"`
+	}
+	
+	if err := c.BodyParser(&requestBody); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format request tidak valid",
+		})
+	}
+	
+	// Validate status
+	if requestBody.Status != "Aktif" && requestBody.Status != "Tidak Aktif" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Status harus 'Aktif' atau 'Tidak Aktif'",
+		})
+	}
 
-	err := d.HTTP.DeleteUser(context.Background(), id)
+	err := d.HTTP.StatusUser(context.Background(), id, requestBody.Status)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal menghapus pengguna",
+			"error": fmt.Sprintf("Gagal mengubah status pengguna: %v", err),
 		})
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Pengguna berhasil dihapus",
+		"message": fmt.Sprintf("Status pengguna berhasil diubah menjadi %s", requestBody.Status),
 	})
 }
 

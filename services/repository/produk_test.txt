@@ -1,0 +1,161 @@
+package repository_test
+
+import (
+	"SIE-SRC/domain"
+	"SIE-SRC/services/repository"
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+var (
+	client *mongo.Client
+	repo   domain.ProdukRepository
+)
+
+func setup() {
+	// Menghubungkan ke MongoDB lokal dengan database testdb
+	ctx := context.Background()
+	client, _ = mongo.Connect(ctx, options.Client().ApplyURI("mongodb+srv://SIE-SRC:hebI5AnhguRxKFIk@sie-src-environtment.01asg.mongodb.net/"))
+	db := client.Database("testdb")
+
+	// Menginisialisasi repository produk
+	repo = repository.NewMongoRepoProduk(db)
+}
+
+func TestCreateProduk(t *testing.T) {
+	setup()
+
+	produk := domain.Produk{
+		IDProduk:      "1234",
+		NamaProduk:    "ProdukTest",
+		Kategori:    "Elektronik",
+		SubKategori: "Elektronik",
+		Stok:          10,
+		KodeProduk:    "0001",
+	}
+
+	createdProduk, err := repo.CreateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+	assert.Equal(t, produk.IDProduk, createdProduk.IDProduk)
+}
+
+func TestGetAllProduk(t *testing.T) {
+	setup()
+
+	produk := domain.Produk{
+		IDProduk:      "123",
+		NamaProduk:    "ProdukTest",
+		Kategori:    "Elektronik",
+		SubKategori: "Elektronik",
+		Stok:          10,
+		KodeProduk:    "0001",
+	}
+
+	_, err := repo.CreateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+
+	produks, err := repo.GetAllProduk(context.Background())
+	assert.NoError(t, err)
+	assert.NotEmpty(t, produks)
+}
+
+func TestGetProdukById(t *testing.T) {
+	setup()
+
+	produk := domain.Produk{
+		IDProduk:      "12345",
+		NamaProduk:    "ProdukTest",
+		Kategori:    "Elektronik",
+		SubKategori: "Elektronik",
+		Stok:          10,
+		KodeProduk:    "0001",
+	}
+
+	_, err := repo.CreateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+
+	foundProduk, err := repo.GetProdukById(context.Background(), produk.IDProduk)
+	assert.NoError(t, err)
+	assert.Equal(t, produk.IDProduk, foundProduk.IDProduk)
+}
+
+func TestGetProdukByName(t *testing.T) {
+	setup()
+
+	produk := domain.Produk{
+		IDProduk:      "123456",
+		NamaProduk:    "ProdukTestByName",
+		Kategori:    "Elektronik",
+		SubKategori: "Elektronik",
+		Stok:          10,
+		KodeProduk:    "0001",
+	}
+
+	_, err := repo.CreateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+
+	foundProduk, err := repo.GetProdukByName(context.Background(), produk.NamaProduk)
+	assert.NoError(t, err)
+	assert.Equal(t, produk.NamaProduk, foundProduk.NamaProduk)
+}
+
+func TestUpdateProduk(t *testing.T) {
+	setup()
+
+	produk := domain.Produk{
+		IDProduk:      "1234567",
+		NamaProduk:    "ProdukTest",
+		Kategori:    "Elektronik",
+		SubKategori: "Elektronik",
+		Stok:          10,
+		KodeProduk:    "0001",
+	}
+
+	_, err := repo.CreateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+
+	// Update produk
+	produk.NamaProduk = "ProdukTestUpdated"
+	produk.Kategori = "Elektronik"
+	produk.SubKategori = "Elektronik"
+	produk.Stok = 20
+
+	err = repo.UpdateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+
+	// Verify update
+	updatedProduk, err := repo.GetProdukById(context.Background(), produk.IDProduk)
+	assert.NoError(t, err)
+	assert.Equal(t, "ProdukTestUpdated", updatedProduk.NamaProduk)
+	assert.Equal(t, "Elektronik", updatedProduk.Kategori)
+	assert.Equal(t, "Elektronik", updatedProduk.SubKategori)
+	assert.Equal(t, 20, updatedProduk.Stok)
+}
+
+func TestDeleteProduk(t *testing.T) {
+	setup()
+
+	produk := domain.Produk{
+		IDProduk:      "12345678",
+		NamaProduk:    "ProdukTestDelete",
+		Kategori:    "Elektronik",
+		SubKategori: "Elektronik",
+		Stok:          10,
+		KodeProduk:    "0001",
+	}
+
+	_, err := repo.CreateProduk(context.Background(), &produk)
+	assert.NoError(t, err)
+
+	// Delete produk
+	err = repo.DeleteProduk(context.Background(), produk.IDProduk)
+	assert.NoError(t, err)
+
+	// Verify deletion
+	_, err = repo.GetProdukById(context.Background(), produk.IDProduk)
+	assert.Error(t, err)
+}
