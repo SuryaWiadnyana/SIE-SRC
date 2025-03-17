@@ -54,3 +54,8 @@ func (uc *SubKategoriUseCase) GetByKategoriID(ctx context.Context, kategoriID st
 	defer cancel()
 	return uc.SubKategoriRepository.GetByKategoriID(ctx, kategoriID)
 }
+
+// DeleteByKategoriID menghapus semua subkategori berdasarkan ID kategori
+func (uc *SubKategoriUseCase) DeleteByKategoriID(ctx context.Context, kategoriID string) error {
+	return uc.SubKategoriRepository.DeleteByKategoriID(ctx, kategoriID)
+}

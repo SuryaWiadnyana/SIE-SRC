@@ -217,3 +217,43 @@ func (rp *mongoRepoSubKategori) GetByKategoriID(ctx context.Context, kategoriID 
 	
 	return subkategoriList, nil
 }
+
+// DeleteByKategoriID menghapus semua subkategori berdasarkan ID kategori
+func (rp *mongoRepoSubKategori) DeleteByKategoriID(ctx context.Context, kategoriID string) error {
+	collection := rp.DB.Collection(_SubKategoriCollection)
+	
+	// Periksa apakah ada subkategori dengan kategori ID tersebut
+	subkategoriList, err := rp.GetByKategoriID(ctx, kategoriID)
+	if err != nil {
+		return fmt.Errorf("error mendapatkan subkategori: %v", err)
+	}
+	
+	if len(subkategoriList) == 0 {
+		return nil // Tidak ada subkategori untuk dihapus
+	}
+	
+	// Kumpulkan ID subkategori untuk memeriksa penggunaan di produk
+	subkategoriIDs := make([]string, len(subkategoriList))
+	for i, subK := range subkategoriList {
+		subkategoriIDs[i] = subK.IDSubKategori
+	}
+	
+	// Periksa apakah subkategori digunakan oleh produk
+	produkCollection := rp.DB.Collection("produk")
+	count, err := produkCollection.CountDocuments(ctx, bson.M{"sub_kategori": bson.M{"$in": subkategoriIDs}})
+	if err != nil {
+		return fmt.Errorf("error memeriksa penggunaan subkategori: %v", err)
+	}
+	if count > 0 {
+		return fmt.Errorf("subkategori tidak dapat dihapus karena masih digunakan oleh %d produk", count)
+	}
+	
+	// Hapus semua subkategori dengan kategori ID tersebut
+	result, err := collection.DeleteMany(ctx, bson.M{"kategori.id_kategori": kategoriID})
+	if err != nil {
+		return fmt.Errorf("error menghapus subkategori: %v", err)
+	}
+	
+	log.Printf("Berhasil menghapus %d subkategori untuk kategori ID %s", result.DeletedCount, kategoriID)
+	return nil
+}

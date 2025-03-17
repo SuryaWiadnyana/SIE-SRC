@@ -21,13 +21,12 @@ func NewKategoriUseCase(kr domain.KategoriRepository, timeout time.Duration) dom
 // CreateNewKategori membuat kategori baru
 func (uc *KategoriUseCase) CreateNewKategori(ctx context.Context, k *domain.Kategori) (domain.Kategori, error) {
 	// Simpan kategori baru
-	_, err := uc.KategoriRepository.CreateNewKategori(ctx, k)
+	result, err := uc.KategoriRepository.CreateNewKategori(ctx, k)
 	if err != nil {
 		return domain.Kategori{}, err
 	}
 
-	// Dapatkan semua kategori setelah penambahan
-	return uc.KategoriRepository.CreateNewKategori(ctx, k)
+	return result, nil
 }
 
 // GetAll mendapatkan semua kategori

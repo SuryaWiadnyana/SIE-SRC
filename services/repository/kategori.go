@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -57,13 +58,25 @@ func (rp *mongoRepoKategori) GenerateNextID(ctx context.Context) (string, error)
 func (rp *mongoRepoKategori) CreateNewKategori(ctx context.Context, k *domain.Kategori) (domain.Kategori, error) {
 	collection := rp.DB.Collection(_KategoriCollection)
 
-	// Cek apakah nama kategori sudah ada
-	var existingKategori domain.Kategori
-	err := collection.FindOne(ctx, bson.M{"nama_kategori": k.NamaKategori}).Decode(&existingKategori)
-	if err == nil {
-		return domain.Kategori{}, fmt.Errorf("kategori dengan nama %s sudah ada", k.NamaKategori)
-	} else if err != mongo.ErrNoDocuments {
-		return domain.Kategori{}, fmt.Errorf("error saat memeriksa kategori: %v", err)
+	// Cek apakah nama kategori sudah ada (case insensitive)
+	// Dapatkan semua kategori terlebih dahulu
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return domain.Kategori{}, fmt.Errorf("error saat mencari kategori: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	var kategoris []domain.Kategori
+	if err := cursor.All(ctx, &kategoris); err != nil {
+		return domain.Kategori{}, fmt.Errorf("error saat mendecode kategori: %v", err)
+	}
+
+	// Cek secara manual apakah nama kategori sudah ada (case insensitive)
+	namaKategoriLower := strings.ToLower(k.NamaKategori)
+	for _, existingKategori := range kategoris {
+		if strings.ToLower(existingKategori.NamaKategori) == namaKategoriLower {
+			return domain.Kategori{}, fmt.Errorf("kategori dengan nama %s sudah ada", k.NamaKategori)
+		}
 	}
 
 	// Generate ID jika kosong
@@ -123,19 +136,9 @@ func (rp *mongoRepoKategori) GetByID(ctx context.Context, id string) (*domain.Ka
 func (rp *mongoRepoKategori) Delete(ctx context.Context, id string) error {
 	collection := rp.DB.Collection(_KategoriCollection)
 
-	// Periksa apakah kategori digunakan oleh subkategori
-	subKategoriCollection := rp.DB.Collection("subkategori")
-	count, err := subKategoriCollection.CountDocuments(ctx, bson.M{"kategori.id_kategori": id})
-	if err != nil {
-		return fmt.Errorf("error memeriksa penggunaan kategori: %v", err)
-	}
-	if count > 0 {
-		return fmt.Errorf("kategori tidak dapat dihapus karena masih digunakan oleh %d subkategori", count)
-	}
-
 	// Periksa apakah kategori digunakan oleh produk
 	produkCollection := rp.DB.Collection("produk")
-	count, err = produkCollection.CountDocuments(ctx, bson.M{"kategori": id})
+	count, err := produkCollection.CountDocuments(ctx, bson.M{"kategori": id})
 	if err != nil {
 		return fmt.Errorf("error memeriksa penggunaan kategori: %v", err)
 	}
@@ -143,6 +146,14 @@ func (rp *mongoRepoKategori) Delete(ctx context.Context, id string) error {
 		return fmt.Errorf("kategori tidak dapat dihapus karena masih digunakan oleh %d produk", count)
 	}
 
+	// Hapus semua subkategori yang terkait dengan kategori ini
+	subKategoriRepo := NewMongoRepoSubKategori(rp.DB)
+	err = subKategoriRepo.DeleteByKategoriID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("error menghapus subkategori: %v", err)
+	}
+
+	// Hapus kategori
 	result, err := collection.DeleteOne(ctx, bson.M{"id_kategori": id})
 	if err != nil {
 		return fmt.Errorf("error menghapus kategori: %v", err)
@@ -163,6 +174,30 @@ func (rp *mongoRepoKategori) Update(ctx context.Context, k *domain.Kategori) err
 	existingKategori, err := rp.GetByID(ctx, k.IDKategori)
 	if err != nil {
 		return fmt.Errorf("kategori dengan ID %s tidak ditemukan", k.IDKategori)
+	}
+
+	// Cek apakah nama kategori baru sudah digunakan oleh kategori lain
+	if k.NamaKategori != existingKategori.NamaKategori {
+		// Dapatkan semua kategori terlebih dahulu
+		cursor, err := collection.Find(ctx, bson.M{})
+		if err != nil {
+			return fmt.Errorf("error saat mencari kategori: %v", err)
+		}
+		defer cursor.Close(ctx)
+
+		var kategoris []domain.Kategori
+		if err := cursor.All(ctx, &kategoris); err != nil {
+			return fmt.Errorf("error saat mendecode kategori: %v", err)
+		}
+
+		// Cek secara manual apakah nama kategori sudah ada (case insensitive)
+		namaKategoriLower := strings.ToLower(k.NamaKategori)
+		for _, otherKategori := range kategoris {
+			if otherKategori.IDKategori != k.IDKategori && // bukan kategori yang sedang diupdate
+				strings.ToLower(otherKategori.NamaKategori) == namaKategoriLower {
+				return fmt.Errorf("kategori dengan nama %s sudah ada", k.NamaKategori)
+			}
+		}
 	}
 
 	// Perbarui kategori

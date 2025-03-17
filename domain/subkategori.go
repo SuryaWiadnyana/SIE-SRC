@@ -16,6 +16,7 @@ type SubKategoriRepository interface {
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)
 	GetByKategoriID(ctx context.Context, kategoriID string) ([]SubKategori, error)
+	DeleteByKategoriID(ctx context.Context, kategoriID string) error
 }
 
 type SubKategoriUseCase interface {
@@ -26,4 +27,5 @@ type SubKategoriUseCase interface {
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)
 	GetByKategoriID(ctx context.Context, kategoriID string) ([]SubKategori, error)
+	DeleteByKategoriID(ctx context.Context, kategoriID string) error
 }

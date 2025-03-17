@@ -31,6 +31,7 @@ func NewHttpDeliveryKategori(app fiber.Router, ku domain.KategoriUseCase) {
 	adminRoutes.Use(middleware.AuthMiddleware("admin"))
 	adminRoutes.Post("/create-kategori", handler.CreateKategori)
 	adminRoutes.Put("/update-kategori/:id_kategori", handler.UpdateKategori)
+	adminRoutes.Delete("/delete-kategori/:id_kategori", handler.DeleteKategori)
 }
 
 // CreateKategori menangani pembuatan kategori baru
@@ -154,5 +155,35 @@ func (d *HttpDeliveryKategori) UpdateKategori(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "Kategori berhasil diperbarui",
+	})
+}
+
+// DeleteKategori menangani penghapusan kategori berdasarkan ID
+func (d *HttpDeliveryKategori) DeleteKategori(c *fiber.Ctx) error {
+	id := c.Params("id_kategori")
+	if id == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID kategori harus diisi",
+		})
+	}
+
+	// Periksa apakah kategori dengan ID tersebut ada
+	_, err := d.KategoriUseCase.GetByID(context.Background(), id)
+	if err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": fmt.Sprintf("Kategori tidak ditemukan: %v", err),
+		})
+	}
+
+	// Hapus kategori
+	err = d.KategoriUseCase.Delete(context.Background(), id)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal menghapus kategori: %v", err),
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Kategori berhasil dihapus",
 	})
 }
