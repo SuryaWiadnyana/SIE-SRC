@@ -53,12 +53,28 @@
         </a>
       </li>
 
-      <!-- Nav Item - Products -->
+      <!-- Nav Item - Products Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link" href="produk.html">
-          <i class="fas fa-fw fa-box"></i>
-          <span>Manajemen Produk</span>
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProducts"
+            aria-expanded="true" aria-controls="collapseProducts">
+            <i class="fas fa-fw fa-box"></i>
+            <span>Manajemen Produk</span>
         </a>
+        <div id="collapseProducts" class="collapse" aria-labelledby="headingProducts"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Menu Produk:</h6>
+                <a class="collapse-item" href="produk.html">
+                    <i class="fas fa-fw fa-list mr-2"></i>Daftar Produk
+                </a>
+                <a class="collapse-item" href="kategori.html">
+                    <i class="fas fa-fw fa-tags mr-2"></i>Kelola Kategori
+                </a>
+                <a class="collapse-item" href="subkategori.html">
+                    <i class="fas fa-fw fa-tag mr-2"></i>Kelola Sub Kategori
+                </a>
+            </div>
+        </div>
       </li>
 
       <!-- Nav Item - Sales -->
@@ -189,7 +205,6 @@
                   </div>
                 </div>
               </div>
-            </div>
     
     </div>
     <!-- End of Main Content -->
@@ -198,7 +213,7 @@
     <footer class="sticky-footer bg-white">
       <div class="container my-auto">
         <div class="copyright text-center my-auto">
-          <span>Copyright &copy; SIE-SRC 2024</span>
+          <span>Copyright &copy; SIE-SRC 2025</span>
         </div>
       </div>
     </footer>

@@ -1177,7 +1177,7 @@ async function handleAddProduct(event) {
     if (!productData.nama_produk || !productData.kategori || !productData.subkategori || 
         !productData.kode_produk || !productData.harga_produk || !productData.tanggal_kadaluarsa || 
         !productData.stok_barang) {
-        showAlert('Semua field harus diisi', 'danger');
+        showAlert('Semua field harus diisi kecuali tanggal kadaluarsa', 'danger');
         return;
     }
     
@@ -1346,18 +1346,22 @@ async function handleUpdateProduct(e) {
             showAlert('Semua field harus diisi kecuali tanggal kadaluarsa', 'danger');
             return;
         }
-
+        
         // Validasi harga dan stok
         if (parseFloat(hargaProduk) < 0) {
             showAlert('Harga produk tidak boleh negatif', 'danger');
             return;
         }
-
+        
         if (parseInt(stokBarang) < 0) {
             showAlert('Stok barang tidak boleh negatif', 'danger');
             return;
         }
-
+        
+        // Format tanggal kadaluarsa ke ISO string
+        const expDate = new Date(tanggalKadaluarsa);
+        tanggalKadaluarsa = expDate.toISOString();
+        
         // Siapkan data produk dengan format yang benar
         const productData = {
             id_produk: idProduk,
@@ -1377,7 +1381,7 @@ async function handleUpdateProduct(e) {
 
         // Tambahkan tanggal kadaluarsa jika ada
         if (tanggalKadaluarsa) {
-            productData.tanggal_kadaluarsa = new Date(tanggalKadaluarsa).toISOString();
+            productData.tanggal_kadaluarsa = tanggalKadaluarsa;
         }
 
         console.log('Data produk yang akan diupdate:', productData);
@@ -1387,6 +1391,7 @@ async function handleUpdateProduct(e) {
         
         if (result.success) {
             showAlert('Produk berhasil diperbarui', 'success');
+            loadSubKategoriTable();
             $('#updateProductModal').modal('hide');
             loadProducts(); // Refresh tabel
         } else {
@@ -1448,91 +1453,101 @@ async function handleEditClick(id) {
 
 // Populate update form with product data
 async function populateUpdateForm(product) {
-    console.log('Populating update form with product data:', product);
+    console.log('Data produk yang akan ditampilkan:', product);
     
-    // Reset form
-    document.getElementById('updateProductForm').reset();
-    
-    // Set form values
-    document.getElementById('update_id_produk').value = product.id_produk;
-    document.getElementById('update_nama_produk').value = product.nama_produk;
-    document.getElementById('update_kode_produk').value = product.kode_produk;
-    document.getElementById('update_harga_produk').value = product.harga_produk;
-    document.getElementById('update_stok_barang').value = product.stok_barang;
-    
-    // Format tanggal kadaluarsa untuk input date
-    if (product.tanggal_kadaluarsa) {
-        const date = new Date(product.tanggal_kadaluarsa);
-        if (!isNaN(date.getTime())) {
-            const formattedDate = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            document.getElementById('update_tanggal_kadaluarsa').value = formattedDate;
-        }
-    } else {
-        document.getElementById('update_tanggal_kadaluarsa').value = '';
-    }
-    
-    // Populate kategori dropdown dengan data lengkap
     try {
-        // Ambil semua kategori
-        const kategoriResponse = await fetchKategori();
+        // Reset form
+        document.getElementById('updateProductForm').reset();
         
+        // Set nilai-nilai dasar
+        document.getElementById('update_id_produk').value = product.id_produk;
+        document.getElementById('update_nama_produk').value = product.nama_produk;
+        document.getElementById('update_kode_produk').value = product.kode_produk;
+        document.getElementById('update_harga_produk').value = product.harga_produk;
+        document.getElementById('update_stok_barang').value = product.stok_barang;
+        
+        // Format tanggal kadaluarsa
+        if (product.tanggal_kadaluarsa) {
+            const date = new Date(product.tanggal_kadaluarsa);
+            if (!isNaN(date.getTime())) {
+                const formattedDate = date.toISOString().split('T')[0];
+                document.getElementById('update_tanggal_kadaluarsa').value = formattedDate;
+            }
+        }
+        
+        // Ambil referensi ke dropdown
+        const kategoriSelect = document.getElementById('update_kategori');
+        const subKategoriSelect = document.getElementById('update_sub_kategori');
+        
+        // Reset dropdown
+        kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+        subKategoriSelect.innerHTML = '<option value="">Pilih Sub Kategori</option>';
+        
+        // Ambil daftar kategori
+        const kategoriResponse = await fetchKategori();
         if (!kategoriResponse.success) {
             throw new Error('Gagal mengambil data kategori');
         }
         
+        // Isi dropdown kategori
         const kategoriList = kategoriResponse.data;
-        const kategoriSelect = document.getElementById('update_kategori');
-        
-        if (!kategoriSelect) return;
-        
-        // Reset dan isi dropdown kategori
-        kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-        
-        // Cari ID kategori dari produk
-        const kategoriId = product.kategori?.id_kategori;
-        const kategoriNama = product.kategori?.nama_kategori;
-        
-        if (!kategoriId || !kategoriNama) {
-            console.warn('Data kategori tidak lengkap:', product.kategori);
-        }
-        
-        kategoriList.forEach(kat => {
+        for (const kat of kategoriList) {
             const option = document.createElement('option');
             option.value = kat.id_kategori;
             option.textContent = kat.nama_kategori;
-            
-            // Pilih kategori yang sesuai berdasarkan ID
-            if (kat.id_kategori === kategoriId) {
+            if (product.kategori && kat.id_kategori === product.kategori.id_kategori) {
                 option.selected = true;
             }
-            
             kategoriSelect.appendChild(option);
+        }
+        
+        // Jika ada kategori yang dipilih, ambil dan isi subkategori
+        if (product.kategori && product.kategori.id_kategori) {
+            const subkategoriList = await fetchSubKategoriByKategori(product.kategori.id_kategori);
+            
+            for (const subkat of subkategoriList) {
+                const option = document.createElement('option');
+                option.value = subkat.id_subkategori;
+                option.textContent = subkat.nama_subkategori;
+                if (product.subkategori && subkat.id_subkategori === product.subkategori.id_subkategori) {
+                    option.selected = true;
+                }
+                subKategoriSelect.appendChild(option);
+            }
+        }
+        
+        // Hapus event listener lama jika ada
+        const oldKategoriSelect = kategoriSelect.cloneNode(true);
+        kategoriSelect.parentNode.replaceChild(oldKategoriSelect, kategoriSelect);
+        
+        // Tambah event listener baru untuk perubahan kategori
+        oldKategoriSelect.addEventListener('change', async function() {
+            const selectedKategoriId = this.value;
+            const subKategoriSelect = document.getElementById('update_sub_kategori');
+            
+            // Reset subkategori dropdown
+            subKategoriSelect.innerHTML = '<option value="">Pilih Sub Kategori</option>';
+            
+            if (selectedKategoriId) {
+                try {
+                    const subkategoriList = await fetchSubKategoriByKategori(selectedKategoriId);
+                    
+                    // Isi dropdown subkategori
+                    for (const subkat of subkategoriList) {
+                        const option = document.createElement('option');
+                        option.value = subkat.id_subkategori;
+                        option.textContent = subkat.nama_subkategori;
+                        subKategoriSelect.appendChild(option);
+                    }
+                } catch (error) {
+                    console.error('Error fetching subkategori:', error);
+                    showAlert('Gagal mengambil data subkategori', 'danger');
+                }
+            }
         });
         
-        // Update subkategori berdasarkan kategori yang dipilih
-        if (kategoriId) {
-            await updateSubCategories(kategoriId, true);
-            
-            // Pilih subkategori yang sesuai
-            setTimeout(async () => {
-                const subKategoriSelect = document.getElementById('update_sub_kategori');
-                if (!subKategoriSelect) return;
-                
-                const subKategoriId = product.subkategori?.id_subkategori;
-                
-                if (subKategoriId) {
-                    // Cari dan pilih opsi yang sesuai
-                    for (let i = 0; i < subKategoriSelect.options.length; i++) {
-                        if (subKategoriSelect.options[i].value === subKategoriId) {
-                            subKategoriSelect.selectedIndex = i;
-                            break;
-                        }
-                    }
-                }
-            }, 300);
-        }
     } catch (error) {
-        console.error('Error populating kategori dropdown:', error);
+        console.error('Error populating update form:', error);
         showAlert(`Error: ${error.message}`, 'danger');
     }
 }
@@ -1809,15 +1824,6 @@ const kategori = {
                 throw new Error('ID kategori tidak valid');
             }
             
-            // Tampilkan peringatan bahwa fitur ini belum diimplementasi di backend
-            console.warn('Fitur hapus kategori belum diimplementasi di backend');
-            alert('Maaf, fitur hapus kategori belum tersedia saat ini. Silakan hubungi administrator.');
-            
-            // Kembalikan false untuk menunjukkan bahwa penghapusan tidak berhasil
-            return false;
-            
-            /* 
-            // Kode asli yang akan digunakan ketika endpoint tersedia
             const response = await fetch(`${BASE_URL}/kategori/admin/delete-kategori/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -1827,7 +1833,6 @@ const kategori = {
             
             const result = await handleResponse(response);
             return result.data;
-            */
         } catch (error) {
             console.error('Error deleting kategori:', error);
             // Jangan throw error, tangani dengan mengembalikan false
@@ -1852,14 +1857,18 @@ const kategori = {
                     'Authorization': `Bearer ${getToken()}`
                 },
                 body: JSON.stringify({ 
-                    id_kategori: id,
                     nama_kategori: namaKategori 
                 })
             });
             
-            const result = await handleResponse(response);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal memperbarui kategori');
+            }
+
+            const result = await response.json();
             console.log('Kategori berhasil diperbarui:', result);
-            return result.data;
+            return result;
         } catch (error) {
             console.error('Error updating kategori:', error);
             throw error;
@@ -1916,6 +1925,7 @@ const subkategori = {
         try {
             // Gunakan fetchSubKategoriByKategori yang sudah menghilangkan duplikasi
             const subkategoriData = await fetchSubKategoriByKategori(kategoriId);
+            
             console.log(`Subkategori for kategori ${kategoriId}:`, subkategoriData);
             return subkategoriData;
         } catch (error) {
@@ -1986,7 +1996,7 @@ const subkategori = {
         }
     },
     
-    // Membuat subkategori baru
+    // Memperbarui subkategori
     update: async function(id, kategoriId, namaSubKategori) {
         try {
             // Validasi input
@@ -1997,15 +2007,25 @@ const subkategori = {
             // Dapatkan data kategori
             let kategoriObj = {};
             try {
-                const kategoriResult = await kategori.getById(kategoriId);
-                if (kategoriResult && kategoriResult.id_kategori) {
-                    kategoriObj = {
-                        id_kategori: kategoriResult.id_kategori,
-                        nama_kategori: kategoriResult.nama_kategori
-                    };
-                } else {
+                const kategoriResponse = await fetch(`${BASE_URL}/kategori/getbyid/${kategoriId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+                
+                if (!kategoriResponse.ok) {
+                    throw new Error('Gagal mendapatkan data kategori');
+                }
+                
+                const kategoriData = await kategoriResponse.json();
+                if (!kategoriData || !kategoriData.id_kategori) {
                     throw new Error('Data kategori tidak valid');
                 }
+                
+                kategoriObj = {
+                    id_kategori: kategoriData.id_kategori,
+                    nama_kategori: kategoriData.nama_kategori
+                };
             } catch (error) {
                 console.error('Error mendapatkan data kategori:', error);
                 throw new Error('Gagal mendapatkan data kategori: ' + error.message);
@@ -2025,10 +2045,18 @@ const subkategori = {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${getToken()}`
                 },
-                body: JSON.stringify(dataToSend)
+                body: JSON.stringify({
+                    nama_subkategori: namaSubKategori,
+                    kategori: kategoriObj
+                })
             });
             
-            const result = await handleResponse(response);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal memperbarui subkategori');
+            }
+
+            const result = await response.json();
             console.log('Subkategori berhasil diperbarui:', result);
             return result;
         } catch (error) {
@@ -2046,15 +2074,6 @@ const subkategori = {
                 throw new Error('ID subkategori tidak valid');
             }
             
-            // Tampilkan peringatan bahwa fitur ini belum diimplementasi di backend
-            console.warn('Fitur hapus subkategori belum diimplementasi di backend');
-            alert('Maaf, fitur hapus subkategori belum tersedia saat ini. Silakan hubungi administrator.');
-            
-            // Kembalikan false untuk menunjukkan bahwa penghapusan tidak berhasil
-            return false;
-            
-            /* 
-            // Kode asli yang akan digunakan ketika endpoint tersedia
             const response = await fetch(`${BASE_URL}/subkategori/admin/delete-subkategori/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -2064,7 +2083,6 @@ const subkategori = {
             
             const result = await handleResponse(response);
             return result.data;
-            */
         } catch (error) {
             console.error('Error deleting subkategori:', error);
             // Jangan throw error, tangani dengan mengembalikan false
@@ -2133,6 +2151,7 @@ function initializeKategoriManagement() {
             try {
                 await kategori.update(id, nama);
                 showAlert('Kategori berhasil diperbarui', 'success');
+                loadKategoriTable();
                 
                 // Tutup modal
                 const modal = document.getElementById('editKategoriModal');
@@ -2142,9 +2161,6 @@ function initializeKategoriManagement() {
                 if (backdrop) {
                     backdrop.remove();
                 }
-                
-                // Refresh tabel
-                loadKategoriTable();
             } catch (error) {
                 console.error('Error updating kategori:', error);
                 showAlert(`Error: ${error.message}`, 'danger');
@@ -2423,4 +2439,295 @@ async function populateKategoriDropdowns(targetId = 'parentKategori') {
         console.error('Error populating kategori dropdowns:', error);
         showAlert(`Error: ${error.message}`, 'danger');
     }
+}
+
+// Inisialisasi halaman berdasarkan URL saat ini
+document.addEventListener('DOMContentLoaded', async () => {
+    // Dapatkan URL halaman saat ini
+    const currentPath = window.location.pathname;
+    
+    // Periksa halaman mana yang sedang diakses
+    if (currentPath.includes('kategori.html')) {
+        console.log('Initializing kategori page...');
+        initializeKategoriPage();
+    } else if (currentPath.includes('subkategori.html')) {
+        console.log('Initializing subkategori page...');
+        initializeSubKategoriPage();
+    } else if (currentPath.includes('produk.html')) {
+        console.log('Initializing produk page...');
+        // Kode inisialisasi produk yang sudah ada
+    }
+});
+
+// Fungsi untuk menginisialisasi halaman kategori
+function initializeKategoriPage() {
+    // Pastikan elemen yang dibutuhkan ada di halaman
+    const kategoriTable = document.getElementById('kategoriTable');
+    const addKategoriForm = document.getElementById('addKategoriForm');
+    const editKategoriForm = document.getElementById('editKategoriForm');
+    
+    if (!kategoriTable || !addKategoriForm || !editKategoriForm) {
+        console.error('Elemen yang dibutuhkan tidak ditemukan di halaman kategori');
+        return;
+    }
+    
+    // Tambahkan tbody jika belum ada
+    if (!document.getElementById('kategoriTableBody')) {
+        const tbody = document.createElement('tbody');
+        tbody.id = 'kategoriTableBody';
+        kategoriTable.appendChild(tbody);
+    }
+    
+    // Load data kategori saat halaman dimuat
+    loadKategoriTable();
+    
+    // Event listener untuk form tambah kategori
+    addKategoriForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const namaKategori = document.getElementById('newKategoriName').value.trim();
+        if (!namaKategori) {
+            showAlert('Nama kategori baru tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        try {
+            await kategori.create(namaKategori);
+            document.getElementById('newKategoriName').value = '';
+            showAlert('Kategori berhasil ditambahkan', 'success');
+            loadKategoriTable();
+            
+            // Tutup modal setelah berhasil
+            $('#addKategoriModal').modal('hide');
+        } catch (error) {
+            console.error('Error creating kategori:', error);
+            showAlert(`Error: ${error.message}`, 'danger');
+        }
+    });
+    
+    // Event listener untuk form edit kategori
+    editKategoriForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('editKategoriId').value;
+        const namaKategori = document.getElementById('editKategoriName').value.trim();
+        
+        if (!namaKategori) {
+            showAlert('Nama kategori tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        try {
+            await kategori.update(id, namaKategori);
+            showAlert('Kategori berhasil diperbarui', 'success');
+            loadKategoriTable();
+            
+            // Tutup modal setelah berhasil
+            $('#editKategoriModal').modal('hide');
+        } catch (error) {
+            console.error('Error updating kategori:', error);
+            showAlert(`Error: ${error.message}`, 'danger');
+        }
+    });
+    
+    // Event delegation untuk tombol edit dan delete
+    document.addEventListener('click', function(e) {
+        // Tombol edit kategori
+        if (e.target.classList.contains('edit-kategori') || e.target.closest('.edit-kategori')) {
+            const button = e.target.closest('.edit-kategori') || e.target;
+            const id = button.getAttribute('data-id');
+            const nama = button.getAttribute('data-nama');
+            
+            document.getElementById('editKategoriId').value = id;
+            document.getElementById('editKategoriName').value = nama;
+            
+            // Tampilkan modal edit
+            $('#editKategoriModal').modal('show');
+        }
+        
+        // Tombol delete kategori
+        if (e.target.classList.contains('delete-kategori') || e.target.closest('.delete-kategori')) {
+            const button = e.target.closest('.delete-kategori') || e.target;
+            const id = button.getAttribute('data-id');
+            const nama = button.getAttribute('data-nama');
+            
+            if (confirm(`Apakah Anda yakin ingin menghapus kategori "${nama}"?`)) {
+                kategori.delete(id).then(result => {
+                    if (result !== false) {
+                        showAlert('Kategori berhasil dihapus', 'success');
+                        loadKategoriTable();
+                    }
+                }).catch(error => {
+                    console.error('Error deleting kategori:', error);
+                    showAlert(`Error: ${error.message}`, 'danger');
+                });
+            }
+        }
+    });
+}
+
+// Fungsi untuk menginisialisasi halaman subkategori
+function initializeSubKategoriPage() {
+    // Pastikan elemen yang dibutuhkan ada di halaman
+    const subKategoriTable = document.getElementById('subKategoriTable');
+    const addSubKategoriForm = document.getElementById('addSubKategoriForm');
+    const editSubKategoriForm = document.getElementById('editSubKategoriForm');
+    const kategoriDropdown = document.getElementById('kategoriDropdown');
+    const editKategoriDropdown = document.getElementById('editKategoriDropdown');
+    
+    if (!subKategoriTable || !addSubKategoriForm || !editSubKategoriForm) {
+        console.error('Elemen yang dibutuhkan tidak ditemukan di halaman subkategori');
+        return;
+    }
+    
+    // Tambahkan tbody jika belum ada
+    if (!document.getElementById('subKategoriTableBody')) {
+        const tbody = document.createElement('tbody');
+        tbody.id = 'subKategoriTableBody';
+        subKategoriTable.appendChild(tbody);
+    }
+    
+    // Load data subkategori saat halaman dimuat
+    loadSubKategoriTable();
+    
+    // Isi dropdown kategori
+    if (kategoriDropdown) {
+        kategori.getAll().then(kategoriList => {
+          kategoriDropdown.innerHTML = '<option value="">Pilih Kategori</option>';
+          kategoriList.forEach(kat => {
+            const option = document.createElement('option');
+            option.value = kat.id_kategori;
+            option.textContent = kat.nama_kategori;
+            kategoriDropdown.appendChild(option);
+          });
+
+        }).catch(error => {
+          console.error('Error loading kategori dropdown:', error);
+          showAlert(`Error: ${error.message}`, 'danger');
+        });
+    }
+    
+    // Event listener untuk form tambah subkategori
+    addSubKategoriForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const kategoriId = kategoriDropdown ? kategoriDropdown.value : '';
+        const namaSubKategori = document.getElementById('newSubKategoriName').value.trim();
+        
+        if (!kategoriId) {
+            showAlert('Silakan pilih kategori terlebih dahulu', 'danger');
+            return;
+        }
+        
+        if (!namaSubKategori) {
+            showAlert('Nama subkategori tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        try {
+            await subkategori.create(kategoriId, namaSubKategori);
+            document.getElementById('newSubKategoriName').value = '';
+            if (kategoriDropdown) kategoriDropdown.value = '';
+            showAlert('Subkategori berhasil ditambahkan', 'success');
+            loadSubKategoriTable();
+            
+            // Tutup modal setelah berhasil
+            $('#addSubKategoriModal').modal('hide');
+        } catch (error) {
+            console.error('Error creating subkategori:', error);
+            showAlert(`Error: ${error.message}`, 'danger');
+        }
+    });
+    
+    // Event listener untuk form edit subkategori
+    editSubKategoriForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('editSubKategoriId').value;
+        const idKategori = editKategoriDropdown ? editKategoriDropdown.value : '';
+        const namaSubKategori = document.getElementById('editSubKategoriName').value.trim();
+        
+        if (!idKategori) {
+            showAlert('Silakan pilih kategori terlebih dahulu', 'danger');
+            return;
+        }
+        
+        if (!namaSubKategori) {
+            showAlert('Nama subkategori tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        try {
+            await subkategori.update(id, idKategori, namaSubKategori);
+            showAlert('Subkategori berhasil diperbarui', 'success');
+            
+            // Tutup modal setelah berhasil
+            $('#editSubKategoriModal').modal('hide');
+        } catch (error) {
+            console.error('Error updating subkategori:', error);
+            showAlert(`Error: ${error.message}`, 'danger');
+        }
+    });
+    
+    // Isi dropdown kategori untuk form edit
+    if (editKategoriDropdown) {
+        // Event listener untuk modal edit subkategori
+        $('#editSubKategoriModal').on('show.bs.modal', function() {
+            kategori.getAll().then(kategoriList => {
+                editKategoriDropdown.innerHTML = '<option value="">Pilih Kategori</option>';
+                kategoriList.forEach(kat => {
+                    const option = document.createElement('option');
+                    option.value = kat.id_kategori;
+                    option.textContent = kat.nama_kategori;
+                    editKategoriDropdown.appendChild(option);
+                });
+                
+                // Set nilai kategori yang dipilih
+                const selectedKategoriId = document.getElementById('editSubKategoriKategoriId').value;
+                if (selectedKategoriId) {
+                    editKategoriDropdown.value = selectedKategoriId;
+                }
+            }).catch(error => {
+                console.error('Error loading kategori dropdown for edit:', error);
+                showAlert(`Error: ${error.message}`, 'danger');
+            });
+        });
+    }
+    
+    // Event delegation untuk tombol edit dan delete
+    document.addEventListener('click', function(e) {
+        // Tombol edit subkategori
+        if (e.target.classList.contains('edit-subkategori') || e.target.closest('.edit-subkategori')) {
+            const button = e.target.closest('.edit-subkategori') || e.target;
+            const id = button.getAttribute('data-id');
+            const idKategori = button.getAttribute('data-kategori-id');
+            const nama = button.getAttribute('data-nama');
+            
+            document.getElementById('editSubKategoriId').value = id;
+            document.getElementById('editSubKategoriKategoriId').value = idKategori;
+            document.getElementById('editSubKategoriName').value = nama;
+            
+            // Tampilkan modal edit
+            $('#editSubKategoriModal').modal('show');
+        }
+        
+        // Tombol delete subkategori
+        if (e.target.classList.contains('delete-subkategori') || e.target.closest('.delete-subkategori')) {
+            const button = e.target.closest('.delete-subkategori') || e.target;
+            const id = button.getAttribute('data-id');
+            const nama = button.getAttribute('data-nama');
+            
+            if (confirm(`Apakah Anda yakin ingin menghapus subkategori "${nama}"?`)) {
+                subkategori.delete(id).then(result => {
+                    if (result !== false) {
+                        showAlert('Subkategori berhasil dihapus', 'success');
+                        loadSubKategoriTable();
+                    }
+                }).catch(error => {
+                    console.error('Error deleting subkategori:', error);
+                    showAlert(`Error: ${error.message}`, 'danger');
+                });
+            }
+        }
+    });
 }
