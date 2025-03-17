@@ -82,7 +82,6 @@ async function loadDetailPenjualan(id_details) {
 
         console.log('Response status:', response.status);
         const responseText = await response.text();
-        console.log('Response text:', responseText);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
@@ -117,7 +116,6 @@ async function loadDetailByPenjualanID(id_penjualan) {
 
         console.log('Response status:', response.status);
         const responseText = await response.text();
-        console.log('Response text:', responseText);
 
         if (!response.ok) {
             if (response.status === 404) {
