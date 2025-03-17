@@ -137,6 +137,7 @@
                                         <tr>
                                             <th>Username</th>
                                             <th>Role</th>
+                                            <th>Status</th>
                                             <th class="text-center" style="width: 200px;">Aksi</th>
                                         </tr>
                                     </thead>
@@ -207,6 +208,13 @@
                                 <option value="owner">Owner</option>
                             </select>
                         </div>
+                        <div class="form-group mt-3">
+                            <label for="status">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="Aktif" selected>Aktif</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -254,6 +262,13 @@
                                 <option value="">Pilih Role</option>
                                 <option value="admin">Admin</option>
                                 <option value="owner">Owner</option>
+                            </select>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="editStatus">Status</label>
+                            <select class="form-control" id="editStatus" name="status" required>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Tidak Aktif">Tidak Aktif</option>
                             </select>
                         </div>
                     </div>
@@ -321,6 +336,14 @@
     <!-- User management functionality -->
     <script type="module" src="../js/pengguna.js"></script>
 
-</body>
+    <!-- Logout handler -->
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            window.location.href = '../login.html';
+        });
+    </script>
+
+    </body>
 
 </html>

@@ -259,7 +259,7 @@ async function loadUsers() {
     try {
         const result = await users.getAll();
         if (result.success) {
-            displayUsers(result.data.data || []);
+            populateUserTable(result.data.data || []);
         } else {
             showAlert(result.error || 'Gagal memuat data pengguna', 'danger');
         }
@@ -269,38 +269,33 @@ async function loadUsers() {
     }
 }
 
-// Display users in table
-function displayUsers(users) {
+// Populate user table
+function populateUserTable(users) {
+    const userTable = document.querySelector('#userTable tbody');
     if (!userTable) return;
-
+    
     userTable.innerHTML = '';
-    if (!users || users.length === 0) {
-        userTable.innerHTML = '<tr><td colspan="3" class="text-center">Tidak ada pengguna ditemukan</td></tr>';
-        return;
-    }
-
+    
     users.forEach(user => {
-        // Pastikan user.id ada
-        const userId = user.id_user || user.id_user;
-        if (!userId) {
-            console.error('User tidak memiliki ID:', user);
-            return;
-        }
-
+        // Tentukan status dan badge
+        const status = user.status || 'Aktif';
+        const statusClass = status === 'Aktif' ? 'success' : 'danger';
+        const statusBadge = `<span class="badge badge-${statusClass}">${status}</span>`;
+        
+        // Buat ID user jika tidak ada
+        const userId = user.id_user || '';
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${user.username}</td>
             <td>${user.role}</td>
+            <td>${statusBadge}</td>
             <td class="text-center">
-                <button class="btn btn-warning btn-sm edit-user me-2" 
+                <button class="btn btn-warning btn-sm edit-user" 
                     data-username="${user.username}" 
-                    data-role="${user.role}">
+                    data-role="${user.role}"
+                    data-status="${status}">
                     <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger btn-sm delete-user" 
-                    data-username="${user.username}"
-                    data-id_user="${userId}">
-                    <i class="fas fa-trash"></i> Hapus
                 </button>
             </td>
         `;
@@ -353,11 +348,14 @@ function handleEditClick(e) {
     const button = e.currentTarget;
     const username = button.dataset.username;
     const role = button.dataset.role;
-
+    const status = button.dataset.status || 'Aktif';
+    
     // Populate edit form
     if (editUserForm) {
         editUserForm.querySelector('#editUsername').value = username;
         editUserForm.querySelector('#editRole').value = role;
+        editUserForm.querySelector('#editStatus').value = status;
+        
         $('#editUserModal').modal('show');
     }
 }
@@ -370,11 +368,13 @@ if (editUserForm) {
         const username = formData.get('username');
         const password = formData.get('password');
         const role = formData.get('role');
+        const status = formData.get('status');
         
         try {
             const userData = {
                 username,
-                role
+                role,
+                status
             };
             
             // Hanya sertakan password jika diisi

@@ -110,7 +110,7 @@
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Owner</span>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">OwnerSRC</span>
                 <img class="img-profile rounded-circle" src="../img/undraw_profile.svg" />
               </a>
               <!-- Dropdown - User Information -->
@@ -212,12 +212,13 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="chart-area">
-                                        <canvas id="salesChart"></canvas>
+                                        <canvas id="myAreaChart"></canvas>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Pie Chart -->
                         <div class="col-xl-4 col-lg-5">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
@@ -225,15 +226,54 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-bordered" id="produkTerlarisTable" width="100%" cellspacing="0">
+                                        <table class="table table-bordered" id="bestSellingTable" width="100%" cellspacing="0">
                                             <thead>
                                                 <tr>
-                                                    <th>No</th>
                                                     <th>Nama Produk</th>
-                                                    <th>Total Terjual</th>
+                                                    <th>Jumlah Terjual</th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="produkTerlarisBody">
+                                            <tbody id="bestSellingTableBody">
+                                                <!-- Data akan diisi melalui JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Produk Mendekati Kadaluarsa -->
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-danger">Produk Mendekati Kadaluarsa</h6>
+                                    <div class="dropdown no-arrow">
+                                        <select id="expiryThreshold" class="form-control form-control-sm">
+                                            <option value="7">7 Hari</option>
+                                            <option value="14">14 Hari</option>
+                                            <option value="30" selected>30 Hari</option>
+                                            <option value="60">60 Hari</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="nearExpiryTable" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Kode Produk</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>Kategori</th>
+                                                    <th>Stok</th>
+                                                    <th>Tanggal Kadaluarsa</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="nearExpiryTableBody">
+                                                <!-- Data akan diisi melalui JavaScript -->
                                             </tbody>
                                         </table>
                                     </div>

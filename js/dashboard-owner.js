@@ -361,55 +361,40 @@ const users = {
 
 // Products API
 const products = {
-  getAll: async () => {
+  getAll: async function () {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Tidak terautentikasi");
-      }
-
       const response = await fetch(`${BASE_URL}/produk/getallproduk`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      // Tangani error non-200 response
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server response:", {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText,
-        });
-        throw new Error(
-          `Server error: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const result = await response.json();
-      // console.log("Raw API Response:", result);
-
-      // Pastikan data memiliki struktur yang benar
-      if (!result || !result.data) {
-        console.warn("Invalid response format:", result);
-        return { success: false, error: "Invalid response format", data: [] };
-      }
-
-      // Kembalikan data mentah dari API
-      return {
-        success: true,
-        data: result.data,
-      };
+      const result = await handleResponse(response);
+      return result.data;
     } catch (error) {
-      console.error("Get all products error:", error);
-      return {
-        success: false,
-        error: error.message,
-        data: [],
-      };
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  },
+
+  // Fungsi untuk mendapatkan produk yang mendekati kadaluarsa
+  getNearExpiry: async function (daysThreshold = 30) {
+    try {
+      const response = await fetch(`${BASE_URL}/produk/getnearexpiry/${daysThreshold}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const result = await handleResponse(response);
+      return result.data;
+    } catch (error) {
+      console.error(`Error fetching products near expiry (${daysThreshold} days):`, error);
+      throw error;
     }
   },
 
@@ -1446,15 +1431,113 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// // Export the new function
-// export const api = {
-//   auth,
-//   checkAuth,
-//   users,
-//   products,
-//   sales,
-//   dashboard,
-//   getBestSellingProducts,
-//   formatRupiah,
-//   displayTotalSalesAndStock,
-// };
+// Fungsi untuk memperbarui tabel produk yang mendekati kadaluarsa
+async function updateNearExpiryProductsTable() {
+  try {
+    console.log("Memperbarui tabel produk mendekati kadaluarsa...");
+    const tableBody = document.getElementById("nearExpiryTableBody");
+    if (!tableBody) {
+      console.error("Elemen tabel produk mendekati kadaluarsa tidak ditemukan");
+      return;
+    }
+
+    // Ambil nilai threshold dari dropdown
+    const thresholdSelect = document.getElementById("expiryThreshold");
+    const daysThreshold = thresholdSelect ? parseInt(thresholdSelect.value) : 30;
+
+    // Ambil data produk yang mendekati kadaluarsa
+    const result = await products.getNearExpiry(daysThreshold);
+    
+    if (!result || !result.data) {
+      tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada data produk mendekati kadaluarsa</td></tr>';
+      return;
+    }
+
+    const nearExpiryProducts = result.data;
+    
+    if (nearExpiryProducts.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada produk yang mendekati kadaluarsa</td></tr>';
+      return;
+    }
+
+    // Kosongkan tabel
+    tableBody.innerHTML = "";
+
+    // Isi tabel dengan data produk
+    nearExpiryProducts.forEach((item) => {
+      const product = item.Produk;
+      const isExpired = item.IsExpired;
+      const daysUntil = item.DaysUntilExpiry;
+
+      const row = document.createElement("tr");
+      
+      // Tambahkan kelas untuk produk yang sudah kadaluarsa
+      if (isExpired) {
+        row.classList.add("table-danger");
+      } else if (daysUntil <= 7) {
+        row.classList.add("table-warning");
+      }
+
+      // Format tanggal kadaluarsa
+      const expiryDate = new Date(product.tanggal_kadaluarsa);
+      const formattedDate = expiryDate.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      // Status kadaluarsa
+      let statusText = "";
+      let statusClass = "";
+      
+      if (isExpired) {
+        statusText = "Kadaluarsa";
+        statusClass = "badge badge-danger";
+      } else {
+        statusText = `${daysUntil} hari lagi`;
+        statusClass = daysUntil <= 7 ? "badge badge-warning" : "badge badge-info";
+      }
+
+      row.innerHTML = `
+        <td>${product.kode_produk || "-"}</td>
+        <td>${product.nama_produk || "-"}</td>
+        <td>${product.kategori || "-"}</td>
+        <td>${product.stok || 0}</td>
+        <td>${formattedDate}</td>
+        <td><span class="${statusClass}">${statusText}</span></td>
+      `;
+
+      tableBody.appendChild(row);
+    });
+
+    console.log(`Berhasil memperbarui tabel dengan ${nearExpiryProducts.length} produk mendekati kadaluarsa`);
+  } catch (error) {
+    console.error("Error updating near expiry products table:", error);
+    const tableBody = document.getElementById("nearExpiryTableBody");
+    if (tableBody) {
+      tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Error: Gagal memuat data produk mendekati kadaluarsa</td></tr>';
+    }
+  }
+}
+
+// Tambahkan event listener untuk perubahan threshold
+document.addEventListener("DOMContentLoaded", () => {
+  const thresholdSelect = document.getElementById("expiryThreshold");
+  if (thresholdSelect) {
+    thresholdSelect.addEventListener("change", updateNearExpiryProductsTable);
+  }
+});
+
+// Jalankan fungsi saat halaman dimuat
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    console.log("Halaman dimuat, memperbarui dashboard...");
+    await checkAuth(); // Pastikan pengguna sudah login
+    await updateDashboardData();
+    await updateBestSellingProductsTable();
+    await displayLowestStockProduct();
+    await updateNearExpiryProductsTable(); // Tambahkan fungsi untuk produk mendekati kadaluarsa
+  } catch (error) {
+    console.error("Error updating dashboard:", error);
+  }
+});
