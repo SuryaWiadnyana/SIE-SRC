@@ -252,7 +252,7 @@ const products = {
         const finalProductData = {
           nama_produk: productData.nama_produk,
           kategori: productData.kategori,
-          subkategori: productData.subkategori,
+          subkategori: productData.subkategori,  // Backend mengharapkan field 'subkategori'
           kode_produk: productData.kode_produk,
           harga_produk: parseInt(productData.harga_produk),
           stok_barang: parseInt(productData.stok_barang),
@@ -470,16 +470,32 @@ async function fetchKategori() {
     console.log('Hasil fetchKategori:', result);
     
     // Periksa berbagai kemungkinan format respons
+    let kategoriList = [];
     if (result && result.data && Array.isArray(result.data)) {
-      return result;
+      kategoriList = result.data;
     } else if (Array.isArray(result)) {
-      return { success: true, data: result };
+      kategoriList = result;
     } else if (result && typeof result === 'object') {
-      return { success: true, data: [result] };
+      kategoriList = [result];
     } else {
       console.warn('Format data kategori tidak dikenali:', result);
       return { success: true, data: [] };
     }
+    
+    // Gunakan Map untuk menghilangkan duplikasi
+    const uniqueKategori = new Map();
+    
+    // Tambahkan kategori unik ke Map
+    kategoriList.forEach(kat => {
+      if (kat && kat.id_kategori && kat.nama_kategori) {
+        uniqueKategori.set(kat.id_kategori, kat);
+      }
+    });
+    
+    // Konversi Map kembali ke array
+    const uniqueKategoriArray = Array.from(uniqueKategori.values());
+    
+    return { success: true, data: uniqueKategoriArray };
   } catch (error) {
     console.error("Error fetching kategori:", error);
     showAlert(`Error: ${error.message}`, 'danger');
@@ -504,16 +520,32 @@ async function fetchSubKategori() {
     console.log('Hasil fetchSubKategori:', result);
     
     // Periksa berbagai kemungkinan format respons
+    let subkategoriList = [];
     if (result && result.data && Array.isArray(result.data)) {
-      return result;
+      subkategoriList = result.data;
     } else if (Array.isArray(result)) {
-      return { success: true, data: result };
+      subkategoriList = result;
     } else if (result && typeof result === 'object') {
-      return { success: true, data: [result] };
+      subkategoriList = [result];
     } else {
       console.warn('Format data subkategori tidak dikenali:', result);
       return { success: true, data: [] };
     }
+    
+    // Gunakan Map untuk menghilangkan duplikasi
+    const uniqueSubkategori = new Map();
+    
+    // Tambahkan subkategori unik ke Map
+    subkategoriList.forEach(subkat => {
+      if (subkat && subkat.id_subkategori && subkat.nama_subkategori) {
+        uniqueSubkategori.set(subkat.id_subkategori, subkat);
+      }
+    });
+    
+    // Konversi Map kembali ke array
+    const uniqueSubkategoriArray = Array.from(uniqueSubkategori.values());
+    
+    return { success: true, data: uniqueSubkategoriArray };
   } catch (error) {
     console.error("Error fetching subkategori:", error);
     showAlert(`Error: ${error.message}`, 'danger');
@@ -541,7 +573,6 @@ async function fetchSubKategoriByKategori(kategoriId) {
     }
 
     const result = await response.json();
-    console.log(`Subkategori untuk kategori ${kategoriId} dari API:`, result);
     
     // Periksa struktur data dan pastikan kita mengembalikan array
     let subkategoriList = [];
@@ -598,43 +629,46 @@ async function updateSubCategories(selectedKategoriId, isUpdateForm = false) {
   }
   
   try {
-    console.log(`Memperbarui dropdown subkategori untuk kategori ID: ${selectedKategoriId}`);
+    // console.log(`Memperbarui dropdown subkategori untuk kategori ID: ${selectedKategoriId}`);
     
     // Dapatkan data subkategori
     const subKategoriList = await fetchSubKategoriByKategori(selectedKategoriId);
     
     console.log('Data subkategori yang diterima:', subKategoriList);
     
+    // Gunakan Set untuk melacak ID subkategori yang sudah ditambahkan
+    const addedSubkategoriIds = new Set();
+    
     // Pastikan subKategoriList adalah array dan memiliki data
     if (Array.isArray(subKategoriList) && subKategoriList.length > 0) {
-      // Gunakan Map untuk melacak subkategori berdasarkan ID
-      const uniqueSubkategori = new Map();
+      // Aktifkan dropdown
+      subCategorySelect.disabled = false;
       
-      // Tambahkan subkategori unik ke Map
-      subKategoriList.forEach(subKat => {
-        if (subKat && subKat.id_subkategori && subKat.nama_subkategori) {
-          uniqueSubkategori.set(subKat.id_subkategori, subKat);
-        } else {
-          console.warn('Data subkategori tidak lengkap:', subKat);
+      // Tambahkan opsi untuk setiap subkategori (tanpa duplikasi)
+      subKategoriList.forEach(subKategori => {
+        if (subKategori && subKategori.id_subkategori && subKategori.nama_subkategori) {
+          // Periksa apakah ID ini sudah ditambahkan sebelumnya
+          if (!addedSubkategoriIds.has(subKategori.id_subkategori)) {
+            const option = document.createElement('option');
+            option.value = subKategori.id_subkategori;
+            option.textContent = subKategori.nama_subkategori;
+            subCategorySelect.appendChild(option);
+            
+            // Tandai ID ini sebagai sudah ditambahkan
+            addedSubkategoriIds.add(subKategori.id_subkategori);
+          }
         }
       });
-      
-      // Tambahkan opsi dari Map (ini menjamin tidak ada duplikasi)
-      uniqueSubkategori.forEach(subKat => {
-        const option = document.createElement('option');
-        option.value = subKat.id_subkategori;
-        option.textContent = subKat.nama_subkategori;
-        subCategorySelect.appendChild(option);
-      });
-      
-      // Enable dropdown karena ada opsi yang tersedia
+    }
+    
+    
+    // Jika tidak ada subkategori sama sekali, pastikan dropdown tetap aktif
+    if (subCategorySelect.options.length <= 1 && !isUpdateForm) {
       subCategorySelect.disabled = false;
-    } else {
-      console.log('Tidak ada subkategori yang tersedia untuk kategori ini');
-      subCategorySelect.disabled = true;
     }
   } catch (error) {
     console.error('Error updating subcategories:', error);
+    showAlert(`Error: ${error.message}`, 'danger');
     subCategorySelect.disabled = true;
   }
 }
@@ -644,8 +678,14 @@ function setupKategoriChangeListeners() {
     // Untuk form tambah produk
     const kategoriDropdown = document.getElementById('kategori');
     if (kategoriDropdown) {
-        kategoriDropdown.addEventListener('change', function() {
+        // Hapus event listener lama untuk menghindari duplikasi
+        const newKategoriDropdown = kategoriDropdown.cloneNode(true);
+        kategoriDropdown.parentNode.replaceChild(newKategoriDropdown, kategoriDropdown);
+        
+        // Pasang event listener baru
+        newKategoriDropdown.addEventListener('change', function() {
             const selectedKategoriId = this.value;
+            console.log(`Kategori dipilih (form tambah): ${selectedKategoriId}`);
             updateSubCategories(selectedKategoriId, false);
         });
     }
@@ -653,8 +693,14 @@ function setupKategoriChangeListeners() {
     // Untuk form edit produk
     const editKategoriDropdown = document.getElementById('update_kategori');
     if (editKategoriDropdown) {
-        editKategoriDropdown.addEventListener('change', function() {
+        // Hapus event listener lama untuk menghindari duplikasi
+        const newEditKategoriDropdown = editKategoriDropdown.cloneNode(true);
+        editKategoriDropdown.parentNode.replaceChild(newEditKategoriDropdown, editKategoriDropdown);
+        
+        // Pasang event listener baru
+        newEditKategoriDropdown.addEventListener('change', function() {
             const selectedKategoriId = this.value;
+            console.log(`Kategori dipilih (form edit): ${selectedKategoriId}`);
             updateSubCategories(selectedKategoriId, true);
         });
     }
@@ -731,16 +777,20 @@ document.addEventListener('DOMContentLoaded', async () => {
               option.textContent = kategori.nama_kategori;
               categorySelect.appendChild(option);
             });
+            
+            // Tambahkan opsi untuk kategori baru
+            const newOption = document.createElement('option');
+            newOption.value = "new";
+            newOption.textContent = "-- Tambah Baru --";
+            categorySelect.appendChild(newOption);
           } else {
             console.warn('Tidak ada data kategori untuk dropdown produk');
           }
+          
+          // Pasang event listener setelah dropdown kategori diisi
+          setupKategoriChangeListeners();
         }).catch(error => {
           console.error('Error loading kategori for dropdown:', error);
-        });
-        
-        // Add change listener
-        categorySelect.addEventListener('change', (e) => {
-            updateSubCategories(e.target.value, false);
         });
     }
 
@@ -762,13 +812,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           } else {
             console.warn('Tidak ada data kategori untuk dropdown update produk');
           }
+          
+          // Pasang event listener setelah dropdown kategori diisi
+          setupKategoriChangeListeners();
         }).catch(error => {
           console.error('Error loading kategori for update dropdown:', error);
-        });
-        
-        // Add change listener
-        updateCategorySelect.addEventListener('change', (e) => {
-            updateSubCategories(e.target.value, true);
         });
     }
 
@@ -788,7 +836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await populateKategoriDropdowns();
     
     // Setup event listener untuk perubahan kategori
-    setupKategoriChangeListeners();
+    // setupKategoriChangeListeners();
 });
 
 // Load all products
@@ -1137,6 +1185,9 @@ async function handleAddProduct(event) {
     console.log("Form data:", productData);
     
     // Validasi data produk
+    const subkategoriValue = productData.sub_kategori;
+    productData.subkategori = subkategoriValue; // Tambahkan field subkategori dengan nilai dari sub_kategori
+    
     if (!productData.nama_produk || !productData.kategori || !productData.subkategori || 
         !productData.kode_produk || !productData.harga_produk || !productData.tanggal_kadaluarsa || 
         !productData.stok_barang) {
@@ -1236,7 +1287,7 @@ async function handleAddProduct(event) {
         const finalProductData = {
             nama_produk: productData.nama_produk,
             kategori: kategoriObj,
-            subkategori: subkategoriObj,
+            subkategori: subkategoriObj,  // Backend mengharapkan field 'subkategori'
             kode_produk: productData.kode_produk,
             harga_produk: productData.harga_produk,
             stok_barang: productData.stok_barang,
@@ -1669,7 +1720,9 @@ const kategori = {
             if (kategoriData && kategoriData.data && Array.isArray(kategoriData.data)) {
                 return kategoriData.data;
             } else if (Array.isArray(kategoriData)) {
-                return kategoriData;
+                return { success: true, data: kategoriData };
+            } else if (kategoriData && typeof kategoriData === 'object') {
+                return { success: true, data: [kategoriData] };
             } else {
                 console.error("Format data kategori tidak valid:", kategoriData);
                 return [];
@@ -1803,7 +1856,9 @@ const subkategori = {
             if (subkategoriData && subkategoriData.data && Array.isArray(subkategoriData.data)) {
                 return subkategoriData.data;
             } else if (Array.isArray(subkategoriData)) {
-                return subkategoriData;
+                return { success: true, data: subkategoriData };
+            } else if (subkategoriData && typeof subkategoriData === 'object') {
+                return { success: true, data: [subkategoriData] };
             } else {
                 console.error("Format data subkategori tidak valid:", subkategoriData);
                 return [];
@@ -2007,7 +2062,7 @@ function initializeKategoriManagement() {
             
             const namaKategori = document.getElementById('newKategoriName').value.trim();
             if (!namaKategori) {
-                showAlert('Nama kategori tidak boleh kosong', 'danger');
+                showAlert('Nama kategori baru tidak boleh kosong', 'danger');
                 return;
             }
             
@@ -2111,7 +2166,7 @@ function initializeSubKategoriManagement() {
             }
             
             if (!namaSubKategori) {
-                showAlert('Nama subkategori tidak boleh kosong', 'danger');
+                showAlert('Nama subkategori baru tidak boleh kosong', 'danger');
                 return;
             }
             
