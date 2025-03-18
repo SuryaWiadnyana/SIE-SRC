@@ -34,6 +34,7 @@ func NewHttpDeliverySubKategori(app fiber.Router, sku domain.SubKategoriUseCase,
 	adminRoutes.Use(middleware.AuthMiddleware("admin"))
 	adminRoutes.Post("/create-subkategori", handler.CreateSubKategori)
 	adminRoutes.Put("/update-subkategori/:id_subkategori", handler.UpdateSubKategori)
+	adminRoutes.Delete("/delete-subkategori/:id_subkategori", handler.DeleteSubKategori)
 }
 
 // CreateSubKategori menangani pembuatan subkategori baru
@@ -214,5 +215,36 @@ func (d *HttpDeliverySubKategori) UpdateSubKategori(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "Sub kategori berhasil diperbarui",
+	})
+}
+
+// DeleteSubKategori menangani penghapusan subkategori
+func (d *HttpDeliverySubKategori) DeleteSubKategori(c *fiber.Ctx) error {
+	// Ambil ID subkategori dari parameter URL
+	id := c.Params("id_subkategori")
+	if id == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID subkategori harus diisi",
+		})
+	}
+
+	// Hapus subkategori
+	err := d.SubKategoriUseCase.Delete(context.Background(), id)
+	if err != nil {
+		// Jika error berisi pesan "masih digunakan", kirim status BadRequest
+		if err.Error() != "" && (err.Error() == fmt.Sprintf("subkategori dengan ID %s tidak ditemukan", id) || 
+			err.Error() == fmt.Sprintf("tidak dapat menghapus subkategori karena masih digunakan oleh produk")) {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+		// Untuk error lainnya, kirim status InternalServerError
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal menghapus subkategori: %v", err),
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Subkategori berhasil dihapus",
 	})
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,14 +45,27 @@ func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("error finding last product: %v", err)
 	}
 
-	// Parse the last ID and increment
-	lastID, err := strconv.Atoi(lastProduct.IDProduk)
+	// Get last ID and increment
+	lastID := lastProduct.IDProduk
+	if lastID == "" {
+		return "001", nil
+	}
+
+	// Check if the ID is in UUID format (contains hyphens)
+	if strings.Contains(lastID, "-") {
+		// If we have UUID format, start fresh with "001"
+		return "001", nil
+	}
+
+	// Try to convert the entire ID to a number
+	num, err := strconv.Atoi(lastID)
 	if err != nil {
-		return "", fmt.Errorf("error parsing last ID: %v", err)
+		// If conversion fails, start with "001"
+		return "001", nil
 	}
 
 	// Format new ID with leading zeros
-	newID := fmt.Sprintf("%03d", lastID+1)
+	newID := fmt.Sprintf("%03d", num+1)
 	return newID, nil
 }
 
@@ -183,13 +197,13 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 	filter := bson.M{"id_produk": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
-			"nama_produk":     bd.NamaProduk,
-			"nama_kategori":     bd.Kategori,
+			"nama_produk":      bd.NamaProduk,
+			"nama_kategori":    bd.Kategori,
 			"nama_subkategori": bd.SubKategori,
-			"kode_produk":     bd.KodeProduk,
-			"harga_produk":    bd.HargaProduk,
-			"stok_barang":     bd.Stok,
-			"updated_at":      bd.UpdatedAt,
+			"kode_produk":      bd.KodeProduk,
+			"harga_produk":     bd.HargaProduk,
+			"stok_barang":      bd.Stok,
+			"updated_at":       bd.UpdatedAt,
 		},
 	}
 
@@ -596,7 +610,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 	}
 
 	// Kita akan menggunakan collection detail_penjualan untuk mendapatkan data penjualan
-	detailPenjualan:= rp.DB.Collection("detail_penjualan")
+	detailPenjualan := rp.DB.Collection("detail_penjualan")
 
 	// Pipeline aggregation untuk mendapatkan produk terlaris
 	produkBestSelling := []bson.M{
@@ -639,9 +653,9 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 		{
 			// Project untuk format hasil akhir
 			"$project": bson.M{
-				"_id":           0,
-				"id_produk":     "$_id",
-				"nama_produk":   "$produk_detail.nama_produk",
+				"_id":            0,
+				"id_produk":      "$_id",
+				"nama_produk":    "$produk_detail.nama_produk",
 				"jumlah_terjual": "$total_terjual",
 			},
 		},
@@ -665,7 +679,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 	// Jika tidak ada hasil, coba pendekatan alternatif dengan collection penjualan
 	if len(HasilData) == 0 {
 		log.Println("No results from detail_penjualan, trying alternative approach with penjualan collection")
-		
+
 		// Pipeline alternatif menggunakan collection penjualan
 		altPipeline := []bson.M{
 			{
@@ -678,7 +692,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 				},
 			},
 		}
-		
+
 		// Jalankan aggregation alternatif
 		altCursor, altErr := rp.DB.Collection("penjualan").Aggregate(ctx, altPipeline)
 		if altErr != nil {
@@ -686,7 +700,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 			return HasilData, nil // Return hasil kosong daripada error
 		}
 		defer altCursor.Close(ctx)
-		
+
 		// Jika pendekatan alternatif juga tidak berhasil, kembalikan hasil kosong
 		log.Println("Alternative approach also yielded no results, returning empty array")
 	}

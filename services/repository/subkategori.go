@@ -145,19 +145,30 @@ func (rp *mongoRepoSubKategori) GetByID(ctx context.Context, id string) (*domain
 func (rp *mongoRepoSubKategori) Delete(ctx context.Context, id string) error {
 	collection := rp.DB.Collection(_SubKategoriCollection)
 
-	// Periksa apakah subkategori digunakan oleh produk
-	produkCollection := rp.DB.Collection("produk")
-	count, err := produkCollection.CountDocuments(ctx, bson.M{"sub_kategori": id})
+	// Cek apakah subkategori ada
+	var existingSubKategori domain.SubKategori
+	err := collection.FindOne(ctx, bson.M{"id_subkategori": id}).Decode(&existingSubKategori)
 	if err != nil {
-		return fmt.Errorf("error memeriksa penggunaan subkategori: %v", err)
-	}
-	if count > 0 {
-		return fmt.Errorf("subkategori tidak dapat dihapus karena masih digunakan oleh %d produk", count)
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("subkategori dengan ID %s tidak ditemukan", id)
+		}
+		return fmt.Errorf("error saat memeriksa subkategori: %v", err)
 	}
 
+	// Cek apakah ada produk yang menggunakan subkategori ini
+	produkCollection := rp.DB.Collection("produk")
+	count, err := produkCollection.CountDocuments(ctx, bson.M{"subkategori.id_subkategori": id})
+	if err != nil {
+		return fmt.Errorf("error saat memeriksa produk: %v", err)
+	}
+	if count > 0 {
+		return fmt.Errorf("tidak dapat menghapus subkategori karena masih digunakan oleh %d produk", count)
+	}
+
+	// Hapus subkategori
 	result, err := collection.DeleteOne(ctx, bson.M{"id_subkategori": id})
 	if err != nil {
-		return fmt.Errorf("error menghapus subkategori: %v", err)
+		return fmt.Errorf("error saat menghapus subkategori: %v", err)
 	}
 
 	if result.DeletedCount == 0 {

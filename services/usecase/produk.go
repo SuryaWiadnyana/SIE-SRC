@@ -43,6 +43,15 @@ func (uc *ProdukUseCase) CreateProduk(Ctx context.Context, bd *domain.Produk) (d
 		return domain.Produk{}, errors.New("stok produk tidak boleh negatif")
 	}
 
+	// Generate ID produk jika belum ada
+	if bd.IDProduk == "" {
+		nextID, err := uc.ProdukRepository.GenerateNextID(ctx)
+		if err != nil {
+			return domain.Produk{}, errors.New("gagal menghasilkan ID produk: " + err.Error())
+		}
+		bd.IDProduk = nextID
+	}
+
 	return uc.ProdukRepository.CreateProduk(ctx, bd)
 }
 

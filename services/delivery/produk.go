@@ -13,6 +13,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/xuri/excelize/v2"
+	"time"
 )
 
 type HttpDeliveryProduk struct {
@@ -183,139 +184,64 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
+	// Log request body sebelum parsing
+	reqBody := c.Body()
+	log.Printf("Raw request body: %s", string(reqBody))
 
-	var produk domain.Produk
-	if err := c.BodyParser(&produk); err != nil {
+	body := new(domain.Produk)
+	log.Printf("Empty body struct: %+v", body)
+
+	if err := c.BodyParser(body); err != nil {
+		log.Printf("Error parsing body: %v", err)
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Format request tidak valid",
 		})
 	}
 
-	log.Printf("Received data: %+v", produk)
+	log.Printf("Parsed body: %+v", body)
 
 	// Validasi data produk
-	if produk.NamaProduk == "" {
+	if body.NamaProduk == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Nama produk harus diisi",
 		})
 	}
 
-	if produk.KodeProduk == "" {
+	if body.KodeProduk == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Kode produk harus diisi",
 		})
 	}
 
-	// Validasi kode produk unik
-	SemuaProduk, err := d.HTTP.GetAllProduk(context.Background())
+	// Cek apakah kode produk sudah ada
+	allProducts, err := d.HTTP.GetAllProduk(context.Background())
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Gagal mendapatkan data produk: %v", err),
 		})
 	}
 
-	for _, existingProduct := range SemuaProduk {
-		if strings.EqualFold(existingProduct.KodeProduk, produk.KodeProduk) {
+	for _, prod := range allProducts {
+		if prod.KodeProduk == body.KodeProduk {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Kode produk '%s' sudah digunakan oleh produk lain", produk.KodeProduk),
+				"error": "Kode produk sudah ada",
 			})
 		}
 	}
 
-	if produk.HargaProduk <= 0 {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Harga produk harus lebih dari 0",
-		})
-	}
+	// Generate ID produk baru menggunakan repository
+	body.UpdatedAt = time.Now()
 
-	if produk.Stok < 0 {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Stok tidak boleh negatif",
-		})
-	}
-
-	// Jika ID produk tidak diisi, generate ID baru
-	if produk.IDProduk == "" {
-		id, err := d.HTTP.GenerateNextID(context.Background())
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Gagal generate ID: %v", err),
-			})
-		}
-		produk.IDProduk = id
-	}
-
-	// Cari kategori berdasarkan nama
-	if produk.Kategori != (domain.Kategori{}) {
-		// Cari kategori berdasarkan nama
-		allKategori, err := d.KategoriUseCase.GetAll(context.Background())
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Gagal mendapatkan data kategori: %v", err),
-			})
-		}
-
-		kategoriFound := false
-		for _, kategori := range allKategori {
-			if strings.EqualFold(kategori.NamaKategori, produk.Kategori.NamaKategori) {
-				kategoriFound = true
-				break
-			}
-		}
-
-		if !kategoriFound {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Kategori dengan nama '%s' tidak ditemukan", produk.Kategori),
-			})
-		}
-	} else {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Nama kategori harus diisi",
-		})
-	}
-
-	// Cari subkategori berdasarkan nama
-	if produk.SubKategori != (domain.SubKategori{}) {
-		// Cari subkategori berdasarkan nama
-		allSubKategori, err := d.SubKategoriUseCase.GetAll(context.Background())
-		if err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Gagal mendapatkan data subkategori: %v", err),
-			})
-		}
-
-		subKategoriFound := false
-		for _, subKategori := range allSubKategori {
-			if strings.EqualFold(subKategori.NamaSubKategori, produk.SubKategori.NamaSubKategori) {
-				// Pastikan subkategori ini berada di bawah kategori yang dipilih
-				if strings.EqualFold(subKategori.Kategori.NamaKategori, produk.Kategori.NamaKategori) {
-					subKategoriFound = true
-					produk.SubKategori.IDSubKategori = subKategori.IDSubKategori // Simpan ID subkategori
-					break
-				}
-			}
-		}
-
-		if !subKategoriFound {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Subkategori dengan nama '%s' tidak ditemukan dalam kategori '%s'", produk.SubKategori.NamaSubKategori, produk.Kategori.NamaKategori),
-			})
-		}
-	} else {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Nama subkategori harus diisi",
-		})
-	}
-
-	createdProduct, err := d.HTTP.CreateProduk(context.Background(), &produk)
+	// Buat produk
+	ctx := context.Background()
+	createdProduct, err := d.HTTP.CreateProduk(ctx, body)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error":   "Gagal membuat produk",
-			"message": err.Error(),
+			"error": fmt.Sprintf("Gagal membuat produk: %v", err),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
+	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"message": "Produk berhasil dibuat",
 		"data":    createdProduct,
 	})
@@ -458,12 +384,21 @@ func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 		})
 	}
 
+	// Log request body sebelum parsing
+	reqBody := c.Body()
+	log.Printf("Raw request body: %s", string(reqBody))
+
 	body := new(domain.Produk)
+	log.Printf("Empty body struct: %+v", body)
+
 	if err := c.BodyParser(body); err != nil {
+		log.Printf("Error parsing body: %v", err)
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Gagal untuk mem-parsing request body",
 		})
 	}
+
+	log.Printf("Parsed body: %+v", body)
 
 	// Validasi data produk
 	if body.NamaProduk == "" {
@@ -749,35 +684,38 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
-	var req ImportRequest
-	err := c.BodyParser(&req)
-	if err != nil {
+	// Log request body sebelum parsing
+	reqBody := c.Body()
+	log.Printf("Raw request body: %s", string(reqBody))
+
+	body := new(ImportRequest)
+	log.Printf("Empty body struct: %+v", body)
+
+	if err := c.BodyParser(body); err != nil {
+		log.Printf("Error parsing body: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
 		})
 	}
 
+	log.Printf("Parsed body: %+v", body)
+
 	// Validasi data
-	for i, produk := range req.Produk {
+	for i, produk := range body.Produk {
 		if produk.NamaProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d tidak memiliki nama", i+1),
+				"error": fmt.Sprintf("Produk ke-%d tidak memiliki nama", i+1),
 			})
 		}
-		if produk.Stok < 0 {
+		if produk.KodeProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d memiliki stok negatif", i+1),
-			})
-		}
-		if produk.HargaProduk <= 0 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Produk #%d memiliki harga produk tidak valid", i+1),
+				"error": fmt.Sprintf("Produk ke-%d tidak memiliki kode", i+1),
 			})
 		}
 	}
 
 	// Import data
-	err = d.HTTP.ImportData(c.Context(), req.Produk)
+	err := d.HTTP.ImportData(c.Context(), body.Produk)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("Gagal import data: %v", err),
@@ -785,7 +723,7 @@ func (d *HttpDeliveryProduk) ImportProdukJSON(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": fmt.Sprintf("Berhasil import %d produk", len(req.Produk)),
+		"message": fmt.Sprintf("Berhasil import %d produk", len(body.Produk)),
 	})
 }
 
