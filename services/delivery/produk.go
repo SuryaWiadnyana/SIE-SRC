@@ -11,9 +11,10 @@ import (
 	"strconv"
 	"strings"
 
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/xuri/excelize/v2"
-	"time"
 )
 
 type HttpDeliveryProduk struct {
@@ -604,6 +605,17 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				HargaProduk: harga,
 				Stok:        stok,
 			}
+
+			// Proses tanggal kadaluarsa jika ada
+			if len(record) > 6 && strings.TrimSpace(record[6]) != "" {
+				tanggalKadaluarsa, err := time.Parse("2006-01-02", strings.TrimSpace(record[6]))
+				if err == nil {
+					produk.TanggalKadaluarsa = tanggalKadaluarsa
+				} else {
+					log.Printf("Baris %d: format tanggal kadaluarsa tidak valid, gunakan format YYYY-MM-DD", i+1)
+				}
+			}
+
 			produkList = append(produkList, produk)
 		}
 
@@ -656,6 +668,17 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				HargaProduk: harga,
 				Stok:        stok,
 			}
+
+			// Proses tanggal kadaluarsa jika ada
+			if len(row) > 6 && strings.TrimSpace(row[6]) != "" {
+				tanggalKadaluarsa, err := time.Parse("2006-01-02", strings.TrimSpace(row[6]))
+				if err == nil {
+					produk.TanggalKadaluarsa = tanggalKadaluarsa
+				} else {
+					log.Printf("Baris %d: format tanggal kadaluarsa tidak valid, gunakan format YYYY-MM-DD", i+1)
+				}
+			}
+
 			produkList = append(produkList, produk)
 		}
 

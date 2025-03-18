@@ -32,7 +32,6 @@ var _Produk = "produk"
 func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
-	// Find the last document sorted by id_produk in descending order
 	// Pastikan menggunakan kolasi untuk pengurutan numerik yang benar
 	opts := options.FindOne().SetSort(bson.M{"id_produk": -1}).SetCollation(&options.Collation{
 		Locale:   "en",
@@ -202,8 +201,8 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 	update := bson.M{
 		"$set": bson.M{
 			"nama_produk":      bd.NamaProduk,
-			"nama_kategori":    bd.Kategori,
-			"nama_subkategori": bd.SubKategori,
+			"kategori":         bd.Kategori,
+			"subkategori":      bd.SubKategori,
 			"kode_produk":      bd.KodeProduk,
 			"harga_produk":     bd.HargaProduk,
 			"stok_barang":      bd.Stok,
@@ -401,8 +400,8 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		doc := bson.D{
 			{Key: "id_produk", Value: idStr},
 			{Key: "nama_produk", Value: produk.NamaProduk},
-			{Key: "nama_kategori", Value: produk.Kategori},
-			{Key: "nama_subkategori", Value: produk.SubKategori},
+			{Key: "kategori", Value: produk.Kategori},
+			{Key: "subkategori", Value: produk.SubKategori},
 			{Key: "kode_produk", Value: produk.KodeProduk},
 			{Key: "harga_produk", Value: produk.HargaProduk},
 			{Key: "stok_barang", Value: produk.Stok},

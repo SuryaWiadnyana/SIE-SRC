@@ -12,6 +12,7 @@ type SubKategoriRepository interface {
 	CreateNewSubKategori(ctx context.Context, subK *SubKategori) (SubKategori, error)
 	GetAll(ctx context.Context) ([]SubKategori, error)
 	GetByID(ctx context.Context, id string) (*SubKategori, error)
+	GetByName(ctx context.Context, name string) (*SubKategori, error)
 	UpdateSubKategori(ctx context.Context, subK *SubKategori) error
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)
@@ -23,6 +24,7 @@ type SubKategoriUseCase interface {
 	CreateNewSubKategori(ctx context.Context, subK *SubKategori) (SubKategori, error)
 	GetAll(ctx context.Context) ([]SubKategori, error)
 	GetByID(ctx context.Context, id string) (*SubKategori, error)
+	GetByName(ctx context.Context, name string) (*SubKategori, error)
 	UpdateSubKategori(ctx context.Context, subK *SubKategori) error
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)

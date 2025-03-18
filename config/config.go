@@ -1,0 +1,28 @@
+package config
+
+import (
+	"os"
+)
+
+// GetFiberConfig returns Fiber configuration
+
+// GetMongoConnString returns MongoDB connection string
+
+// GetDatabaseName returns MongoDB database name
+func GetDatabaseName() string {
+	// Default to "sie_src" if environment variable is not set
+	dbName := os.Getenv("MONGODB_DATABASE")
+	if dbName == "" {
+		dbName = "sie_src"
+	}
+	return dbName
+}
+
+// GetJWTSecret returns JWT secret key
+func GetJWTSecret() string {
+	secret := os.Getenv("JWT_SECRET_KEY")
+	if secret == "" {
+		secret = "your-secret-key" // Default secret for development
+	}
+	return secret
+}

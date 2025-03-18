@@ -33,6 +33,11 @@ func (uc *SubKategoriUseCase) GetByID(ctx context.Context, id string) (*domain.S
 	return uc.SubKategoriRepository.GetByID(ctx, id)
 }
 
+// GetByName mendapatkan subkategori berdasarkan nama
+func (uc *SubKategoriUseCase) GetByName(ctx context.Context, name string) (*domain.SubKategori, error) {
+	return uc.SubKategoriRepository.GetByName(ctx, name)
+}
+
 // Delete menghapus subkategori berdasarkan ID
 func (uc *SubKategoriUseCase) Delete(ctx context.Context, id string) error {
 	return uc.SubKategoriRepository.Delete(ctx, id)

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -134,6 +135,26 @@ func (rp *mongoRepoSubKategori) GetByID(ctx context.Context, id string) (*domain
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("subkategori dengan ID %s tidak ditemukan", id)
+		}
+		return nil, fmt.Errorf("error mendapatkan subkategori: %v", err)
+	}
+
+	return &subKategori, nil
+}
+
+// GetByName mendapatkan subkategori berdasarkan nama
+func (rp *mongoRepoSubKategori) GetByName(ctx context.Context, name string) (*domain.SubKategori, error) {
+	collection := rp.DB.Collection(_SubKategoriCollection)
+
+	// Gunakan regex untuk pencarian case-insensitive
+	regexPattern := fmt.Sprintf("^%s$", regexp.QuoteMeta(name))
+	filter := bson.M{"nama_subkategori": bson.M{"$regex": regexPattern, "$options": "i"}}
+
+	var subKategori domain.SubKategori
+	err := collection.FindOne(ctx, filter).Decode(&subKategori)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("subkategori dengan nama %s tidak ditemukan", name)
 		}
 		return nil, fmt.Errorf("error mendapatkan subkategori: %v", err)
 	}

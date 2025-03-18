@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -125,6 +126,26 @@ func (rp *mongoRepoKategori) GetByID(ctx context.Context, id string) (*domain.Ka
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("kategori dengan ID %s tidak ditemukan", id)
+		}
+		return nil, fmt.Errorf("error mendapatkan kategori: %v", err)
+	}
+
+	return &kategori, nil
+}
+
+// GetByName mendapatkan kategori berdasarkan nama
+func (rp *mongoRepoKategori) GetByName(ctx context.Context, name string) (*domain.Kategori, error) {
+	collection := rp.DB.Collection(_KategoriCollection)
+
+	// Gunakan regex untuk pencarian case-insensitive
+	regexPattern := fmt.Sprintf("^%s$", regexp.QuoteMeta(name))
+	filter := bson.M{"nama_kategori": bson.M{"$regex": regexPattern, "$options": "i"}}
+
+	var kategori domain.Kategori
+	err := collection.FindOne(ctx, filter).Decode(&kategori)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("kategori dengan nama %s tidak ditemukan", name)
 		}
 		return nil, fmt.Errorf("error mendapatkan kategori: %v", err)
 	}
