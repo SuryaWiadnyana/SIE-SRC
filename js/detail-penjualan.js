@@ -176,11 +176,54 @@ async function updateUI(detail) {
         const products = detail.produk || [];
         if (Array.isArray(products) && products.length > 0) {
             products.forEach(produk => {
+                // Ekstrak nama kategori dengan penanganan yang lebih baik
+                let kategoriDisplay = '-';
+                let subKategoriDisplay = '-';
+                
+                // Penanganan kategori
+                if (produk.kategori) {
+                    if (typeof produk.kategori === 'object' && produk.kategori !== null) {
+                        kategoriDisplay = produk.kategori.nama_kategori || '-';
+                    } else if (typeof produk.kategori === 'string') {
+                        kategoriDisplay = produk.kategori;
+                    }
+                } else if (produk.nama_kategori) {
+                    kategoriDisplay = produk.nama_kategori;
+                }
+                
+                // Penanganan subkategori
+                if (produk.subkategori) {
+                    if (typeof produk.subkategori === 'object' && produk.subkategori !== null) {
+                        subKategoriDisplay = produk.subkategori.nama_subkategori || '-';
+                    } else if (typeof produk.subkategori === 'string') {
+                        subKategoriDisplay = produk.subkategori;
+                    }
+                } else if (produk.nama_subkategori) {
+                    subKategoriDisplay = produk.nama_subkategori;
+                }
+                
+                // Format tanggal kadaluarsa jika ada
+                let tanggalKadaluarsa = '-';
+                if (produk.tanggal_kadaluarsa) {
+                    const date = new Date(produk.tanggal_kadaluarsa);
+                    if (!isNaN(date.getTime())) {
+                        tanggalKadaluarsa = date.toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                    }
+                }
+                
                 detailTable.row.add([
                     produk.id_produk || '-',
                     produk.nama_produk || '-',
-                    produk.kategori || '-',
-                    formatRupiah(produk.harga_produk || 0), // Menggunakan subtotal
+                    kategoriDisplay,
+                    subKategoriDisplay,
+                    produk.kode_produk || '-',
+                    formatRupiah(produk.harga_produk || 0),
+                    produk.stok_barang || '0',
+                    tanggalKadaluarsa
                 ]);
             });
         } else {
@@ -199,14 +242,9 @@ async function updateUI(detail) {
     }
 }
 
-// Helper function to format currency
+// Function to format currency to Rupiah
 function formatRupiah(angka) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(angka);
+    return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 // Function to show notifications

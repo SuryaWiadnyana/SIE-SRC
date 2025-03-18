@@ -1,0 +1,118 @@
+{
+  "produk": [
+    {
+      "nama_produk": "Indomie Goreng Special",
+      "kategori": {
+        "id_kategori": "KT002",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK006",
+        "nama_subkategori": "Mie Instan",
+        "kategori": {
+          "id_kategori": "KT002",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8997035563414",
+      "harga_produk": 2700,
+      "stok_barang": 40,
+      "tanggal_kadaluarsa": "2025-04-25T00:00:00Z"
+    },
+    {
+      "nama_produk": "Pocari Sweat",
+      "kategori": {
+        "id_kategori": "KT003",
+        "nama_kategori": "Minuman"
+      },
+      "subkategori": {
+        "id_subkategori": "SK009",
+        "nama_subkategori": "Minuman Botol",
+        "kategori": {
+          "id_kategori": "KT003",
+          "nama_kategori": "Minuman"
+        }
+      },
+      "kode_produk": "899703556322",
+      "harga_produk": 5000,
+      "stok_barang": 30,
+      "tanggal_kadaluarsa": "2025-05-18T00:00:00Z"
+    },
+    {
+      "nama_produk": "Chitato Sapi Panggang",
+      "kategori": {
+        "id_kategori": "KT002",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK003",
+        "nama_subkategori": "Makanan Ringan",
+        "kategori": {
+          "id_kategori": "KT002",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8996001600146",
+      "harga_produk": 10000,
+      "stok_barang": 50,
+      "tanggal_kadaluarsa": "2025-07-15T00:00:00Z"
+    },
+    {
+      "nama_produk": "Bakso Champ",
+      "kategori": {
+        "id_kategori": "KT005",
+        "nama_kategori": "Makanan Beku"
+      },
+      "subkategori": {
+        "id_subkategori": "SK004",
+        "nama_subkategori": "Bakso Champ",
+        "kategori": {
+          "id_kategori": "KT005",
+          "nama_kategori": "Makanan Beku"
+        }
+      },
+      "kode_produk": "8995179002204",
+      "harga_produk": 25000,
+      "stok_barang": 20,
+      "tanggal_kadaluarsa": "2025-06-30T00:00:00Z"
+    },
+    {
+      "nama_produk": "Minyak Goreng Bimoli",
+      "kategori": {
+        "id_kategori": "KT009",
+        "nama_kategori": "Bumbu Masakan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK007",
+        "nama_subkategori": "Minyak Goreng",
+        "kategori": {
+          "id_kategori": "KT009",
+          "nama_kategori": "Bumbu Masakan"
+        }
+      },
+      "kode_produk": "8995555123456",
+      "harga_produk": 20000,
+      "stok_barang": 15,
+      "tanggal_kadaluarsa": "2025-08-20T00:00:00Z"
+    },
+    {
+      "nama_produk": "Colokan T",
+      "kategori": {
+        "id_kategori": "KT011",
+        "nama_kategori": "Elektronik"
+      },
+      "subkategori": {
+        "id_subkategori": "SK008",
+        "nama_subkategori": "Colokan",
+        "kategori": {
+          "id_kategori": "KT011",
+          "nama_kategori": "Elektronik"
+        }
+      },
+      "kode_produk": "8997123456789",
+      "harga_produk": 15000,
+      "stok_barang": 10,
+      "tanggal_kadaluarsa": "2026-12-31T00:00:00Z"
+    }
+  ]
+}

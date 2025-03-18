@@ -738,7 +738,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Add search handler
     if (elements.searchInput) {
-        elements.searchInput.addEventListener('input', handleSearch);
+        // Hapus event listener input untuk mencegah pencarian otomatis
+        // elements.searchInput.addEventListener('input', handleSearch);
+        
+        // Tambahkan event listener untuk tombol search
+        const searchButton = document.getElementById('searchButton');
+        if (searchButton) {
+            searchButton.addEventListener('click', handleSearch);
+        }
+        
+        // Tambahkan event listener untuk tombol Enter pada input search
+        elements.searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSearch();
+            }
+        });
     }
 
     // Add table click handlers
@@ -1136,27 +1151,42 @@ function updatePagination(totalItems) {
 
 // Handle search with debounce
 let searchTimeout;
-function handleSearch(e) {
-    const searchQuery = e.target.value.toLowerCase();
+function handleSearch() {
+    const searchQuery = document.getElementById('searchProduct').value.trim();
     
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        let filteredProducts = allProducts;
-        
-        if (searchQuery) {
-            filteredProducts = filteredProducts.filter(item => {
-                const product = item.produk;
-                return (
-                    product.nama_produk.toLowerCase().includes(searchQuery) ||
-                    product.kategori.toLowerCase().includes(searchQuery) ||
-                    product.sub_kategori.toLowerCase().includes(searchQuery) ||
-                    product.kode_produk.toLowerCase().includes(searchQuery)
-                );
-            });
-        }
-        
-        displayProducts(filteredProducts);
-    }, 300);
+    let filteredProducts = allProducts;
+    
+    if (searchQuery) {
+        filteredProducts = filteredProducts.filter(item => {
+            const product = item.produk;
+            
+            // Ekstrak nama kategori dan subkategori
+            let kategoriNama = '-';
+            let subKategoriNama = '-';
+            
+            if (product.kategori && typeof product.kategori === 'object') {
+                kategoriNama = product.kategori.nama_kategori || '';
+            } else if (product.nama_kategori) {
+                kategoriNama = product.nama_kategori;
+            }
+            
+            if (product.subkategori && typeof product.subkategori === 'object') {
+                subKategoriNama = product.subkategori.nama_subkategori || '';
+            } else if (product.nama_subkategori) {
+                subKategoriNama = product.nama_subkategori;
+            }
+            
+            const searchLower = searchQuery.toLowerCase();
+            return (
+                (product.nama_produk || '').toLowerCase().includes(searchLower) ||
+                kategoriNama.toLowerCase().includes(searchLower) ||
+                subKategoriNama.toLowerCase().includes(searchLower) ||
+                (product.kode_produk || '').toLowerCase().includes(searchLower)
+            );
+        });
+    }
+    
+    displayProducts(filteredProducts);
 }
 
 // Handle form submissions
@@ -1283,7 +1313,7 @@ async function handleUpdateProduct(e) {
         const kodeProduk = document.getElementById('update_kode_produk').value;
         const hargaProduk = document.getElementById('update_harga_produk').value;
         const stokBarang = document.getElementById('update_stok_barang').value;
-        const tanggalKadaluarsa = document.getElementById('update_tanggal_kadaluarsa').value;
+        const tanggalKadaluarsaInput = document.getElementById('update_tanggal_kadaluarsa').value;
 
         // Validasi input dasar
         if (!namaProduk || !kategoriSelect.value || !subKategoriSelect.value || !kodeProduk || !hargaProduk || !stokBarang) {
@@ -1303,8 +1333,11 @@ async function handleUpdateProduct(e) {
         }
         
         // Format tanggal kadaluarsa ke ISO string
-        const expDate = new Date(tanggalKadaluarsa);
-        tanggalKadaluarsa = expDate.toISOString();
+        let formattedTanggalKadaluarsa = null;
+        if (tanggalKadaluarsaInput) {
+            const expDate = new Date(tanggalKadaluarsaInput);
+            formattedTanggalKadaluarsa = expDate.toISOString();
+        }
         
         // Siapkan data produk dengan format yang benar
         const productData = {
@@ -1324,8 +1357,8 @@ async function handleUpdateProduct(e) {
         };
 
         // Tambahkan tanggal kadaluarsa jika ada
-        if (tanggalKadaluarsa) {
-            productData.tanggal_kadaluarsa = tanggalKadaluarsa;
+        if (formattedTanggalKadaluarsa) {
+            productData.tanggal_kadaluarsa = formattedTanggalKadaluarsa;
         }
 
         console.log('Data produk yang akan diupdate:', productData);
