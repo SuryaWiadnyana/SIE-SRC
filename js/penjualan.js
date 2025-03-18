@@ -130,14 +130,35 @@ async function loadProdukOptions() {
             }
 
             const product = item.produk;
+            
+            // Format tanggal kadaluarsa
+            let tanggalKadaluarsa = null;
+            if (product.tanggal_kadaluarsa && product.tanggal_kadaluarsa !== "0001-01-01T00:00:00Z") {
+                const date = new Date(product.tanggal_kadaluarsa);
+                if (!isNaN(date.getTime())) {
+                    tanggalKadaluarsa = date.toISOString();
+                }
+            }
+
             return {
                 id_produk: product.id_produk || '',
                 nama_produk: product.nama_produk || '',
-                kategori: product.kategori || '',
-                sub_kategori: product.sub_kategori || '',
+                kategori: product.kategori || {
+                    id_kategori: '',
+                    nama_kategori: ''
+                },
+                subkategori: product.subkategori || {
+                    id_subkategori: '',
+                    nama_subkategori: '',
+                    kategori: product.kategori || {
+                        id_kategori: '',
+                        nama_kategori: ''
+                    }
+                },
                 kode_produk: product.kode_produk || '',
                 harga_produk: parseInt(product.harga_produk) || 0,
-                stok_barang: parseInt(product.stok_barang) || 0
+                stok_barang: parseInt(product.stok_barang) || 0,
+                tanggal_kadaluarsa: tanggalKadaluarsa
             };
         }).filter(product => product !== null);
 
@@ -150,9 +171,18 @@ async function loadProdukOptions() {
         // Generate options untuk dropdown
         const options = produkList.map(product => {
             const hargaFormatted = formatRupiah(product.harga_produk).replace('IDR', 'Rp');
+            const kadaluarsaText = product.tanggal_kadaluarsa ? 
+                new Date(product.tanggal_kadaluarsa).toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }) : '-';
+                
             return `<option value="${product.id_produk}" 
                 data-harga="${product.harga_produk}"
-                data-nama="${product.nama_produk}">
+                data-nama="${product.nama_produk}"
+                data-kadaluarsa="${product.tanggal_kadaluarsa || ''}"
+                data-stok="${product.stok_barang}">
                 ${product.nama_produk} (${hargaFormatted})
             </option>`;
         }).join('');
@@ -329,9 +359,13 @@ async function initializeDataTable() {
             console.log('Delete button clicked for ID:', id_penjualan);
             
             if (id_penjualan) {
-                if (confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
-                    deletePenjualan(id_penjualan);
-                }
+                showDeleteConfirmation(
+                    "Konfirmasi Hapus Penjualan",
+                    `Apakah Anda yakin ingin menghapus data penjualan dengan ID: ${id_penjualan}?`,
+                    async function() {
+                        await deletePenjualan(id_penjualan);
+                    }
+                );
             } else {
                 console.error('No id_penjualan found for delete button');
                 alert('ID Penjualan tidak ditemukan');
@@ -403,6 +437,37 @@ async function setupEventHandlers() {
         console.log('Form submitted');
 
         try {
+            // Validasi form
+            const tanggalInput = document.getElementById('tanggalPenjualan');
+            if (!tanggalInput.value) {
+                throw new Error('Tanggal penjualan harus diisi');
+            }
+
+            let hasValidProduct = false;
+            $('.produk-item').each(function() {
+                const $select = $(this).find('.select-produk');
+                const $quantity = $(this).find('.produk-terjual');
+                
+                if ($select.val() && $quantity.val()) {
+                    const qty = parseInt($quantity.val());
+                    const stok = parseInt($select.data('stok'));
+                    
+                    if (qty <= 0) {
+                        throw new Error('Jumlah produk harus lebih dari 0');
+                    }
+                    
+                    if (qty > stok) {
+                        throw new Error(`Stok produk ${$select.find('option:selected').text()} tidak mencukupi`);
+                    }
+                    
+                    hasValidProduct = true;
+                }
+            });
+
+            if (!hasValidProduct) {
+                throw new Error('Pilih minimal satu produk dan masukkan jumlahnya');
+            }
+
             const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('Token tidak ditemukan');
@@ -429,7 +494,17 @@ async function setupEventHandlers() {
                                 produk_terjual: parseInt($quantity.val()),
                                 tanggal_penjualan: formattedDate
                             },
-                            produk: selectedProduct
+                            produk: {
+                                id_produk: selectedProduct.id_produk,
+                                nama_produk: selectedProduct.nama_produk,
+                                kategori: selectedProduct.kategori,
+                                subkategori: selectedProduct.subkategori,
+                                kode_produk: selectedProduct.kode_produk,
+                                harga_produk: selectedProduct.harga_produk,
+                                stok_barang: selectedProduct.stok_barang,
+                                tanggal_kadaluarsa: selectedProduct.tanggal_kadaluarsa,
+                                is_deleted: null
+                            }
                         });
                     }
                 }
@@ -458,18 +533,34 @@ async function setupEventHandlers() {
             const result = await response.json();
             console.log('Server response:', result);
 
-            // Reset form and close modal
-            $('#formTambahPenjualan')[0].reset();
-            $('#modal-tambah-penjualan').modal('hide');
-            
-            // Refresh table
-            await refreshDataTable();
+            if (result.error) {
+                throw new Error(result.error);
+            }
 
-            alert('Penjualan berhasil ditambahkan');
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Data penjualan berhasil disimpan',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                // Reset form
+                $('#formTambahPenjualan')[0].reset();
+                $('#modal-tambah-penjualan').modal('hide');
+                
+                // Reload data
+                refreshDataTable();
+                loadProdukOptions();
+            });
 
         } catch (error) {
-            console.error('Error:', error);
-            alert('Gagal menambahkan penjualan: ' + error.message);
+            console.error('Error submitting form:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message
+            });
         }
     });
 
@@ -496,16 +587,41 @@ async function setupEventHandlers() {
     $(document).on('change', '.select-produk', function() {
         const row = $(this).closest('.produk-item');
         const produkId = $(this).val();
+        const selectedOption = $(this).find('option:selected');
         const quantityInput = row.find('.produk-terjual');
         
         // Reset jumlah saat produk berubah
         quantityInput.val('');
         
-        // Set max quantity berdasarkan stok
+        // Hapus info produk sebelumnya
+        row.find('.produk-info').remove();
+        
+        // Set max quantity dan tampilkan info produk
         if (produkId) {
             const produk = produkList.find(p => p.id_produk === produkId);
             if (produk) {
                 quantityInput.attr('max', produk.stok_barang);
+                
+                // Format tanggal kadaluarsa
+                const kadaluarsaText = produk.tanggal_kadaluarsa ? 
+                    new Date(produk.tanggal_kadaluarsa).toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : '-';
+
+                // Tampilkan info produk
+                const infoHtml = `
+                    <div class="produk-info small text-muted mt-2">
+                        <div>Kode: ${produk.kode_produk || '-'}</div>
+                        <div>Kategori: ${produk.kategori?.nama_kategori || '-'}</div>
+                        <div>Subkategori: ${produk.subkategori?.nama_subkategori || '-'}</div>
+                        <div>Kadaluarsa: ${kadaluarsaText}</div>
+                        <div>Harga: ${formatRupiah(produk.harga_produk)}</div>
+                        <div>Stok: ${produk.stok_barang}</div>
+                    </div>
+                `;
+                row.find('.select-produk').after(infoHtml);
             }
         }
         

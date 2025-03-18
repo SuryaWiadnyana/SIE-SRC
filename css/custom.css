@@ -1,0 +1,48 @@
+.delete-confirmation-modal .modal-dialog {
+    position: relative;
+    top: 25%;
+    transform: translateY(-25%);
+}
+
+.delete-confirmation-modal .modal-content {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.delete-confirmation-modal .modal-header {
+    background-color: #dc3545;
+    color: white;
+    border-bottom: none;
+}
+
+.delete-confirmation-modal .modal-body {
+    font-size: 1.1em;
+    padding: 2rem;
+    text-align: center;
+}
+
+.delete-confirmation-modal .modal-footer {
+    border-top: none;
+    padding: 1rem 2rem;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.delete-confirmation-modal .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.5rem 2rem;
+    font-weight: 500;
+}
+
+.delete-confirmation-modal .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 0.5rem 2rem;
+    font-weight: 500;
+}
+
+.delete-confirmation-modal .modal-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}

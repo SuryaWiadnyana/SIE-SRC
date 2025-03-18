@@ -1566,29 +1566,30 @@ function initializeUpdateForm() {
 async function handleDeleteClick(event) {
     const button = event.target.closest('.delete-product');
     if (!button) return;
-    
-    const id = button.getAttribute('data-id');
-    if (!id) {
-        alert('ID produk tidak ditemukan');
-        return;
-    }
-    
-    if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-        try {
-            const result = await products.delete(id);
-            console.log('Delete result:', result);
-            
-            if (result.success) {
-                showAlert('Produk berhasil dihapus', 'success');
-                await loadProducts();
-            } else {
-                throw new Error(result.error);
+
+    const id = button.dataset.id;
+    const namaProduk = button.closest('tr').querySelector('td:nth-child(2)').textContent;
+
+    showDeleteConfirmation(
+        "Konfirmasi Hapus",
+        `Apakah Anda yakin ingin menghapus produk "${namaProduk}"?`,
+        async function() {
+            try {
+                const result = await products.delete(id);
+                console.log('Delete result:', result);
+                
+                if (result.success) {
+                    showAlert('Produk berhasil dihapus', 'success');
+                    await loadProducts();
+                } else {
+                    throw new Error(result.error || 'Gagal menghapus produk');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showAlert(`Error: ${error.message}`, 'danger');
             }
-        } catch (error) {
-            console.error('Error deleting product:', error);
-            showAlert('Gagal menghapus produk: ' + error.message, 'danger');
         }
-    }
+    );
 }
 
 // Handle import data
@@ -1839,8 +1840,7 @@ const kategori = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Gagal memperbarui kategori');
+                throw new Error(responseData.message || 'Gagal memperbarui kategori');
             }
 
             const result = await response.json();
@@ -2029,8 +2029,7 @@ const subkategori = {
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Gagal memperbarui subkategori');
+                throw new Error(responseData.message || 'Gagal memperbarui subkategori');
             }
 
             const result = await response.json();
@@ -2146,22 +2145,30 @@ function initializeKategoriManagement() {
     }
     
     // Hapus kategori
-    document.addEventListener('click', async function(e) {
+    $('#kategoriTable').on('click', function(e) {
+        // Tombol delete kategori
         if (e.target.classList.contains('delete-kategori') || e.target.closest('.delete-kategori')) {
             const button = e.target.closest('.delete-kategori') || e.target;
-            const id = button.getAttribute('data-id');
-            const nama = button.getAttribute('data-nama');
-            
-            if (confirm(`Apakah Anda yakin ingin menghapus kategori "${nama}"? Semua subkategori yang terkait juga akan dihapus.`)) {
-                try {
-                    await kategori.delete(id);
-                    showAlert('Kategori berhasil dihapus', 'success');
-                    loadKategoriTable();
-                } catch (error) {
-                    console.error('Error deleting kategori:', error);
-                    showAlert(`Error: ${error.message}`, 'danger');
+            const id = button.dataset.id;
+            const namaKategori = button.dataset.nama;
+
+            showDeleteConfirmation(
+                "Konfirmasi Hapus Kategori",
+                `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"?`,
+                function() {
+                    kategori.delete(id).then(result => {
+                        if (result.success) {
+                            showAlert('Kategori berhasil dihapus', 'success');
+                            loadKategoriTable();
+                        } else {
+                            showAlert(result.error || 'Gagal menghapus kategori', 'danger');
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        showAlert(error.message || 'Gagal menghapus kategori', 'danger');
+                    });
                 }
-            }
+            );
         }
     });
 }
@@ -2402,16 +2409,16 @@ async function populateKategoriDropdowns(targetId = 'parentKategori') {
         
         // Add kategori options
         if (Array.isArray(kategoriList) && kategoriList.length > 0) {
-            kategoriList.forEach(kat => {
-              const option = document.createElement('option');
-              option.value = kat.id_kategori;
-              option.textContent = kat.nama_kategori;
-              kategoriSelect.appendChild(option);
-            });
+          kategoriList.forEach(kat => {
+            const option = document.createElement('option');
+            option.value = kat.id_kategori;
+            option.textContent = kat.nama_kategori;
+            kategoriSelect.appendChild(option);
+          });
 
-          } else {
-            console.warn('Tidak ada data kategori untuk dropdown');
-          }
+        } else {
+          console.warn('Tidak ada data kategori untuk dropdown');
+        }
     } catch (error) {
         console.error('Error populating kategori dropdowns:', error);
         showAlert(`Error: ${error.message}`, 'danger');
@@ -2708,3 +2715,31 @@ function initializeSubKategoriPage() {
         }
     });
 }
+
+$(document).on('click', '.btn-delete', function() {
+    const id = $(this).data('id');
+    const namaProduk = $(this).data('nama');
+    
+    showDeleteConfirmation(
+        "Konfirmasi Hapus",
+        `Apakah Anda yakin ingin menghapus produk "${namaProduk}"?`,
+        async function() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${BASE_URL}/produk/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await handleResponse(response);
+                showNotification('success', 'Produk berhasil dihapus');
+                await loadProdukData(); // Refresh table
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('error', error.message || 'Gagal menghapus produk');
+            }
+        }
+    );
+});

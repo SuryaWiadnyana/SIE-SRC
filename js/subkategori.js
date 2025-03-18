@@ -379,26 +379,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (e.target.closest('.edit-subkategori')) {
                 const button = e.target.closest('.edit-subkategori');
                 document.getElementById('editSubKategoriId').value = button.dataset.id;
-                document.getElementById('editKategoriDropdown').value = button.dataset.kategoriId;
-                document.getElementById('editSubKategoriName').value = button.dataset.nama;
+                document.getElementById('editNamaSubKategori').value = button.dataset.nama;
+                document.getElementById('editKategoriId').value = button.dataset.kategoriId;
                 $('#editSubKategoriModal').modal('show');
             }
-            
+
             // Delete button handler
             if (e.target.closest('.delete-subkategori')) {
                 const button = e.target.closest('.delete-subkategori');
                 const id = button.dataset.id;
-                const nama = button.dataset.nama;
-                
-                if (confirm(`Apakah Anda yakin ingin menghapus subkategori "${nama}"?`)) {
-                    try {
-                        await subkategori.delete(id);
-                        showAlert('Subkategori berhasil dihapus', 'success');
-                        await loadSubKategoriTable();
-                    } catch (error) {
-                        showAlert('Gagal menghapus subkategori: ' + error.message, 'danger');
+                const namaSubKategori = button.dataset.nama;
+
+                showDeleteConfirmation(
+                    "Konfirmasi Hapus Subkategori",
+                    `Apakah Anda yakin ingin menghapus subkategori "${namaSubKategori}"?`,
+                    async function() {
+                        try {
+                            const result = await subkategori.delete(id);
+                            if (result.success) {
+                                showAlert('Subkategori berhasil dihapus', 'success');
+                                await loadSubKategoriTable();
+                            } else {
+                                showAlert(result.error || 'Gagal menghapus subkategori', 'danger');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showAlert(error.message || 'Gagal menghapus subkategori', 'danger');
+                        }
                     }
-                }
+                );
             }
         });
         

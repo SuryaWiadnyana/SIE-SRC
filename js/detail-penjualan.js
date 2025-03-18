@@ -207,11 +207,14 @@ async function updateUI(detail) {
                 if (produk.tanggal_kadaluarsa) {
                     const date = new Date(produk.tanggal_kadaluarsa);
                     if (!isNaN(date.getTime())) {
-                        tanggalKadaluarsa = date.toLocaleDateString('id-ID', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        });
+                        // Pastikan tanggal valid sebelum memformat
+                        if (date.getFullYear() > 1970) {
+                            tanggalKadaluarsa = date.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        }
                     }
                 }
                 

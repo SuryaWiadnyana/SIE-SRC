@@ -319,21 +319,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (e.target.closest('.delete-kategori')) {
                 const button = e.target.closest('.delete-kategori');
                 const id = button.dataset.id;
-                const nama = button.dataset.nama;
+                const namaKategori = button.dataset.nama;
                 
-                if (confirm(`Apakah Anda yakin ingin menghapus kategori "${nama}"?`)) {
-                    try {
-                        await kategori.delete(id, nama);
-                        showAlert('Kategori berhasil dihapus', 'success');
-                        await loadKategoriTable();
-                    } catch (error) {
-                        if (error.message.includes('tidak ditemukan')) {
-                            showAlert(error.message, 'warning');
-                        } else {
-                            showAlert('Gagal menghapus kategori: ' + error.message, 'danger');
+                showDeleteConfirmation(
+                    "Konfirmasi Hapus Kategori",
+                    `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"? Semua subkategori yang terkait juga akan dihapus.`,
+                    async function() {
+                        try {
+                            await kategori.delete(id, namaKategori);
+                            showAlert('Kategori berhasil dihapus', 'success');
+                            await loadKategoriTable();
+                        } catch (error) {
+                            if (error.message.includes('tidak ditemukan')) {
+                                showAlert(error.message, 'warning');
+                            } else {
+                                showAlert('Gagal menghapus kategori: ' + error.message, 'danger');
+                            }
                         }
                     }
-                }
+                );
             }
         });
         
