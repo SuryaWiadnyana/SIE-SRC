@@ -33,7 +33,11 @@ func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	// Find the last document sorted by id_produk in descending order
-	opts := options.FindOne().SetSort(bson.M{"id_produk": -1})
+	// Pastikan menggunakan kolasi untuk pengurutan numerik yang benar
+	opts := options.FindOne().SetSort(bson.M{"id_produk": -1}).SetCollation(&options.Collation{
+		Locale:   "en",
+		NumericOrdering: true,
+	})
 	var lastProduct domain.Produk
 
 	err := DataProduk.FindOne(ctx, bson.M{}, opts).Decode(&lastProduct)
