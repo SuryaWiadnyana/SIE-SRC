@@ -1171,123 +1171,63 @@ async function handleAddProduct(event) {
     console.log("Form data:", productData);
     
     // Validasi data produk
-    const subkategoriValue = productData.sub_kategori;
-    productData.subkategori = subkategoriValue; // Tambahkan field subkategori dengan nilai dari sub_kategori
-    
-    if (!productData.nama_produk || !productData.kategori || !productData.subkategori || 
-        !productData.kode_produk || !productData.harga_produk || !productData.tanggal_kadaluarsa || 
-        !productData.stok_barang) {
-        showAlert('Semua field harus diisi kecuali tanggal kadaluarsa', 'danger');
+    if (!productData.nama_produk || !productData.kode_produk || 
+        !productData.harga_produk || !productData.stok_barang ||
+        !productData.kategori || !productData.sub_kategori) {
+        showAlert('Nama produk, kode produk, harga, stok, kategori, dan sub kategori harus diisi', 'danger');
         return;
     }
+
+    // Validasi kategori dan subkategori
+    const kategoriSelect = document.getElementById('kategori');
+    const subKategoriSelect = document.getElementById('sub_kategori');
     
+    if (!kategoriSelect.value || !subKategoriSelect.value) {
+        showAlert('Kategori dan sub kategori harus dipilih', 'danger');
+        return;
+    }
+
+    // Format data produk dengan kategori dan subkategori
+    const formattedData = {
+        nama_produk: productData.nama_produk,
+        kode_produk: productData.kode_produk,
+        harga_produk: parseFloat(productData.harga_produk),
+        stok_barang: parseInt(productData.stok_barang),
+        kategori: {
+            id_kategori: kategoriSelect.value,
+            nama_kategori: kategoriSelect.options[kategoriSelect.selectedIndex].text
+        },
+        subkategori: {
+            id_subkategori: subKategoriSelect.value,
+            nama_subkategori: subKategoriSelect.options[subKategoriSelect.selectedIndex].text,
+            kategori: {
+                id_kategori: kategoriSelect.value,
+                nama_kategori: kategoriSelect.options[kategoriSelect.selectedIndex].text
+            }
+        }
+    };
+
     // Validasi harga dan stok (tidak boleh negatif)
-    if (parseFloat(productData.harga_produk) < 0) {
+    if (formattedData.harga_produk < 0) {
         showAlert('Harga produk tidak boleh negatif', 'danger');
         return;
     }
     
-    if (parseInt(productData.stok_barang) < 0) {
+    if (formattedData.stok_barang < 0) {
         showAlert('Stok barang tidak boleh negatif', 'danger');
         return;
     }
     
-    // Format tanggal kadaluarsa ke ISO string
-    const expDate = new Date(productData.tanggal_kadaluarsa);
-    productData.tanggal_kadaluarsa = expDate.toISOString();
+    // Format tanggal kadaluarsa ke ISO string jika ada
+    if (productData.tanggal_kadaluarsa) {
+        const expDate = new Date(productData.tanggal_kadaluarsa);
+        if (!isNaN(expDate.getTime())) {
+            formattedData.tanggal_kadaluarsa = expDate.toISOString();
+        }
+    }
     
     try {
-        // Cek apakah kategori dan subkategori adalah opsi "Baru"
-        let kategoriId = productData.kategori;
-        let subkategoriId = productData.subkategori;
-        
-        // Jika kategori adalah "Baru", buat kategori baru
-        if (kategoriId === "new") {
-            const newKategoriName = document.getElementById('new_kategori_name').value.trim();
-            if (!newKategoriName) {
-                showAlert('Nama kategori baru tidak boleh kosong', 'danger');
-                return;
-            }
-            
-            try {
-                console.log(`Membuat kategori baru: "${newKategoriName}"`);
-                const newKategori = await kategori.create(newKategoriName);
-                console.log('Kategori baru berhasil dibuat:', newKategori);
-                kategoriId = newKategori.data.id_kategori;
-            } catch (error) {
-                console.error('Gagal membuat kategori baru:', error);
-                showAlert(`Gagal membuat kategori baru: ${error.message}`, 'danger');
-                return;
-            }
-        }
-        
-        // Jika subkategori adalah "Baru", buat subkategori baru
-        if (subkategoriId === "new") {
-            const newSubkategoriName = document.getElementById('new_subkategori_name').value.trim();
-            if (!newSubkategoriName) {
-                showAlert('Nama subkategori baru tidak boleh kosong', 'danger');
-                return;
-            }
-            
-            try {
-                const newSubkategori = await subkategori.create(newSubkategoriName, kategoriId);
-                subkategoriId = newSubkategori.data.id_subkategori;
-            } catch (error) {
-                console.error('Gagal membuat subkategori baru:', error);
-                showAlert(`Gagal membuat subkategori baru: ${error.message}`, 'danger');
-                return;
-            }
-        }
-        
-        // Dapatkan data kategori dan subkategori
-        let kategoriObj = {};
-        let subkategoriObj = {};
-        
-        try {
-            // Dapatkan data kategori menggunakan fungsi kategori.getById
-            const kategoriResponse = await kategori.getById(kategoriId);
-            console.log('Kategori response:', kategoriResponse);
-            
-            if (!kategoriResponse || !kategoriResponse.data) {
-                throw new Error('Gagal mendapatkan data kategori');
-            }
-            
-            kategoriObj = {
-                id_kategori: kategoriResponse.data.id_kategori,
-                nama_kategori: kategoriResponse.data.nama_kategori
-            };
-            
-            // Dapatkan data subkategori menggunakan fungsi subkategori.getById
-            const subkategoriResponse = await subkategori.getById(subkategoriId);
-            console.log('Subkategori response:', subkategoriResponse);
-            
-            if (!subkategoriResponse || !subkategoriResponse.data) {
-                throw new Error('Gagal mendapatkan data subkategori');
-            }
-            
-            subkategoriObj = {
-                id_subkategori: subkategoriResponse.data.id_subkategori,
-                nama_subkategori: subkategoriResponse.data.nama_subkategori,
-                kategori: kategoriObj
-            };
-        } catch (error) {
-            console.error('Error fetching kategori/subkategori data:', error);
-            showAlert(`Error: ${error.message}`, 'danger');
-            return;
-        }
-        
-        // Siapkan data produk dengan format yang benar
-        const finalProductData = {
-            nama_produk: productData.nama_produk,
-            kategori: kategoriObj,
-            subkategori: subkategoriObj,  // Backend mengharapkan field 'subkategori'
-            kode_produk: productData.kode_produk,
-            harga_produk: productData.harga_produk,
-            stok_barang: productData.stok_barang,
-            tanggal_kadaluarsa: productData.tanggal_kadaluarsa
-        };
-        
-        console.log('Mengirim data produk:', finalProductData);
+        console.log('Mengirim data produk:', formattedData);
         
         // Kirim data ke backend
         const response = await fetch(`${BASE_URL}/produk/createproduk`, {
@@ -1296,7 +1236,7 @@ async function handleAddProduct(event) {
                 Authorization: `Bearer ${getToken()}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(finalProductData),
+            body: JSON.stringify(formattedData),
         });
         
         if (!response.ok) {
@@ -1305,21 +1245,25 @@ async function handleAddProduct(event) {
         }
         
         const result = await response.json();
+        console.log('Produk berhasil ditambahkan:', result);
         
         // Reset form dan tampilkan notifikasi sukses
         event.target.reset();
         showAlert('Produk berhasil ditambahkan', 'success');
         
         // Perbarui tabel produk
-        displayProducts();
+        await loadProducts();
         
-        // Tutup modal tanpa menggunakan jQuery
+        // Tutup modal
         const modal = document.getElementById('addProductModal');
-        modal.classList.remove('show');
-        modal.style.display = 'none';
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
         }
     } catch (error) {
         console.error('Error adding product:', error);

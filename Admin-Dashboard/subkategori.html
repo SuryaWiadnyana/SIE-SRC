@@ -20,8 +20,11 @@
 </head>
 
 <body id="page-top">
-  <!-- Page Wrapper -->
-  <div id="wrapper">
+    <!-- Alert placeholder -->
+    <div id="alertPlaceholder" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
         <!-- Sidebar - Brand -->
@@ -182,13 +185,13 @@
                 <form id="addSubKategoriForm">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="kategoriDropdown">Kategori</label>
+                            <label for="kategoriDropdown">Kategori <span class="text-danger">*</span></label>
                             <select class="form-control" id="kategoriDropdown" required>
                                 <option value="">Pilih Kategori</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="newSubKategoriName">Nama Sub Kategori</label>
+                            <label for="newSubKategoriName">Nama Sub Kategori <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="newSubKategoriName" required>
                         </div>
                     </div>
@@ -215,16 +218,15 @@
                     <div class="modal-body">
                         <input type="hidden" id="editSubKategoriId">
                         <div class="form-group">
-                            <label for="editKategoriDropdown">Kategori</label>
+                            <label for="editKategoriDropdown">Kategori <span class="text-danger">*</span></label>
                             <select class="form-control" id="editKategoriDropdown" required>
                                 <option value="">Pilih Kategori</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="editSubKategoriName">Nama Sub Kategori</label>
+                            <label for="editSubKategoriName">Nama Sub Kategori <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="editSubKategoriName" required>
                         </div>
-                        <input type="hidden" id="editSubKategoriKategoriId">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -264,7 +266,10 @@
 <!-- Custom scripts for all pages-->
 <script src="../js/sb-admin-2.min.js"></script>
 
-<!-- Import produk.js as a module -->
-<script type="module" src="../js/produk.js"></script>
+<!-- Import subkategori.js -->
+<script src="../js/subkategori.js"></script>
+
+<!-- Add alert placeholder -->
+<div id="alertPlaceholder" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 </body>
 </html>
