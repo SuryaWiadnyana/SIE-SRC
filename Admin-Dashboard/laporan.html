@@ -8,12 +8,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SIE-SRC |  Cetak Laporan</title>
+    <title>SIE-SRC | Cetak Laporan</title>
 
     <!-- Custom fonts for this template-->
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
@@ -23,7 +22,6 @@
     <!-- jsPDF library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
 </head>
 
 <body id="page-top">
@@ -61,7 +59,7 @@
             <!-- Nav Item - Sales -->
             <li class="nav-item active">
                 <a class="nav-link" href="laporan.html">
-                    <i class="fas fa-fw fa-file"></i>
+                    <i class="fas fa-fw fa-download"></i>
                     <span>Cetak Laporan</span>
                 </a>
             </li>
@@ -114,9 +112,9 @@
                     <!-- Page Heading -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Cetak Laporan</h1>
-                        </button>
                     </div>
 
+                    <!-- Report Filter Card -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Filter Laporan</h6>
@@ -133,6 +131,27 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <!-- Filter Kategori -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Kategori</label>
+                                            <select class="form-control" id="kategoriFilter">
+                                                <option value="">Semua Kategori</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <!-- Filter Subkategori -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Subkategori</label>
+                                            <select class="form-control" id="subkategoriFilter" disabled>
+                                                <option value="">Semua Subkategori</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <!-- Filter Tanggal untuk Laporan Penjualan -->
                                     <div class="col-md-4 date-range">
                                         <div class="form-group">
                                             <label for="startDate">Tanggal Mulai</label>
@@ -141,64 +160,73 @@
                                     </div>
                                     <div class="col-md-4 date-range">
                                         <div class="form-group">
-                                            <label for="endDate">Tanggal Selesai</label>
+                                            <label for="endDate">Tanggal Akhir</label>
                                             <input type="date" class="form-control" id="endDate">
                                         </div>
                                     </div>
+                                    <!-- Sorting Options -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Urutkan Berdasarkan</label>
+                                            <select class="form-control" id="sortOption">
+                                                <!-- Options will be populated by JavaScript -->
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn btn-primary mt-3" id="generatePdf">
-                                    Download Laporan
-                                </button>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <button type="button" class="btn btn-primary" onclick="generateReport()">
+                                            <i class="fas fa-download fa-sm"></i> Unduh Laporan
+                                        </button>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     </div>
-
-                <!-- Footer -->
-                <footer class="sticky-footer bg-white">
-                    <div class="container my-auto">
-                        <div class="copyright text-center my-auto">
-                            <span>Copyright &copy; SIE-SRC 2025</span>
-                        </div>
-                    </div>
-                </footer>
-                <!-- End of Footer -->
+                </div>
+                <!-- /.container-fluid -->
             </div>
-            <!-- End of Content Wrapper -->
-        </div>
-        <!-- End of Page Wrapper -->
+            <!-- End of Main Content -->
 
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
-
-  <!-- Logout Modal-->
-  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">
-            Siap untuk Keluar?
-          </h5>
-          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">×</span>
-          </button>
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                            <span>Copyright &copy; SIE-SRC 2025</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
         </div>
-        <div class="modal-body">
-          Apakah Anda yakin ingin keluar?
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">
-            Batal
-          </button>
-          <button class="btn btn-primary" type="button" id="logoutButton">
-            Keluar
-          </button>
-        </div>
-      </div>
+        <!-- End of Content Wrapper -->
     </div>
-  </div>>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Yakin ingin keluar?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Pilih "Logout" jika anda ingin mengakhiri sesi ini.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                    <button class="btn btn-primary" type="button" id="logoutButton">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap core JavaScript-->
     <script src="../vendor/jquery/jquery.min.js"></script>
@@ -209,11 +237,7 @@
 
     <!-- Custom scripts for all pages-->
     <script src="../js/sb-admin-2.min.js"></script>
-    <script src="../vendor/moment/moment.min.js"></script>
-
-    <!-- Page level plugins -->
-    <script type="module" src="../js/laporan.js"></script>
-    
+    <script src="../js/laporan.js"></script>
 </body>
 
 </html>
