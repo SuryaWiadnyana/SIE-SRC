@@ -144,34 +144,136 @@ const kategori = {
     },
 
     // Delete kategori
-    delete: async function(id, nama) {
+    delete: async function(id) {
         try {
-            if (!id) {
-                throw new Error('ID kategori tidak valid');
-            }
-            
             const response = await fetch(`${BASE_URL}/kategori/admin/delete-kategori/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${getToken()}`
                 }
             });
-
+            
             if (!response.ok) {
                 const errorData = await response.json();
-                if (response.status === 404) {
-                    throw new Error(`Kategori "${nama}" tidak ditemukan atau sudah dihapus`);
-                }
-                throw new Error(errorData.error || 'Gagal menghapus kategori');
+                return {
+                    success: false,
+                    error: errorData.error || 'Gagal menghapus kategori'
+                };
             }
-
-            return true;
+            
+            return {
+                success: true
+            };
         } catch (error) {
             console.error('Error deleting kategori:', error);
-            throw error;
+            return {
+                success: false,
+                error: error.message || 'Gagal menghapus kategori'
+            };
         }
     }
 };
+
+// Global variables for pagination
+let currentPage = 1;
+const itemsPerPage = 5;
+let filteredData = [];
+
+// Search and filter function
+function searchKategori(data, searchTerm) {
+    if (!searchTerm) return data;
+    searchTerm = searchTerm.toLowerCase();
+    return data.filter(item => 
+        item.id_kategori.toLowerCase().includes(searchTerm) ||
+        item.nama_kategori.toLowerCase().includes(searchTerm)
+    );
+}
+
+// Update pagination info
+function updatePaginationInfo(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(start + itemsPerPage - 1, totalItems);
+    
+    document.getElementById('pagination-info').innerHTML = `
+        Showing ${totalItems ? start : 0} to ${end} of ${totalItems} entries
+    `;
+
+    // Update pagination buttons
+    const paginationContainer = document.getElementById('pagination-buttons');
+    let buttons = '';
+    
+    // Previous button
+    buttons += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+    
+    // Page buttons
+    for (let i = 1; i <= totalPages; i++) {
+        buttons += `<button onclick="changePage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+    }
+    
+    // Next button
+    buttons += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+    
+    paginationContainer.innerHTML = buttons;
+}
+
+// Change page function
+function changePage(newPage) {
+    currentPage = newPage;
+    loadKategoriTable();
+}
+
+// Load kategori table with search and pagination
+async function loadKategoriTable() {
+    try {
+        const searchTerm = document.getElementById('searchInput').value;
+        const result = await kategori.getAll();
+        
+        if (result.success) {
+            // Filter data based on search term
+            filteredData = searchKategori(result.data, searchTerm);
+            
+            // Calculate pagination
+            const totalItems = filteredData.length;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            // Generate table rows
+            const tableBody = document.getElementById('kategoriTableBody');
+            tableBody.innerHTML = '';
+            
+            paginatedData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id_kategori}</td>
+                    <td>${item.nama_kategori}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-kategori" 
+                            data-id="${item.id_kategori}" 
+                            data-nama="${item.nama_kategori}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-kategori" 
+                            data-id="${item.id_kategori}" 
+                            data-nama="${item.nama_kategori}">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update pagination info
+            updatePaginationInfo(totalItems);
+        } else {
+            showAlert(result.error || 'Failed to load categories', 'error');
+        }
+    } catch (error) {
+        console.error('Error in loadKategoriTable:', error);
+        showAlert('Failed to load categories: ' + error.message, 'error');
+    }
+}
 
 // Show alert message
 function showAlert(message, type) {
@@ -202,60 +304,24 @@ function showAlert(message, type) {
     }, 5000);
 }
 
-// Load kategori table
-async function loadKategoriTable() {
-    const tableBody = document.getElementById('kategoriTableBody');
-    if (!tableBody) {
-        console.error('Kategori table body not found');
-        return;
-    }
-    
-    try {
-        const result = await kategori.getAll();
-        if (!result.success) {
-            throw new Error(result.error || 'Failed to load kategori');
-        }
-
-        const kategoriList = result.data;
-        tableBody.innerHTML = '';
-        
-        kategoriList.forEach(kat => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${kat.id_kategori}</td>
-                <td>${kat.nama_kategori}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary edit-kategori" 
-                        data-id="${kat.id_kategori}" 
-                        data-nama="${kat.nama_kategori}">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-kategori" 
-                        data-id="${kat.id_kategori}" 
-                        data-nama="${kat.nama_kategori}">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Error loading kategori table:', error);
-        showAlert(`Error: ${error.message}`, 'danger');
-    }
-}
-
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing kategori page...');
-    
-    if (!checkAuth()) {
-        console.log('Auth check failed');
-        return;
-    }
-    
+    if (!checkAuth()) return;
+
     try {
-        // Load initial data
+        // Add search input event listener
+        const searchInput = document.getElementById('searchInput');
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1; // Reset to first page on search
+                loadKategoriTable();
+            }, 300);
+        });
+
+        // Initial load
         await loadKategoriTable();
         
         // Add form submit handlers
@@ -320,21 +386,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const button = e.target.closest('.delete-kategori');
                 const id = button.dataset.id;
                 const namaKategori = button.dataset.nama;
-                
+
                 showDeleteConfirmation(
                     "Konfirmasi Hapus Kategori",
-                    `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"? Semua subkategori yang terkait juga akan dihapus.`,
+                    `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"?`,
                     async function() {
                         try {
-                            await kategori.delete(id, namaKategori);
-                            showAlert('Kategori berhasil dihapus', 'success');
-                            await loadKategoriTable();
-                        } catch (error) {
-                            if (error.message.includes('tidak ditemukan')) {
-                                showAlert(error.message, 'warning');
+                            const result = await kategori.delete(id);
+                            if (result.success) {
+                                showAlert('Kategori berhasil dihapus', 'success');
+                                await loadKategoriTable();
                             } else {
-                                showAlert('Gagal menghapus kategori: ' + error.message, 'danger');
+                                const errorMsg = result.error === 'kategori dengan ID ' + id + ' tidak ditemukan'
+                                    ? 'Kategori sudah tidak ada di database'
+                                    : result.error || 'Gagal menghapus kategori';
+                                showAlert(errorMsg, 'danger');
+                                await loadKategoriTable(); // Refresh table to show current state
                             }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showAlert('Terjadi kesalahan saat menghapus kategori', 'danger');
+                            await loadKategoriTable(); // Refresh table to show current state
                         }
                     }
                 );
@@ -342,8 +414,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         
     } catch (error) {
-        console.error('Error initializing page:', error);
-        showAlert('Terjadi kesalahan saat memuat halaman: ' + error.message, 'danger');
+        console.error('Error during initialization:', error);
+        showAlert('Failed to initialize page: ' + error.message, 'error');
     }
 });
 

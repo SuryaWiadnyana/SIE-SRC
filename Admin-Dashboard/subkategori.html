@@ -17,11 +17,30 @@
     <!-- Custom styles -->
     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../css/sie-src-theme.css" rel="stylesheet">
+    
+    <!-- Delete confirmation styles -->
+    <style>
+        .warning-triangle {
+            animation: warning-shake 0.5s ease-in-out;
+        }
+        @keyframes warning-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .modal-header.bg-danger .close {
+            color: white;
+            opacity: 1;
+        }
+        .modal-header.bg-danger .close:hover {
+            color: #f8f9fc;
+        }
+    </style>
 </head>
 
 <body id="page-top">
     <!-- Alert placeholder -->
-    <div id="alertPlaceholder" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+    <div id="alertPlaceholder"></div>
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -124,15 +143,28 @@
 
                     <!-- Sub Kategori Card -->
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Daftar Sub Kategori</h6>
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#addSubKategoriModal">
-                                <i class="fas fa-plus fa-sm"></i> Tambah Sub Kategori
-                            </button>
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Daftar Sub Kategori</h5>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubKategoriModal">
+                                    <i class="fas fa-plus"></i> Tambah Sub Kategori
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
+                            <!-- Search input -->
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Cari sub kategori...">
+                                </div>
+                            </div>
+
+                            <!-- Table -->
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="subKategoriTable" width="100%" cellspacing="0">
+                                <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -141,10 +173,19 @@
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="subKategoriTableBody">
-                                        <!-- Data will be loaded dynamically -->
+                                    <tbody id="subkategoriTableBody">
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div id="pagination-info" class="text-muted">
+                                    Showing 0 to 0 of 0 entries
+                                </div>
+                                <div id="pagination-buttons" class="btn-group">
+                                    <!-- Pagination buttons will be inserted here -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -173,30 +214,28 @@
     </a>
 
     <!-- Add Sub Kategori Modal -->
-    <div class="modal fade" id="addSubKategoriModal" tabindex="-1" role="dialog" aria-labelledby="addSubKategoriModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="addSubKategoriModal" tabindex="-1" aria-labelledby="addSubKategoriModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addSubKategoriModalLabel">Tambah Sub Kategori Baru</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="addSubKategoriModalLabel">Tambah Sub Kategori</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addSubKategoriForm">
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="kategoriDropdown">Kategori <span class="text-danger">*</span></label>
-                            <select class="form-control" id="kategoriDropdown" required>
+                        <div class="mb-3">
+                            <label for="kategoriDropdown" class="form-label">Kategori <span class="text-danger">*</span></label>
+                            <select class="form-select" id="kategoriDropdown" required>
                                 <option value="">Pilih Kategori</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="newSubKategoriName">Nama Sub Kategori <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="newSubKategoriName" required>
+                        <div class="mb-3">
+                            <label for="namaSubKategori" class="form-label">Nama Sub Kategori <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="namaSubKategori" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
@@ -205,32 +244,30 @@
     </div>
 
     <!-- Edit Sub Kategori Modal -->
-    <div class="modal fade" id="editSubKategoriModal" tabindex="-1" role="dialog" aria-labelledby="editSubKategoriModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="editSubKategoriModal" tabindex="-1" aria-labelledby="editSubKategoriModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editSubKategoriModalLabel">Edit Sub Kategori</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editSubKategoriForm">
                     <div class="modal-body">
                         <input type="hidden" id="editSubKategoriId">
-                        <div class="form-group">
-                            <label for="editKategoriDropdown">Kategori <span class="text-danger">*</span></label>
-                            <select class="form-control" id="editKategoriDropdown" required>
+                        <div class="mb-3">
+                            <label for="editKategoriDropdown" class="form-label">Kategori <span class="text-danger">*</span></label>
+                            <select class="form-select" id="editKategoriDropdown" required>
                                 <option value="">Pilih Kategori</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="editSubKategoriName">Nama Sub Kategori <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="editSubKategoriName" required>
+                        <div class="mb-3">
+                            <label for="editNamaSubKategori" class="form-label">Nama Sub Kategori <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="editNamaSubKategori" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -257,8 +294,9 @@
    </div>
 </div>
 
-<script src="../vendor/jquery/jquery.min.js"></script>
-<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap core JavaScript-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Core plugin JavaScript-->
 <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
@@ -266,10 +304,10 @@
 <!-- Custom scripts for all pages-->
 <script src="../js/sb-admin-2.min.js"></script>
 
+<!-- Delete confirmation script -->
+<script src="../js/delete-confirmation.js"></script>
+
 <!-- Import subkategori.js -->
 <script src="../js/subkategori.js"></script>
-
-<!-- Add alert placeholder -->
-<div id="alertPlaceholder" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 </body>
 </html>
