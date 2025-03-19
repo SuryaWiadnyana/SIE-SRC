@@ -200,13 +200,14 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 	filter := bson.M{"id_produk": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
-			"nama_produk":      bd.NamaProduk,
-			"kategori":         bd.Kategori,
-			"subkategori":      bd.SubKategori,
-			"kode_produk":      bd.KodeProduk,
-			"harga_produk":     bd.HargaProduk,
-			"stok_barang":      bd.Stok,
-			"updated_at":       bd.UpdatedAt,
+			"nama_produk":        bd.NamaProduk,
+			"kategori":           bd.Kategori,
+			"subkategori":        bd.SubKategori,
+			"kode_produk":        bd.KodeProduk,
+			"harga_produk":       bd.HargaProduk,
+			"stok_barang":        bd.Stok,
+			"tanggal_kadaluarsa": bd.TanggalKadaluarsa,
+			"updated_at":         bd.UpdatedAt,
 		},
 	}
 
@@ -405,6 +406,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 			{Key: "kode_produk", Value: produk.KodeProduk},
 			{Key: "harga_produk", Value: produk.HargaProduk},
 			{Key: "stok_barang", Value: produk.Stok},
+			{Key: "tanggal_kadaluarsa", Value: produk.TanggalKadaluarsa},
 			{Key: "updated_at", Value: now},
 			{Key: "is_deleted", Value: nil},
 		}
