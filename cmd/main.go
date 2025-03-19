@@ -117,9 +117,8 @@ func startHTTPServer() {
 	// Produk Use Case route
 	delivery.NewHttpDeliveryProduk(app, produkUseCase, kategoriUseCase, subKategoriUseCase)
 
-	// Algoritma Use Case and Handler
-	// algoritmaUseCase := usecase.NewAlgoritmaUsecase(algoritmaRepo)
-	// delivery.NewAlgoritmaHandler(app, algoritmaUseCase)
+	// Laporan Use Case route
+	delivery.NewHttpDeliveryLaporan(app, penjualanUseCase, detailPenjualanUC, produkUseCase)
 
 	// Signal handling for graceful shutdown
 	quit := make(chan os.Signal, 1)

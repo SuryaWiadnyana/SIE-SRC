@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"time"
 )
 
 type DetailPenjualan struct {
@@ -9,6 +10,16 @@ type DetailPenjualan struct {
 	Penjualan          Penjualan `json:"penjualan" bson:"penjualan"`
 	Produk             []Produk  `json:"produk" bson:"produk"`
 	TotalPendapatan    int       `json:"total_pendapatan" bson:"total_pendapatan"`
+}
+
+type ResponseSalesReportItem struct {
+	TanggalPenjualan time.Time          `json:"tanggal_penjualan"`
+	KodeProduk       string             `json:"kode_produk"`
+	NamaProduk       string             `json:"nama_produk"`
+	Kategori         Kategori           `json:"kategori"`
+	SubKategori      SubKategori        `json:"subkategori"`
+	JumlahProduk     int                `json:"jumlah_produk"`
+	Total            int                `json:"total"`
 }
 
 type DetailPenjualanRepository interface {
