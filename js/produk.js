@@ -43,7 +43,7 @@ async function handleResponse(response) {
 
 // Authentication API
 async function auth() {
-  console.log("Starting penjualan page initialization...");
+  console.log("Starting page initialization...");
 
   try {
     // Show loading indicator
@@ -71,12 +71,8 @@ async function auth() {
     $("#username").text(displayName);
     $("#namaPenjual").val(displayName);
 
-    // Load products first
-    await loadProdukOptions();
-
-    // Initialize DataTable
-    await initializeDataTable();
-    await setupEventHandlers();
+    // Load products
+    await loadProducts();
 
     console.log("Page initialization completed successfully");
   } catch (error) {
@@ -2153,9 +2149,9 @@ function initializeKategoriManagement() {
             const namaKategori = button.dataset.nama;
 
             showDeleteConfirmation(
-                "Konfirmasi Hapus Kategori",
+                "Konfirmasi Hapus",
                 `Apakah Anda yakin ingin menghapus kategori "${namaKategori}"?`,
-                function() {
+                async function() {
                     kategori.delete(id).then(result => {
                         if (result.success) {
                             showAlert('Kategori berhasil dihapus', 'success');
