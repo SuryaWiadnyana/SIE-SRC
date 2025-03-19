@@ -160,28 +160,82 @@
                     <!-- Products Table -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h4 class="m-0 font-weight-bold text-primary">Daftar Produk</h4>
+                            <ul class="nav nav-tabs card-header-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="normalView-tab" data-toggle="tab" href="#normalView">
+                                        <i class="fas fa-list"></i> Daftar Produk
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="expiryView-tab" data-toggle="tab" href="#expiryView">
+                                        <i class="fas fa-calendar-times"></i> Monitoring Kadaluarsa
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="productTable" width="100%" cellspacing="0">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th>ID Produk</th>
-                                            <th>Nama Produk</th>
-                                            <th>Kategori</th>
-                                            <th>Sub Kategori</th>
-                                            <th>Kode Produk</th>
-                                            <th>Harga</th>
-                                            <th>Stok</th>
-                                            <th>Tanggal Kadaluarsa</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Product data will be loaded here -->
-                                    </tbody>
-                                </table>
+                            <div class="tab-content">
+                                <!-- Normal View -->
+                                <div class="tab-pane fade show active" id="normalView">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="productTable" width="100%" cellspacing="0">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>ID Produk</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>Kategori</th>
+                                                    <th>Sub Kategori</th>
+                                                    <th>Kode Produk</th>
+                                                    <th>Harga</th>
+                                                    <th>Stok</th>
+                                                    <th>Tanggal Kadaluarsa</th>
+                                                    <th>Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="productTableBody">
+                                                <!-- Product data will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Expiry View -->
+                                <div class="tab-pane fade" id="expiryView">
+                                    <!-- Filter Days -->
+                                    <div class="form-group mb-4">
+                                        <label for="daysThreshold">Tampilkan produk yang akan kadaluarsa dalam:</label>
+                                        <div class="input-group" style="max-width: 300px;">
+                                            <input type="number" class="form-control" id="daysThreshold" value="60" min="1">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">hari</span>
+                                                <button class="btn btn-primary" onclick="loadNearExpiryProducts()">
+                                                    <i class="fas fa-sync-alt"></i> Perbarui
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Expiry Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" width="100%" cellspacing="0">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Kode Produk</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>Kategori</th>
+                                                    <th>Subkategori</th>
+                                                    <th>Stok</th>
+                                                    <th>Tanggal Kadaluarsa</th>
+                                                    <th>Status</th>
+                                                    <th>Sisa Hari</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="expiryTableBody">
+                                                <!-- Data will be populated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
