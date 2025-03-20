@@ -176,11 +176,63 @@ const kategori = {
     }
 };
 
+// Global variables for pagination
+let currentPage = 1;
+const itemsPerPage = 10;
+let filteredData = [];
+
+// Update pagination info
+function updatePaginationInfo(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(start + itemsPerPage - 1, totalItems);
+    
+    document.getElementById('pagination-info').innerHTML = `
+        Showing ${totalItems ? start : 0} to ${end} of ${totalItems} entries
+    `;
+
+    // Update pagination buttons
+    const paginationContainer = document.getElementById('pagination-buttons');
+    let buttons = '';
+    
+    // Previous button
+    buttons += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+    
+    // Page buttons
+    for (let i = 1; i <= totalPages; i++) {
+        buttons += `<button onclick="changePage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+    }
+    
+    // Next button
+    buttons += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+    
+    paginationContainer.innerHTML = buttons;
+}
+
+// Change page function
+function changePage(newPage) {
+    currentPage = newPage;
+    loadSubKategoriTable();
+}
+
+// Search and filter function
+function searchSubKategori(data, searchTerm) {
+    if (!searchTerm) return data;
+    
+    searchTerm = searchTerm.toLowerCase();
+    return data.filter(item => 
+        (item.id_subkategori && item.id_subkategori.toString().toLowerCase().includes(searchTerm)) ||
+        (item.nama_subkategori && item.nama_subkategori.toLowerCase().includes(searchTerm)) ||
+        (item.kategori && item.kategori.nama_kategori && item.kategori.nama_kategori.toLowerCase().includes(searchTerm))
+    );
+}
+
 // Load subkategori table
 async function loadSubKategoriTable() {
     try {
-        const subkategoriList = await subkategori.getAll();
+        const result = await subkategori.getAll();
         const tableBody = document.getElementById('subkategoriTableBody');
+        const searchTerm = document.getElementById('searchInput').value;
         
         if (!tableBody) {
             console.error('Table body element not found');
@@ -189,31 +241,70 @@ async function loadSubKategoriTable() {
         
         tableBody.innerHTML = '';
         
-        subkategoriList.forEach(subkat => {
+        if (Array.isArray(result) && result.length > 0) {
+            // Filter data based on search term
+            filteredData = searchSubKategori(result, searchTerm);
+            
+            // Calculate pagination
+            const totalItems = filteredData.length;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            // Generate table rows
+            paginatedData.forEach(subkat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${subkat.id_subkategori}</td>
+                    <td>${subkat.kategori ? subkat.kategori.nama_kategori : '-'}</td>
+                    <td>${subkat.nama_subkategori}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-subkategori" 
+                            data-id="${subkat.id_subkategori}"
+                            data-kategori-id="${subkat.kategori ? subkat.kategori.id_kategori : ''}"
+                            data-nama="${subkat.nama_subkategori}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-subkategori" 
+                            data-id="${subkat.id_subkategori}"
+                            data-nama="${subkat.nama_subkategori}">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update pagination info
+            updatePaginationInfo(totalItems);
+        } else {
+            // Show message when no data
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${subkat.id_subkategori}</td>
-                <td>${subkat.kategori ? subkat.kategori.nama_kategori : '-'}</td>
-                <td>${subkat.nama_subkategori}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary edit-subkategori" 
-                        data-id="${subkat.id_subkategori}"
-                        data-kategori-id="${subkat.kategori ? subkat.kategori.id_kategori : ''}"
-                        data-nama="${subkat.nama_subkategori}">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-subkategori" 
-                        data-id="${subkat.id_subkategori}"
-                        data-nama="${subkat.nama_subkategori}">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
+                <td colspan="4" class="text-center">
+                    <strong>Tidak Ada Data Sub Kategori</strong>
                 </td>
             `;
             tableBody.appendChild(row);
-        });
+            
+            // Reset pagination
+            updatePaginationInfo(0);
+        }
     } catch (error) {
         console.error('Error loading subkategori table:', error);
         showAlert('Gagal memuat data subkategori: ' + error.message, 'danger');
+        
+        // Show error in table
+        const tableBody = document.getElementById('subkategoriTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-danger">
+                        Terjadi kesalahan saat memuat data
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 
@@ -280,6 +371,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     try {
+        // Add search input handler
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                currentPage = 1; // Reset to first page when searching
+                loadSubKategoriTable();
+            });
+        }
+
         // Load initial data
         await loadSubKategoriTable();
         await populateKategoriDropdowns();

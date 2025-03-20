@@ -226,21 +226,37 @@ const products = {
           }
         }
 
-        // Pastikan kategori dan subkategori dalam format yang benar
-        if (productData.kategori && typeof productData.kategori === 'object') {
-          if (!productData.kategori.id_kategori) {
-            throw new Error("ID kategori tidak valid");
+        // Dapatkan kategori dan subkategori berdasarkan nama jika ID tidak ada
+        if (productData.kategori && !productData.kategori.id_kategori) {
+          try {
+            const kategoriResponse = await fetch(`${BASE_URL}/kategori/getbynama/${encodeURIComponent(productData.kategori.nama_kategori)}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const kategoriData = await kategoriResponse.json();
+            if (kategoriData.data) {
+              productData.kategori.id_kategori = kategoriData.data.id_kategori;
+            }
+          } catch (error) {
+            console.warn('Gagal mendapatkan ID kategori:', error);
           }
         }
 
-        if (productData.subkategori && typeof productData.subkategori === 'object') {
-          if (!productData.subkategori.id_subkategori) {
-            throw new Error("ID subkategori tidak valid");
-          }
-          
-          // Pastikan subkategori memiliki referensi ke kategori yang benar
-          if (!productData.subkategori.kategori) {
-            productData.subkategori.kategori = productData.kategori;
+        if (productData.subkategori && !productData.subkategori.id_subkategori) {
+          try {
+            const subkategoriResponse = await fetch(`${BASE_URL}/subkategori/getbynama/${encodeURIComponent(productData.subkategori.nama_subkategori)}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const subkategoriData = await subkategoriResponse.json();
+            if (subkategoriData.data) {
+              productData.subkategori.id_subkategori = subkategoriData.data.id_subkategori;
+              productData.subkategori.kategori = productData.kategori;
+            }
+          } catch (error) {
+            console.warn('Gagal mendapatkan ID subkategori:', error);
           }
         }
 
@@ -248,7 +264,7 @@ const products = {
         const finalProductData = {
           nama_produk: productData.nama_produk,
           kategori: productData.kategori,
-          subkategori: productData.subkategori,  // Backend mengharapkan field 'subkategori'
+          subkategori: productData.subkategori,
           kode_produk: productData.kode_produk,
           harga_produk: parseInt(productData.harga_produk),
           stok_barang: parseInt(productData.stok_barang),
@@ -844,35 +860,24 @@ async function loadProducts() {
         console.log('API response:', result);
         
         if (result.success && result.data) {  
-            console.log('Raw products data:', result.data);      
-            // Ambil data produk dari nested object
+            // Set both allProducts and filteredProducts
             allProducts = result.data;
-            console.log('Processed products:', allProducts);
+            filteredProducts = [...allProducts]; // Pastikan filteredProducts diinisialisasi
+            currentPage = 1; // Reset ke halaman pertama
             
-            // Mengumpulkan kategori dan sub-kategori unik
-            uniqueCategories.clear();
-            uniqueSubCategories.clear();
-            allProducts.forEach(item => {
-                const product = item.produk;
-                if (product) {
-                    if (product.kategori) uniqueCategories.add(product.kategori);
-                    if (product.sub_kategori) uniqueSubCategories.add(product.sub_kategori);
-                }
-            });
-            
-            // Update filter buttons
+            // Update UI
             updateFilterButtons();
-            
-            // Tampilkan semua produk
-            displayProducts(allProducts);
+            displayProducts(filteredProducts);
         } else {
             console.log('No products data found or error:', result.error);
             showAlert('Gagal memuat data produk: ' + (result.error || 'Data tidak ditemukan'), 'danger');
+            filteredProducts = [];
             displayProducts([]);
         }
     } catch (error) {
         console.error('Error loading products:', error);
         showAlert('Terjadi kesalahan saat memuat produk', 'danger');
+        filteredProducts = [];
         displayProducts([]);
     }
 }
@@ -982,15 +987,25 @@ function displayProducts(products = []) {
     // If no products, show message
     if (!products || products.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada produk ditemukan</td></tr>';
-        updatePagination(0);
+        paginationContainer.innerHTML = '';
         return;
     }
 
     // Calculate pagination
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    
+    // Validate current page
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    } else if (currentPage < 1) {
+        currentPage = 1;
+    }
+    
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, products.length);
     const paginatedProducts = products.slice(startIndex, endIndex);
 
+    // Display products
     paginatedProducts.forEach(item => {
         if (!item || !item.produk) {
             console.warn('Invalid product item:', item);
@@ -1000,7 +1015,7 @@ function displayProducts(products = []) {
         const product = item.produk;
         const row = document.createElement('tr');
         
-        // Ekstrak nama kategori dan subkategori
+        // Format kategori and subkategori
         let kategoriDisplay = '-';
         let subKategoriDisplay = '-';
         
@@ -1016,7 +1031,7 @@ function displayProducts(products = []) {
             subKategoriDisplay = product.nama_subkategori;
         }
         
-        // Format tanggal kadaluarsa jika ada
+        // Format tanggal kadaluarsa
         let tanggalKadaluarsa = '-';
         if (product.tanggal_kadaluarsa) {
             const date = new Date(product.tanggal_kadaluarsa);
@@ -1052,94 +1067,56 @@ function displayProducts(products = []) {
         tbody.appendChild(row);
     });
 
-    // Remove any existing page info
-    const existingPageInfo = document.querySelector('.page-info');
-    if (existingPageInfo) {
-        existingPageInfo.remove();
-    }
-
-    // Add page info after the table
-    const totalPages = Math.ceil(products.length / itemsPerPage);
-    const pageInfo = document.createElement('div');
-    pageInfo.className = 'page-info text-center mb-2';
-    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${products.length} produk)`;
-    productTable.parentNode.insertBefore(pageInfo, paginationContainer);
-
     // Update pagination
-    updatePagination(products.length);
-}
-
-// Add pagination controls
-function updatePagination(totalItems) {
-    const paginationContainer = document.getElementById('pagination');
-    if (!paginationContainer) return;
-
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
     let paginationHTML = '<ul class="pagination justify-content-center">';
 
     // Previous button
     paginationHTML += `
         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo; Previous</a>
+            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
         </li>
     `;
 
-    // First page
-    paginationHTML += `
-        <li class="page-item ${currentPage === 1 ? 'active' : ''}">
-            <a class="page-link" href="#" data-page="1">1</a>
-        </li>
-    `;
-
-    // Add ellipsis and pages around current page
-    let startPage = Math.max(2, currentPage - 2);
-    let endPage = Math.min(totalPages - 1, currentPage + 2);
-
-    if (startPage > 2) {
-        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-        paginationHTML += `
-            <li class="page-item ${currentPage === i ? 'active' : ''}">
-                <a class="page-link" href="#" data-page="${i}">${i}</a>
-            </li>
-        `;
-    }
-
-    if (endPage < totalPages - 1) {
-        paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-    }
-
-    // Last page
-    if (totalPages > 1) {
-        paginationHTML += `
-            <li class="page-item ${currentPage === totalPages ? 'active' : ''}">
-                <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
-            </li>
-        `;
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            paginationHTML += `
+                <li class="page-item ${currentPage === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            paginationHTML += `<li class="page-item disabled"><a class="page-link">...</a></li>`;
+        }
     }
 
     // Next button
     paginationHTML += `
         <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-            <a class="page-link" href="#" data-page="${currentPage + 1}">Next &raquo;</a>
+            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
         </li>
     `;
 
     paginationHTML += '</ul>';
-    paginationContainer.innerHTML = paginationHTML;
+    
+    // Add page info
+    const pageInfo = document.createElement('div');
+    pageInfo.className = 'page-info text-center mb-2';
+    pageInfo.innerHTML = `Halaman ${currentPage} dari ${totalPages} (Total: ${products.length} produk)`;
+    
+    // Update pagination container
+    paginationContainer.innerHTML = '';
+    paginationContainer.appendChild(pageInfo);
+    paginationContainer.insertAdjacentHTML('beforeend', paginationHTML);
 
     // Add click handlers
     paginationContainer.querySelectorAll('.page-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const newPage = parseInt(e.target.dataset.page);
-            if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+            if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
                 currentPage = newPage;
                 displayProducts(filteredProducts);
-                // Scroll to top of table
-                productTable.scrollIntoView({ behavior: 'smooth' });
             }
         });
     });
@@ -2775,18 +2752,18 @@ async function getNearExpiryProducts(days = 60) {
     try {
         const response = await fetch(`${BASE_URL}/produk/getnearexpiry/${days}`, {
             headers: {
-                'Authorization': `Bearer ${getToken()}`
-            }
+                'Authorization': `Bearer ${localStorage.getItem("token")}`,
+            },
         });
 
         if (!response.ok) {
-            throw new Error('Gagal mengambil data produk');
+            throw new Error("Failed to fetch near expiry products");
         }
 
         const result = await response.json();
         return result.data;
     } catch (error) {
-        console.error('Error:', error);
+        console.error("Error fetching near expiry products:", error);
         throw error;
     }
 }
@@ -2846,7 +2823,7 @@ async function loadNearExpiryProducts() {
         });
 
     } catch (error) {
-        console.error('Error:', error);
+        console.error("Error fetching near expiry products:", error);
         const tableBody = document.getElementById('expiryTableBody');
         if (tableBody) {
             tableBody.innerHTML = `

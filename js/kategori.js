@@ -176,7 +176,7 @@ const kategori = {
 
 // Global variables for pagination
 let currentPage = 1;
-const itemsPerPage = 5;
+const itemsPerPage = 10;
 let filteredData = [];
 
 // Search and filter function
@@ -229,7 +229,11 @@ async function loadKategoriTable() {
         const searchTerm = document.getElementById('searchInput').value;
         const result = await kategori.getAll();
         
-        if (result.success) {
+        // Get table body reference
+        const tableBody = document.getElementById('kategoriTableBody');
+        tableBody.innerHTML = '';
+
+        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             // Filter data based on search term
             filteredData = searchKategori(result.data, searchTerm);
             
@@ -240,38 +244,57 @@ async function loadKategoriTable() {
             const paginatedData = filteredData.slice(startIndex, endIndex);
             
             // Generate table rows
-            const tableBody = document.getElementById('kategoriTableBody');
-            tableBody.innerHTML = '';
-            
             paginatedData.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.id_kategori}</td>
-                    <td>${item.nama_kategori}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary edit-kategori" 
-                            data-id="${item.id_kategori}" 
-                            data-nama="${item.nama_kategori}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-sm btn-danger delete-kategori" 
-                            data-id="${item.id_kategori}" 
-                            data-nama="${item.nama_kategori}">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
+                if (item && item.id_kategori && item.nama_kategori) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.id_kategori}</td>
+                        <td>${item.nama_kategori}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-kategori" 
+                                data-id="${item.id_kategori}" 
+                                data-nama="${item.nama_kategori}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-kategori" 
+                                data-id="${item.id_kategori}" 
+                                data-nama="${item.nama_kategori}">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
             });
             
             // Update pagination info
             updatePaginationInfo(totalItems);
         } else {
-            showAlert(result.error || 'Failed to load categories', 'error');
+            // Show message when no data
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="3" class="text-center">
+                    <strong>Tidak Ada Data Kategori</strong>
+                </td>
+            `;
+            tableBody.appendChild(row);
+            
+            // Reset pagination
+            updatePaginationInfo(0);
         }
     } catch (error) {
         console.error('Error in loadKategoriTable:', error);
-        showAlert('Failed to load categories: ' + error.message, 'error');
+        showAlert('Gagal memuat data kategori: ' + error.message, 'error');
+        
+        // Show error in table
+        const tableBody = document.getElementById('kategoriTableBody');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center text-danger">
+                    Terjadi kesalahan saat memuat data
+                </td>
+            </tr>
+        `;
     }
 }
 

@@ -122,65 +122,60 @@
                         <div class="card-body">
                             <form id="reportFilterForm">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Jenis Laporan</label>
+                                            <label for="reportType">Jenis Laporan</label>
                                             <select class="form-control" id="reportType">
                                                 <option value="penjualan">Laporan Penjualan</option>
                                                 <option value="produk">Laporan Produk</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <!-- Filter Kategori -->
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Kategori</label>
+                                            <label for="kategoriFilter">Kategori</label>
                                             <select class="form-control" id="kategoriFilter">
                                                 <option value="">Semua Kategori</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <!-- Filter Subkategori -->
-                                    <div class="col-md-4">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Subkategori</label>
-                                            <select class="form-control" id="subkategoriFilter" disabled>
+                                            <label for="subkategoriFilter">Subkategori</label>
+                                            <select class="form-control" id="subkategoriFilter">
                                                 <option value="">Semua Subkategori</option>
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="sortOption">Urutkan Berdasarkan</label>
+                                            <select class="form-control" id="sortOption">
+                                                <option value="date_desc">Tanggal (Terbaru)</option>
+                                                <option value="date_asc">Tanggal (Terlama)</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="row mt-3">
-                                    <!-- Filter Tanggal untuk Laporan Penjualan -->
-                                    <div class="col-md-4 date-range">
+                                <div class="row" id="dateFilterSection">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="startDate">Tanggal Mulai</label>
                                             <input type="date" class="form-control" id="startDate">
                                         </div>
                                     </div>
-                                    <div class="col-md-4 date-range">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="endDate">Tanggal Akhir</label>
                                             <input type="date" class="form-control" id="endDate">
                                         </div>
                                     </div>
-                                    <!-- Sorting Options -->
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Urutkan Berdasarkan</label>
-                                            <select class="form-control" id="sortOption">
-                                                <!-- Options will be populated by JavaScript -->
-                                            </select>
-                                        </div>
-                                    </div>
                                 </div>
-                                <div class="row mt-3">
-                                    <div class="col-12">
-                                        <button type="button" class="btn btn-primary" onclick="generateReport()">
-                                            <i class="fas fa-download fa-sm"></i> Unduh Laporan
-                                        </button>
-                                    </div>
-                                </div>
+                                <button type="button" class="btn btn-primary" onclick="generateReport()">
+                                    <i class="fas fa-file-pdf fa-sm text-white-50 mr-2"></i>Cetak PDF
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -237,7 +232,10 @@
 
     <!-- Custom scripts for all pages-->
     <script src="../js/sb-admin-2.min.js"></script>
+
+    <!-- Page level custom scripts -->
     <script src="../js/laporan.js"></script>
+
 </body>
 
 </html>

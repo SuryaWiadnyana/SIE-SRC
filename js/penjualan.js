@@ -537,22 +537,27 @@ async function setupEventHandlers() {
                 throw new Error(result.error);
             }
 
-            // Show success message
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: 'Data penjualan berhasil disimpan',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                // Reset form
-                $('#formTambahPenjualan')[0].reset();
-                $('#modal-tambah-penjualan').modal('hide');
-                
-                // Reload data
-                refreshDataTable();
-                loadProdukOptions();
-            });
+            // Hide modal first
+            $('#modal-tambah-penjualan').modal('hide');
+
+            // // Show success message with modal in center
+                    // Clear first row's product info
+                    $productRows.first().find('.produk-info').remove();
+                    
+                    // Reset total
+                    updateTotal();
+                    
+                    // Refresh data and options
+                    Promise.all([
+                        refreshDataTable(),
+                        loadProdukOptions()
+                    ]).then(() => {
+                        console.log('Data dan opsi berhasil diperbarui');
+                    }).catch(err => {
+                        console.error('Error memperbarui data:', err);
+                    });
+            //     }
+            // });
 
         } catch (error) {
             console.error('Error submitting form:', error);
