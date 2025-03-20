@@ -567,13 +567,17 @@ async function fetchSubKategoriByKategori(kategoriId) {
 
   try {
     console.log(`Mengambil subkategori untuk kategori ID: ${kategoriId}`);
-    const response = await fetch(`${BASE_URL}/subkategori/bykategori/${kategoriId}`, {
+    const response = await fetch(`${BASE_URL}/subkategori/getbykategori/${kategoriId}`, {
       headers: {
         'Authorization': `Bearer ${getToken()}`
       }
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        console.warn(`Tidak ada subkategori untuk kategori ${kategoriId}`);
+        return [];
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -585,8 +589,8 @@ async function fetchSubKategoriByKategori(kategoriId) {
       subkategoriList = result.data;
     } else if (Array.isArray(result)) {
       subkategoriList = result;
-    } else if (result && typeof result === 'object') {
-      subkategoriList = [result];
+    } else if (result && typeof result === 'object' && result.data) {
+      subkategoriList = [result.data];
     } else {
       console.warn('Format data subkategori tidak sesuai:', result);
       return [];
@@ -606,6 +610,7 @@ async function fetchSubKategoriByKategori(kategoriId) {
     return Array.from(uniqueSubkategori.values());
   } catch (error) {
     console.error(`Error fetching subkategori for kategori ${kategoriId}:`, error);
+    showAlert(`Gagal mengambil data subkategori: ${error.message}`, 'danger');
     return [];
   }
 }
@@ -1015,6 +1020,31 @@ function displayProducts(products = []) {
         const product = item.produk;
         const row = document.createElement('tr');
         
+        // Function to calculate days until expiry
+        function getDaysUntilExpiry(expiryDate) {
+            if (!expiryDate) return null;
+            const today = new Date();
+            const expiry = new Date(expiryDate);
+            const diffTime = expiry - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        // Function to get row color based on expiry date
+        function getRowColorClass(daysUntilExpiry) {
+            if (daysUntilExpiry === null) return '';
+            if (daysUntilExpiry <= 10) return 'table-danger';
+            if (daysUntilExpiry <= 30) return 'table-warning';
+            return '';
+        }
+
+        // Calculate days until expiry and set row color
+        const daysUntilExpiry = getDaysUntilExpiry(product.tanggal_kadaluarsa);
+        const rowColorClass = getRowColorClass(daysUntilExpiry);
+        if (rowColorClass) {
+            row.className = rowColorClass;
+        }
+        
         // Format kategori and subkategori
         let kategoriDisplay = '-';
         let subKategoriDisplay = '-';
@@ -1033,6 +1063,7 @@ function displayProducts(products = []) {
         
         // Format tanggal kadaluarsa
         let tanggalKadaluarsa = '-';
+        let infoButton = '';
         if (product.tanggal_kadaluarsa) {
             const date = new Date(product.tanggal_kadaluarsa);
             if (!isNaN(date.getTime())) {
@@ -1041,11 +1072,29 @@ function displayProducts(products = []) {
                     month: '2-digit',
                     year: 'numeric'
                 });
+                
+                // Add info button if product has expiry date
+                let tooltipText = '';
+                if (daysUntilExpiry <= 10) {
+                    tooltipText = 'Produk akan kadaluarsa dalam 10 hari';
+                } else if (daysUntilExpiry <= 30) {
+                    tooltipText = 'Produk akan kadaluarsa dalam 30 hari';
+                } else {
+                    tooltipText = `${daysUntilExpiry} hari menuju kadaluarsa`;
+                }
+                
+                infoButton = `
+                    <button class="btn btn-link btn-sm p-0 me-2" 
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="${tooltipText}">
+                        <i class="fas fa-info-circle"></i>
+                    </button>`;
             }
         }
         
         row.innerHTML = `
-            <td>${product.id_produk || '-'}</td>
+            <td>${infoButton}${product.id_produk || '-'}</td>
             <td>${product.nama_produk || '-'}</td>
             <td>${kategoriDisplay}</td>
             <td>${subKategoriDisplay}</td>
@@ -1065,6 +1114,12 @@ function displayProducts(products = []) {
             </td>
         `;
         tbody.appendChild(row);
+        
+        // Initialize tooltips
+        const tooltips = row.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip);
+        });
     });
 
     // Update pagination
@@ -2633,20 +2688,20 @@ function initializeSubKategoriPage() {
             kategori.getAll().then(kategoriList => {
                 editKategoriDropdown.innerHTML = '<option value="">Pilih Kategori</option>';
                 kategoriList.forEach(kat => {
-                    const option = document.createElement('option');
-                    option.value = kat.id_kategori;
-                    option.textContent = kat.nama_kategori;
-                    editKategoriDropdown.appendChild(option);
+                  const option = document.createElement('option');
+                  option.value = kat.id_kategori;
+                  option.textContent = kat.nama_kategori;
+                  editKategoriDropdown.appendChild(option);
                 });
                 
                 // Set nilai kategori yang dipilih
                 const selectedKategoriId = document.getElementById('editSubKategoriKategoriId').value;
                 if (selectedKategoriId) {
-                    editKategoriDropdown.value = selectedKategoriId;
+                  editKategoriDropdown.value = selectedKategoriId;
                 }
             }).catch(error => {
-                console.error('Error loading kategori dropdown for edit:', error);
-                showAlert(`Error: ${error.message}`, 'danger');
+              console.error('Error loading kategori dropdown for edit:', error);
+              showAlert(`Error: ${error.message}`, 'danger');
             });
         });
     }
@@ -2726,127 +2781,3 @@ function formatDate(dateString) {
     };
     return new Date(dateString).toLocaleDateString('id-ID', options);
 }
-
-// Get status class and text based on expiry status
-function getExpiryStatus(isExpired, daysUntilExpiry) {
-    if (isExpired) {
-        return {
-            class: 'danger',
-            text: 'Kadaluarsa'
-        };
-    } else if (daysUntilExpiry <= 7) {
-        return {
-            class: 'warning',
-            text: 'Segera Kadaluarsa'
-        };
-    } else {
-        return {
-            class: 'info',
-            text: 'Mendekati Kadaluarsa'
-        };
-    }
-}
-
-// Get near expiry products
-async function getNearExpiryProducts(days = 60) {
-    try {
-        const response = await fetch(`${BASE_URL}/produk/getnearexpiry/${days}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch near expiry products");
-        }
-
-        const result = await response.json();
-        return result.data;
-    } catch (error) {
-        console.error("Error fetching near expiry products:", error);
-        throw error;
-    }
-}
-
-// Load near expiry products to table
-async function loadNearExpiryProducts() {
-    try {
-        const days = document.getElementById('daysThreshold')?.value || 60;
-        const products = await getNearExpiryProducts(days);
-        const tableBody = document.getElementById('expiryTableBody');
-        
-        if (!tableBody) {
-            console.error('Table body element not found');
-            return;
-        }
-
-        tableBody.innerHTML = '';
-
-        if (!products || products.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center">
-                        <div class="py-4">
-                            <i class="fas fa-info-circle fa-2x text-info mb-3"></i>
-                            <p class="mb-0">Tidak Ada Data Produk yang Mendekati Kadaluarsa</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        products.forEach(item => {
-            if (!item?.produk) return;
-            
-            const status = getExpiryStatus(item.is_expired, item.days_until_expiry);
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${item.produk.kode_produk || '-'}</td>
-                <td>${item.produk.nama_produk || '-'}</td>
-                <td>${item.produk.kategori?.nama_kategori || '-'}</td>
-                <td>${item.produk.subkategori?.nama_subkategori || '-'}</td>
-                <td>${item.produk.stok_barang || 0}</td>
-                <td>${formatDate(item.produk.tanggal_kadaluarsa) || '-'}</td>
-                <td>
-                    <span class="badge badge-${status.class}">
-                        ${status.text}
-                    </span>
-                </td>
-                <td>
-                    <span class="badge badge-${status.class}">
-                        ${item.days_until_expiry} hari
-                    </span>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-
-    } catch (error) {
-        console.error("Error fetching near expiry products:", error);
-        const tableBody = document.getElementById('expiryTableBody');
-        if (tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center">
-                        <div class="py-4">
-                            <i class="fas fa-exclamation-circle fa-2x text-danger mb-3"></i>
-                            <p class="mb-0">Gagal memuat data: ${error.message}</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }
-        showNotification('error', 'Gagal memuat data produk: ' + error.message);
-    }
-}
-
-// Add event listener for tab changes
-document.addEventListener('DOMContentLoaded', function() {
-    const expiryTab = document.getElementById('expiryView-tab');
-    if (expiryTab) {
-        expiryTab.addEventListener('shown.bs.tab', function (e) {
-            loadNearExpiryProducts();
-        });
-    }
-});
