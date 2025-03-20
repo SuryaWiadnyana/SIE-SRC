@@ -27,7 +27,8 @@ func NewHttpDeliverySubKategori(app fiber.Router, sku domain.SubKategoriUseCase,
 	// Routes publik
 	subKategoriRoutes.Get("/getall", handler.GetAll)
 	subKategoriRoutes.Get("/getbyid/:id_subkategori", handler.GetByID)
-	subKategoriRoutes.Get("/bykategori/:id_kategori", handler.GetByKategoriID)
+	subKategoriRoutes.Get("/getbykategori/:id_kategori", handler.GetByKategoriID)
+	subKategoriRoutes.Get("/getbynama/:nama_subkategori", handler.GetByName)
 
 	// Routes khusus admin
 	adminRoutes := subKategoriRoutes.Group("/admin")
@@ -149,6 +150,33 @@ func (d *HttpDeliverySubKategori) GetByKategoriID(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"data": subKategoris,
+	})
+}
+
+// GetByName menangani pengambilan subkategori berdasarkan nama
+func (d *HttpDeliverySubKategori) GetByName(c *fiber.Ctx) error {
+	namaSubKategori := c.Params("nama_subkategori")
+	if namaSubKategori == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Nama subkategori harus diisi",
+		})
+	}
+
+	subkategori, err := d.SubKategoriUseCase.GetByName(context.Background(), namaSubKategori)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal mendapatkan subkategori: %v", err),
+		})
+	}
+
+	if subkategori == nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "Subkategori tidak ditemukan",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"data": subkategori,
 	})
 }
 

@@ -107,7 +107,7 @@ func (uc *ProdukUseCase) IncreaseProdukStock(ctx context.Context, id string, kua
 }
 
 // GetFrequentItemsets mengimplementasikan algoritma Apriori
-func (uc *ProdukUseCase) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemset, error) {
+func (uc *ProdukUseCase) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemsetResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
 	defer cancel()
 	return uc.ProdukRepository.GetFrequentItemsets(ctx, minSupport)
@@ -138,7 +138,7 @@ func (uc *ProdukUseCase) GenerateNextID(ctx context.Context) (string, error) {
 
 // GetProductsNearExpiry mengembalikan daftar produk yang mendekati tanggal kadaluarsa
 // daysThreshold adalah jumlah hari sebelum kadaluarsa untuk memberikan peringatan
-func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshold int) ([]domain.ProdukExpiry, error) {
+func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshold int) ([]domain.ProdukExpiryResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, uc.contextTimeout)
 	defer cancel()
 
@@ -149,7 +149,7 @@ func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshol
 	}
 
 	// Filter produk yang mendekati kadaluarsa
-	var nearExpiryProducts []domain.ProdukExpiry
+	var nearExpiryProducts []domain.ProdukExpiryResponse
 	now := time.Now()
 	thresholdDate := now.AddDate(0, 0, daysThreshold)
 
@@ -160,7 +160,7 @@ func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshol
 		}
 
 		// Buat objek ProdukExpiry
-		produkExpiry := domain.ProdukExpiry{
+		produkExpiry := domain.ProdukExpiryResponse{
 			Produk: product,
 		}
 

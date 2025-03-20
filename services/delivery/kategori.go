@@ -25,6 +25,7 @@ func NewHttpDeliveryKategori(app fiber.Router, ku domain.KategoriUseCase) {
 	// Routes publik
 	kategoriRoutes.Get("/getall", handler.GetAll)
 	kategoriRoutes.Get("/getbyid/:id_kategori", handler.GetByID)
+	kategoriRoutes.Get("/getbynama/:nama_kategori", handler.GetByName)
 
 	// Routes khusus admin
 	adminRoutes := kategoriRoutes.Group("/admin")
@@ -106,6 +107,33 @@ func (d *HttpDeliveryKategori) GetByID(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"data": kategori,
+	})
+}
+
+// GetByName menangani pengambilan kategori berdasarkan nama
+func (d *HttpDeliveryKategori) GetByName(c *fiber.Ctx) error {
+	namaKategori := c.Params("nama_kategori")
+	if namaKategori == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Nama kategori harus diisi",
+		})
+	}
+
+	kategori, err := d.KategoriUseCase.GetByName(context.Background(), namaKategori)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("Gagal mendapatkan kategori: %v", err),
+		})
+	}
+
+	if kategori == nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "Kategori tidak ditemukan",
+		})
+	}
+
+	return c.JSON(fiber.Map{
 		"data": kategori,
 	})
 }

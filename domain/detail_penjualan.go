@@ -22,6 +22,12 @@ type ResponseSalesReportItem struct {
 	Total            int                `json:"total"`
 }
 
+type CategoryStats struct {
+	KategoriNama   string  `json:"nama_kategori"`
+	TotalPenjualan float64 `json:"total_penjualan"`
+	JumlahProduk   int     `json:"jumlah_produk"`
+}
+
 type DetailPenjualanRepository interface {
 	CreateDetails(ctx context.Context, bd *DetailPenjualan) (*DetailPenjualan, error)
 	GetAll(ctx context.Context) ([]DetailPenjualan, error)

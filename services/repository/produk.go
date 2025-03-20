@@ -449,7 +449,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 }
 
 // Mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
-func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemset, error) {
+func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemsetResponse, error) {
 	// Ambil semua data detail penjualan
 	DetailPenjualan := rp.DB.Collection("detail_penjualan")
 
@@ -468,7 +468,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 	// Hitung total transaksi
 	totalTransactions := float64(len(details))
 	if totalTransactions == 0 {
-		return []domain.FrequentItemset{}, nil
+		return []domain.FrequentItemsetResponse{}, nil
 	}
 
 	// Map untuk menyimpan jumlah kemunculan setiap produk
@@ -503,7 +503,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		}
 	}
 
-	var result []domain.FrequentItemset
+	var result []domain.FrequentItemsetResponse
 
 	// Fungsi untuk mengecek apakah itemset muncul dalam transaksi
 	checkItemsetInTransaction := func(itemset []string, products primitive.A) bool {
@@ -556,7 +556,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 			pairSupport := pairCount / totalTransactions
 			if pairSupport >= minSupport {
-				itemset := domain.FrequentItemset{
+				itemset := domain.FrequentItemsetResponse{
 					Produk:     []string{item1, item2},
 					Support:    pairSupport,
 					ProdukList: []string{itemNames[item1], itemNames[item2]},
@@ -587,7 +587,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 				tripletSupport := tripletCount / totalTransactions
 				if tripletSupport >= minSupport {
-					itemset := domain.FrequentItemset{
+					itemset := domain.FrequentItemsetResponse{
 						Produk:     []string{item1, item2, item3},
 						Support:    tripletSupport,
 						ProdukList: []string{itemNames[item1], itemNames[item2], itemNames[item3]},
