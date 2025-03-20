@@ -540,7 +540,39 @@ async function setupEventHandlers() {
             // Hide modal first
             $('#modal-tambah-penjualan').modal('hide');
 
-            // // Show success message with modal in center
+            // Create success modal if not exists
+            if (!$('#successModal').length) {
+                const successModalHtml = `
+                    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title" id="successModalLabel">Berhasil!</h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body text-center py-4">
+                                    <i class="fas fa-check-circle text-success mb-3" style="font-size: 64px;"></i>
+                                    <p class="mb-0">Data penjualan berhasil disimpan</p>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-success px-4" data-dismiss="modal">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('body').append(successModalHtml);
+
+                // Handle success modal hidden event
+                $('#successModal').on('hidden.bs.modal', function () {
+                    // Reset form and clear all product rows except the first one
+                    $('#formTambahPenjualan')[0].reset();
+                    const $productRows = $('.produk-item');
+                    if ($productRows.length > 1) {
+                        $productRows.slice(1).remove();
+                    }
                     // Clear first row's product info
                     $productRows.first().find('.produk-info').remove();
                     
@@ -556,16 +588,46 @@ async function setupEventHandlers() {
                     }).catch(err => {
                         console.error('Error memperbarui data:', err);
                     });
-            //     }
-            // });
+                });
+            }
+
+            // Show success modal
+            $('#successModal').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
 
         } catch (error) {
             console.error('Error submitting form:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message
-            });
+            // Show error modal
+            const errorModal = `
+                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title">Error</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-center py-4">
+                                <i class="fas fa-exclamation-circle text-danger mb-3" style="font-size: 64px;"></i>
+                                <p class="mb-0">${error.message}</p>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing error modal if any
+            $('#errorModal').remove();
+            // Add new error modal
+            $('body').append(errorModal);
+            // Show error modal
+            $('#errorModal').modal('show');
         }
     });
 
