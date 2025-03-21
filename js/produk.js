@@ -1023,9 +1023,20 @@ function displayProducts(products = []) {
         // Function to calculate days until expiry
         function getDaysUntilExpiry(expiryDate) {
             if (!expiryDate) return null;
-            const today = new Date();
+            
+            // Konversi string tanggal ke objek Date
             const expiry = new Date(expiryDate);
-            const diffTime = expiry - today;
+            if (isNaN(expiry.getTime())) return null;
+
+            // Dapatkan tanggal sekarang (reset ke awal hari)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            expiry.setHours(0, 0, 0, 0);
+
+            // Hitung selisih dalam miliseconds
+            const diffTime = expiry.getTime() - today.getTime();
+            
+            // Konversi ke hari (pembulatan ke atas)
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             return diffDays;
         }
@@ -1033,8 +1044,9 @@ function displayProducts(products = []) {
         // Function to get row color based on expiry date
         function getRowColorClass(daysUntilExpiry) {
             if (daysUntilExpiry === null) return '';
-            if (daysUntilExpiry <= 10) return 'table-danger';
-            if (daysUntilExpiry <= 30) return 'table-warning';
+            if (daysUntilExpiry <= 0) return 'table-danger';  // Sudah kadaluarsa
+            if (daysUntilExpiry <= 10) return 'table-danger'; // Akan kadaluarsa dalam 10 hari
+            if (daysUntilExpiry <= 30) return 'table-warning'; // Akan kadaluarsa dalam 30 hari
             return '';
         }
 
@@ -1075,10 +1087,12 @@ function displayProducts(products = []) {
                 
                 // Add info button if product has expiry date
                 let tooltipText = '';
-                if (daysUntilExpiry <= 10) {
-                    tooltipText = 'Produk akan kadaluarsa dalam 10 hari';
+                if (daysUntilExpiry <= 0) {
+                    tooltipText = 'Produk sudah kadaluarsa';
+                } else if (daysUntilExpiry <= 10) {
+                    tooltipText = `Produk akan kadaluarsa dalam ${daysUntilExpiry} hari`;
                 } else if (daysUntilExpiry <= 30) {
-                    tooltipText = 'Produk akan kadaluarsa dalam 30 hari';
+                    tooltipText = `Produk akan kadaluarsa dalam ${daysUntilExpiry} hari`;
                 } else {
                     tooltipText = `${daysUntilExpiry} hari menuju kadaluarsa`;
                 }
@@ -1868,6 +1882,7 @@ const kategori = {
             });
             
             if (!response.ok) {
+                const responseData = await response.json();
                 throw new Error(responseData.message || 'Gagal memperbarui kategori');
             }
 
@@ -2057,6 +2072,7 @@ const subkategori = {
             });
             
             if (!response.ok) {
+                const responseData = await response.json();
                 throw new Error(responseData.message || 'Gagal memperbarui subkategori');
             }
 
