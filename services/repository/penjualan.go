@@ -230,56 +230,83 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 
 // GetLaporanPenjualan retrieves sales report data with filters
 func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
-    collection := rp.DB.Collection(_Penjualan)
+	collection := rp.DB.Collection(_Penjualan)
 
-    // Build filter
-    filter := bson.M{
-        "tanggal_penjualan": bson.M{
-            "$gte": startDate,
-            "$lte": endDate,
-        },
-    }
+	// Build pipeline stages
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"tanggal_penjualan": bson.M{
+					"$gte": startDate,
+					"$lte": endDate,
+				},
+			},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         "produk",
+				"localField":   "id_produk",
+				"foreignField": "id_produk",
+				"as":           "produk",
+			},
+		},
+		{
+			"$unwind": "$produk",
+		},
+	}
 
-    // Add kategori filter if provided
-    if kategoriID != 0 {
-        filter["produk.kategori.id_kategori"] = kategoriID
-    }
+	// Add kategori filter if provided
+	if kategoriID != 0 {
+		pipeline = append(pipeline, bson.M{
+			"$match": bson.M{
+				"produk.kategori.id_kategori": kategoriID,
+			},
+		})
+	}
 
-    // Add subkategori filter if provided
-    if subkategoriID != 0 {
-        filter["produk.subkategori.id_subkategori"] = subkategoriID
-    }
+	// Add subkategori filter if provided
+	if subkategoriID != 0 {
+		pipeline = append(pipeline, bson.M{
+			"$match": bson.M{
+				"produk.subkategori.id_subkategori": subkategoriID,
+			},
+		})
+	}
 
-    // Build sort options
-    sortOptions := bson.D{}
-    if sort != "" {
-        switch sort {
-        case "tanggal_asc":
-            sortOptions = append(sortOptions, bson.E{Key: "tanggal_penjualan", Value: 1})
-        case "tanggal_desc":
-            sortOptions = append(sortOptions, bson.E{Key: "tanggal_penjualan", Value: -1})
-        case "total_asc":
-            sortOptions = append(sortOptions, bson.E{Key: "total", Value: 1})
-        case "total_desc":
-            sortOptions = append(sortOptions, bson.E{Key: "total", Value: -1})
-        }
-    } else {
-        // Default sort by tanggal_penjualan descending
-        sortOptions = append(sortOptions, bson.E{Key: "tanggal_penjualan", Value: -1})
-    }
+	// Add sort stage
+	sortStage := bson.M{
+		"$sort": bson.M{},
+	}
 
-    // Execute query
-    opts := options.Find().SetSort(sortOptions)
-    cursor, err := collection.Find(ctx, filter, opts)
-    if err != nil {
-        return nil, err
-    }
-    defer cursor.Close(ctx)
+	if sort != "" {
+		switch sort {
+		case "tanggal_asc":
+			sortStage["$sort"] = bson.M{"tanggal_penjualan": 1}
+		case "tanggal_desc":
+			sortStage["$sort"] = bson.M{"tanggal_penjualan": -1}
+		case "total_asc":
+			sortStage["$sort"] = bson.M{"total": 1}
+		case "total_desc":
+			sortStage["$sort"] = bson.M{"total": -1}
+		}
+	} else {
+		// Default sort by tanggal_penjualan descending
+		sortStage["$sort"] = bson.M{"tanggal_penjualan": -1}
+	}
 
-    var penjualanList []domain.Penjualan
-    if err = cursor.All(ctx, &penjualanList); err != nil {
-        return nil, err
-    }
+	pipeline = append(pipeline, sortStage)
 
-    return penjualanList, nil
+	// Execute pipeline
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var penjualanList []domain.Penjualan
+	if err = cursor.All(ctx, &penjualanList); err != nil {
+		return nil, err
+	}
+
+	return penjualanList, nil
 }

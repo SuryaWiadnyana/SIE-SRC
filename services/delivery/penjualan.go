@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -42,11 +41,6 @@ func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, us
 	protected.Get("/getall", handler.GetAll)
 	protected.Get("/by-id/:id_penjualan", handler.GetByID)
 	protected.Delete("/delete/:id_penjualan", handler.Delete)
-
-	// Endpoint laporan
-	laporanGroup := app.Group("/laporan")
-	protectedLaporan := laporanGroup.Use(middleware.AuthMiddleware("admin", "owner"))
-	protectedLaporan.Get("/penjualan", handler.GetLaporanPenjualan)
 }
 
 func (d *HttpDeliveryPenjualan) GetAll(c *fiber.Ctx) error {
@@ -54,11 +48,14 @@ func (d *HttpDeliveryPenjualan) GetAll(c *fiber.Ctx) error {
 	if err != nil {
 		log.Printf("Error getting all sales: %v", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal mendapatkan data penjualan",
+			"status":  http.StatusInternalServerError,
+			"message": "Gagal mendapatkan data penjualan",
+			"data":    nil,
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
+	return c.JSON(fiber.Map{
+		"status":  http.StatusOK,
 		"message": "Data penjualan berhasil diambil",
 		"data":    val,
 	})
@@ -70,7 +67,9 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 	if err := c.BodyParser(&requestList); err != nil {
 		log.Printf("Error parsing request body: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
 			"message": "Format request tidak valid",
+			"data":    nil,
 		})
 	}
 
@@ -78,14 +77,18 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 	username := c.Locals("username")
 	if username == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"status":  fiber.StatusUnauthorized,
 			"message": "Unauthorized: Data pengguna tidak ditemukan",
+			"data":    nil,
 		})
 	}
 
 	usernameStr, ok := username.(string)
 	if !ok || usernameStr == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"status":  fiber.StatusUnauthorized,
 			"message": "Data username tidak valid",
+			"data":    nil,
 		})
 	}
 
@@ -94,7 +97,9 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 	if err != nil {
 		log.Printf("Error getting user: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  fiber.StatusInternalServerError,
 			"message": fmt.Sprintf("Gagal mendapatkan data pengguna: %v", err),
+			"data":    nil,
 		})
 	}
 
@@ -106,14 +111,18 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		// Validasi ID Produk
 		if req.Produk.IDProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
 				"message": "ID Produk tidak boleh kosong",
+				"data":    nil,
 			})
 		}
 
 		// Validasi tanggal
 		if req.Penjualan.Tanggal_Penjualan == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
 				"message": "Tanggal penjualan tidak boleh kosong",
+				"data":    nil,
 			})
 		}
 
@@ -122,7 +131,9 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		if err != nil {
 			log.Printf("Error parsing date: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
 				"message": "Format tanggal tidak valid. Gunakan format DD-MM-YYYY",
+				"data":    nil,
 			})
 		}
 
@@ -146,7 +157,9 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 	if err != nil {
 		log.Printf("Error creating sales: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  fiber.StatusInternalServerError,
 			"message": fmt.Sprintf("Gagal membuat penjualan: %v", err),
+			"data":    nil,
 		})
 	}
 
@@ -191,10 +204,10 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusCreated,
 		"message": "Data penjualan berhasil dibuat",
 		"data":    result,
-		// "details": details,
 	})
 }
 
@@ -202,7 +215,9 @@ func (d *HttpDeliveryPenjualan) Delete(c *fiber.Ctx) error {
 	id := c.Params("id_penjualan")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID Penjualan tidak boleh kosong",
+			"status":  http.StatusBadRequest,
+			"message": "ID Penjualan tidak boleh kosong",
+			"data":    nil,
 		})
 	}
 
@@ -216,12 +231,16 @@ func (d *HttpDeliveryPenjualan) Delete(c *fiber.Ctx) error {
 	err = d.HTTP.Delete(c.Context(), id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Gagal menghapus penjualan: %v", err),
+			"status":  http.StatusInternalServerError,
+			"message": fmt.Sprintf("Gagal menghapus penjualan: %v", err),
+			"data":    nil,
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
+	return c.JSON(fiber.Map{
+		"status":  http.StatusOK,
 		"message": "Penjualan berhasil dihapus",
+		"data":    nil,
 	})
 }
 
@@ -229,86 +248,24 @@ func (d *HttpDeliveryPenjualan) GetByID(c *fiber.Ctx) error {
 	id := c.Params("id_penjualan")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID Penjualan tidak boleh kosong",
+			"status":  http.StatusBadRequest,
+			"message": "ID Penjualan tidak boleh kosong",
+			"data":    nil,
 		})
 	}
 
 	penjualan, err := d.HTTP.GetByID(c.Context(), id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Gagal mendapatkan penjualan: %v", err),
-		})
-	}
-
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Data penjualan berhasil diambil",
-		"data":    penjualan,
-	})
-}
-
-func (d *HttpDeliveryPenjualan) GetLaporanPenjualan(c *fiber.Ctx) error {
-	// Parse query parameters
-	tanggalMulai := c.Query("tanggal_mulai")
-	tanggalAkhir := c.Query("tanggal_akhir")
-	idKategori := c.Query("id_kategori")
-	idSubkategori := c.Query("id_subkategori")
-	sort := c.Query("sort")
-
-	// Validate required dates
-	if tanggalMulai == "" || tanggalAkhir == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Tanggal awal dan akhir harus diisi",
-		})
-	}
-
-	// Parse dates
-	startDate, err := time.Parse("2006-01-02", tanggalMulai)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Format tanggal awal tidak valid",
-		})
-	}
-
-	endDate, err := time.Parse("2006-01-02", tanggalAkhir)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Format tanggal akhir tidak valid",
-		})
-	}
-
-	// Convert string IDs to uint if provided
-	var kategoriID, subkategoriID uint
-	if idKategori != "" {
-		id, err := strconv.ParseUint(idKategori, 10, 32)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "ID kategori tidak valid",
-			})
-		}
-		kategoriID = uint(id)
-	}
-
-	if idSubkategori != "" {
-		id, err := strconv.ParseUint(idSubkategori, 10, 32)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "ID subkategori tidak valid",
-			})
-		}
-		subkategoriID = uint(id)
-	}
-
-	// Get sales data
-	penjualanList, err := d.HTTP.GetLaporanPenjualan(c.Context(), startDate, endDate, kategoriID, subkategoriID, sort)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Gagal mengambil data penjualan",
-			"error":   err.Error(),
+			"status":  http.StatusInternalServerError,
+			"message": fmt.Sprintf("Gagal mendapatkan penjualan: %v", err),
+			"data":    nil,
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"message": "Berhasil mengambil data penjualan",
-		"data":    penjualanList,
+		"status":  http.StatusOK,
+		"message": "Data penjualan berhasil diambil",
+		"data":    penjualan,
 	})
 }

@@ -715,49 +715,55 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 
 // GetLaporanProduk retrieves product report data with filters
 func (rp *mongoRepoProduk) GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]domain.Produk, error) {
-	collection := rp.DB.Collection("produk")
+    collection := rp.DB.Collection(_Produk)
 
-	// Build filter
-	filter := bson.M{"is_deleted": false}
+    // Build filter
+    filter := bson.M{}
 
-	// Add category and subcategory filters if provided
-	if kategoriID > 0 {
-		filter["kategori.id"] = kategoriID
-	}
-	if subkategoriID > 0 {
-		filter["subkategori.id"] = subkategoriID
-	}
+    // Add kategori filter if provided
+    if kategoriID != 0 {
+        filter["kategori.id_kategori"] = kategoriID
+    }
 
-	// Build sort options
-	var sortOptions bson.D
-	switch sort {
-	case "name_asc":
-		sortOptions = bson.D{{Key: "nama_produk", Value: 1}}
-	case "name_desc":
-		sortOptions = bson.D{{Key: "nama_produk", Value: -1}}
-	case "stock_asc":
-		sortOptions = bson.D{{Key: "stok", Value: 1}}
-	case "stock_desc":
-		sortOptions = bson.D{{Key: "stok", Value: -1}}
-	case "price_asc":
-		sortOptions = bson.D{{Key: "harga_produk", Value: 1}}
-	case "price_desc":
-		sortOptions = bson.D{{Key: "harga_produk", Value: -1}}
-	default:
-		sortOptions = bson.D{{Key: "nama_produk", Value: 1}} // Default sort by name asc
-	}
+    // Add subkategori filter if provided
+    if subkategoriID != 0 {
+        filter["subkategori.id_subkategori"] = subkategoriID
+    }
 
-	// Execute query
-	cursor, err := collection.Find(ctx, filter, options.Find().SetSort(sortOptions))
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
+    // Build sort options
+    sortOptions := bson.D{}
+    if sort != "" {
+        switch sort {
+        case "nama_asc":
+            sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: 1})
+        case "nama_desc":
+            sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: -1})
+        case "stok_asc":
+            sortOptions = append(sortOptions, bson.E{Key: "stok", Value: 1})
+        case "stok_desc":
+            sortOptions = append(sortOptions, bson.E{Key: "stok", Value: -1})
+        case "harga_asc":
+            sortOptions = append(sortOptions, bson.E{Key: "harga_produk", Value: 1})
+        case "harga_desc":
+            sortOptions = append(sortOptions, bson.E{Key: "harga_produk", Value: -1})
+        }
+    } else {
+        // Default sort by nama_produk ascending
+        sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: 1})
+    }
 
-	var produkList []domain.Produk
-	if err = cursor.All(ctx, &produkList); err != nil {
-		return nil, err
-	}
+    // Execute query
+    opts := options.Find().SetSort(sortOptions)
+    cursor, err := collection.Find(ctx, filter, opts)
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
 
-	return produkList, nil
+    var produkList []domain.Produk
+    if err = cursor.All(ctx, &produkList); err != nil {
+        return nil, err
+    }
+
+    return produkList, nil
 }
