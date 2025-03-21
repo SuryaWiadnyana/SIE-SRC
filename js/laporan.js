@@ -467,7 +467,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Setup event listeners
     const reportTypeSelect = document.getElementById("reportType");
-    const kategoriFilter = document.getElementById("kategoriFilter");
     const generateButton = document.getElementById("generateReportButton");
     const logoutButton = document.getElementById("logoutButton");
     const dateRangeFields = document.querySelectorAll('.date-range');
@@ -502,7 +501,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (logoutButton) {
         logoutButton.addEventListener("click", function() {
             localStorage.clear();
-            window.location.href = "login.html";
+            window.location.href = "../login.html";
         });
     }
 });

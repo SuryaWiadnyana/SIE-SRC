@@ -15,9 +15,9 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template-->
-    <link href="../css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="../css/sie-src-theme.css" rel="stylesheet">
+     <!-- Custom styles -->
+     <link href="../css/sb-admin-2.min.css" rel="stylesheet">
+     <link href="../css/sie-src-theme.css" rel="stylesheet">
 
     <!-- jsPDF library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -30,7 +30,7 @@
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index-admin.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index-owner.html">
                 <div class="sidebar-brand-icon">
                     <img src="../img/Logo_SRC-removebg-preview.png" alt="SRC Logo" class="sidebar-logo">
                 </div>
@@ -42,23 +42,15 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item">
-                <a class="nav-link" href="index-admin.html">
+                <a class="nav-link" href="index-owner.html">
                     <i class="fas fa-fw fa-home"></i>
-                    <span>Dashboard</span>
+                    <span>Beranda</span>
                 </a>
             </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Data Management
-            </div>
-
-            <!-- Nav Item - Sales -->
+            <!-- Nav Item - Unduh Laporan -->
             <li class="nav-item active">
-                <a class="nav-link" href="laporan.html">
+                <a class="nav-link" href="unduh_laporan.html">
                     <i class="fas fa-fw fa-download"></i>
                     <span>Cetak Laporan</span>
                 </a>
@@ -91,7 +83,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">Admin</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="username">OwnerSRC</span>
                                 <img class="img-profile rounded-circle" src="../img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
@@ -114,128 +106,133 @@
                         <h1 class="h3 mb-0 text-gray-800">Cetak Laporan</h1>
                     </div>
 
-                    <!-- Filter Section -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="card shadow">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-3">Filter Laporan</h5>
-                                    <div class="row">
-                                        <!-- Report Type -->
-                                        <div class="col-md-3 mb-3">
-                                            <label for="reportType" class="form-label">Jenis Laporan</label>
-                                            <select class="form-select" id="reportType" onchange="updateSortingOptions()">
+                    <!-- Filter Laporan -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Filter Laporan</h6>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="reportType">Jenis Laporan</label>
+                                            <select class="form-control" id="reportType">
                                                 <option value="penjualan">Laporan Penjualan</option>
                                                 <option value="produk">Laporan Produk</option>
                                             </select>
                                         </div>
-
-                                        <!-- Date Filter Section -->
-                                        <div class="col-md-6 mb-3" id="dateFilterSection">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <label for="startDate" class="form-label">Tanggal Mulai</label>
-                                                    <input type="date" class="form-control" id="startDate">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="endDate" class="form-label">Tanggal Akhir</label>
-                                                    <input type="date" class="form-control" id="endDate">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Sort Option -->
-                                        <div class="col-md-3 mb-3">
-                                            <label for="sortOption" class="form-label">Urutan</label>
-                                            <select class="form-select" id="sortOption">
-                                                <option value="">Pilih Urutan</option>
-                                            </select>
-                                        </div>
-
+                                    </div>
+                                    <div class="col-md-6">
                                         <!-- Category Filter -->
-                                        <div class="col-md-3 mb-3">
+                                        <div class="form-group">
                                             <label for="kategoriFilter" class="form-label">Kategori</label>
-                                            <select class="form-select" id="kategoriFilter" onchange="updateSubkategori()">
+                                            <select class="form-control" id="kategoriFilter" onchange="updateSubkategori()">
                                                 <option value="">Semua Kategori</option>
                                             </select>
                                         </div>
-
-                                        <!-- Subcategory Filter -->
-                                        <div class="col-md-3 mb-3">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
                                             <label for="subkategoriFilter" class="form-label">Subkategori</label>
-                                            <select class="form-select" id="subkategoriFilter">
+                                            <select class="form-control" id="subkategoriFilter">
                                                 <option value="">Semua Subkategori</option>
                                             </select>
                                         </div>
-
-                                        <!-- Generate Button -->
-                                        <div class="col-md-3 mb-3 d-flex align-items-end">
-                                            <button class="btn btn-primary w-100" onclick="generateReport()">
-                                                <i class="fas fa-file-pdf me-2"></i>Generate PDF
-                                            </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="sortOption" class="form-label">Urutkan Berdasarkan</label>
+                                            <select class="form-control" id="sortOption">
+                                                <option value="date_desc">Tanggal (Terbaru)</option>
+                                                <option value="date_asc">Tanggal (Terlama)</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sales Chart Card -->
-                    <div class="row mb-4" id="salesChartCard" style="display: none;">
-                        <div class="col-md-12">
-                            <div class="card shadow">
-                                <div class="card-body">
-                                    <h5 class="card-title">Grafik Penjualan</h5>
-                                    <div style="height: 400px;">
-                                        <canvas id="salesChart"></canvas>
+                                <div class="row" id="dateFilterSection">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="startDate">Tanggal Mulai</label>
+                                            <input type="date" class="form-control" id="startDate">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="endDate">Tanggal Akhir</label>
+                                            <input type="date" class="form-control" id="endDate">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                                <button type="button" class="btn btn-primary" onclick="generateReport()">
+                                    <i class="fas fa-file-pdf fa-sm text-white-50 mr-2"></i>Cetak PDF
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
                 <!-- /.container-fluid -->
+
+                <!-- Sales Chart Card -->
+                <div class="row mb-4" id="salesChartCard" style="display: none;">
+                    <div class="col-md-12">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <h5 class="card-title">Grafik Penjualan</h5>
+                                <div style="height: 400px;">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div
+
+                <!-- Footer -->
+                <footer class="sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Copyright &copy; SIE-SRC 2025</span>
+                        </div>
+                    </div>
+                </footer>
+                <!-- End of Footer -->
             </div>
             <!-- End of Main Content -->
 
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                            <span>Copyright &copy; SIE-SRC 2025</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
-        </div>
-        <!-- End of Content Wrapper -->
+            <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Siap untuk Keluar?
+        </h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin keluar?
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">
+          Batal
+        </button>
+        <button class="btn btn-primary" type="button" id="logoutButton">
+          Keluar
+        </button>
+      </div>
     </div>
-    <!-- End of Page Wrapper -->
+  </div>
+</div>
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Yakin ingin keluar?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Pilih "Logout" jika anda ingin mengakhiri sesi ini.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary" type="button" id="logoutButton">Logout</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap core JavaScript-->
     <script src="../vendor/jquery/jquery.min.js"></script>
@@ -244,11 +241,11 @@
     <!-- Core plugin JavaScript-->
     <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
 
-    <!-- Custom scripts for all pages-->
-    <script src="../js/sb-admin-2.min.js"></script>
-
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="../js/sb-admin-2.min.js"></script>
 
     <!-- Page level custom scripts -->
     <script src="../js/laporan.js"></script>
