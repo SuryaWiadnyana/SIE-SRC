@@ -229,8 +229,8 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 }
 
 // GetLaporanPenjualan retrieves sales report data with filters
-func (r *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
-    collection := r.DB.Collection("penjualan")
+func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
+    collection := rp.DB.Collection(_Penjualan)
 
     // Build filter
     filter := bson.M{
@@ -240,31 +240,37 @@ func (r *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate,
         },
     }
 
-    // Add category and subcategory filters if provided
-    if kategoriID > 0 {
-        filter["produk.kategori.id"] = kategoriID
+    // Add kategori filter if provided
+    if kategoriID != 0 {
+        filter["produk.kategori.id_kategori"] = kategoriID
     }
-    if subkategoriID > 0 {
-        filter["produk.subkategori.id"] = subkategoriID
+
+    // Add subkategori filter if provided
+    if subkategoriID != 0 {
+        filter["produk.subkategori.id_subkategori"] = subkategoriID
     }
 
     // Build sort options
-    var sortOptions bson.D
-    switch sort {
-    case "date_asc":
-        sortOptions = bson.D{{Key: "tanggal_penjualan", Value: 1}}
-    case "date_desc":
-        sortOptions = bson.D{{Key: "tanggal_penjualan", Value: -1}}
-    case "quantity_asc":
-        sortOptions = bson.D{{Key: "jumlah_produk", Value: 1}}
-    case "quantity_desc":
-        sortOptions = bson.D{{Key: "jumlah_produk", Value: -1}}
-    default:
-        sortOptions = bson.D{{Key: "tanggal_penjualan", Value: -1}} // Default sort by date desc
+    sortOptions := bson.D{}
+    if sort != "" {
+        switch sort {
+        case "tanggal_asc":
+            sortOptions = append(sortOptions, bson.E{Key: "tanggal_penjualan", Value: 1})
+        case "tanggal_desc":
+            sortOptions = append(sortOptions, bson.E{Key: "tanggal_penjualan", Value: -1})
+        case "total_asc":
+            sortOptions = append(sortOptions, bson.E{Key: "total", Value: 1})
+        case "total_desc":
+            sortOptions = append(sortOptions, bson.E{Key: "total", Value: -1})
+        }
+    } else {
+        // Default sort by tanggal_penjualan descending
+        sortOptions = append(sortOptions, bson.E{Key: "tanggal_penjualan", Value: -1})
     }
 
     // Execute query
-    cursor, err := collection.Find(ctx, filter, options.Find().SetSort(sortOptions))
+    opts := options.Find().SetSort(sortOptions)
+    cursor, err := collection.Find(ctx, filter, opts)
     if err != nil {
         return nil, err
     }

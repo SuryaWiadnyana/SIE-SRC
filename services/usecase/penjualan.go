@@ -4,6 +4,7 @@ import (
 	"SIE-SRC/domain"
 	"context"
 	"time"
+	"errors"
 )
 
 type PenjualanUseCase struct {
@@ -44,4 +45,23 @@ func (uc *PenjualanUseCase) Delete(Ctx context.Context, id string) error {
 	defer cancel()
 
 	return uc.PenjualanRepository.Delete(ctx, id)
+}
+
+// GetLaporanPenjualan retrieves sales report data with filters
+func (uc *PenjualanUseCase) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
+    // Validate date range
+    if startDate.After(endDate) {
+        return nil, errors.New("tanggal awal tidak boleh lebih besar dari tanggal akhir")
+    }
+
+    // Get data from repository
+    ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+    defer cancel()
+    
+    penjualanList, err := uc.PenjualanRepository.GetLaporanPenjualan(ctx, startDate, endDate, kategoriID, subkategoriID, sort)
+    if err != nil {
+        return nil, err
+    }
+
+    return penjualanList, nil
 }

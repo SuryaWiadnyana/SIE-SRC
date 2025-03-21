@@ -22,6 +22,7 @@ type PenjualanRepository interface {
 	GetByID(ctx context.Context, id string) (*Penjualan, error)
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)
+	GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]Penjualan, error)
 }
 
 type PenjualanUseCase interface {
@@ -29,4 +30,5 @@ type PenjualanUseCase interface {
 	GetAll(ctx context.Context) ([]Penjualan, error)
 	GetByID(ctx context.Context, id string) (*Penjualan, error)
 	Delete(ctx context.Context, id string) error
+	GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]Penjualan, error)
 }

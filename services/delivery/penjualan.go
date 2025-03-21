@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -41,7 +42,11 @@ func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, us
 	protected.Get("/getall", handler.GetAll)
 	protected.Get("/by-id/:id_penjualan", handler.GetByID)
 	protected.Delete("/delete/:id_penjualan", handler.Delete)
-	// group.Put("/update/:id_penjualan", handler.Update)
+
+	// Endpoint laporan
+	laporanGroup := app.Group("/laporan")
+	protectedLaporan := laporanGroup.Use(middleware.AuthMiddleware("admin", "owner"))
+	protectedLaporan.Get("/penjualan", handler.GetLaporanPenjualan)
 }
 
 func (d *HttpDeliveryPenjualan) GetAll(c *fiber.Ctx) error {
@@ -220,70 +225,6 @@ func (d *HttpDeliveryPenjualan) Delete(c *fiber.Ctx) error {
 	})
 }
 
-// func (d *HttpDeliveryPenjualan) Update(c *fiber.Ctx) error {
-// 	id := c.Params("id_penjualan")
-// 	if id == "" {
-// 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-// 			"error": "ID Penjualan tidak boleh kosong",
-// 		})
-// 	}
-
-// 	var updatedPenjualan domain.Penjualan
-// 	if err := c.BodyParser(&updatedPenjualan); err != nil {
-// 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-// 			"error": "Format data tidak valid",
-// 		})
-// 	}
-
-// 	// Set ID from path parameter
-// 	updatedPenjualan.IDPenjualan = id
-
-// 	// Validate products and calculate total
-// 	if len(updatedPenjualan.Produk) == 0 {
-// 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-// 			"error": "Penjualan harus memiliki minimal satu produk",
-// 		})
-// 	}
-
-// 	total := 0
-// 	for i, prod := range updatedPenjualan.Produk {
-// 		if prod.IDProduk == "" {
-// 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-// 				"error": fmt.Sprintf("Produk pada index %d tidak memiliki ID", i),
-// 			})
-// 		}
-// 		if prod.Stok <= 0 {
-// 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-// 				"error": fmt.Sprintf("Produk pada index %d memiliki stok tidak valid", i),
-// 			})
-// 		}
-// 		total += prod.HargaProduk * prod.Stok
-// 	}
-// 	updatedPenjualan.Total = total
-
-// 	// Update penjualan
-// 	err := d.HTTP.Update(c.Context(), &updatedPenjualan)
-// 	if err != nil {
-// 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-// 			"error": fmt.Sprintf("Gagal mengupdate penjualan: %v", err),
-// 		})
-// 	}
-
-// 	// Update detail penjualan
-// 	err = d.DetailPenjualan.UpdateDetails(c.Context(), &domain.DetailPenjualan{
-// 		Penjualan: updatedPenjualan,
-// 	})
-// 	if err != nil {
-// 		log.Printf("Error updating sale detail %s: %v", id, err)
-// 		// Continue as the main sale is already updated
-// 	}
-
-// 	return c.Status(http.StatusOK).JSON(fiber.Map{
-// 		"message": "Penjualan berhasil diupdate",
-// 		"data":    updatedPenjualan,
-// 	})
-// }
-
 func (d *HttpDeliveryPenjualan) GetByID(c *fiber.Ctx) error {
 	id := c.Params("id_penjualan")
 	if id == "" {
@@ -302,5 +243,72 @@ func (d *HttpDeliveryPenjualan) GetByID(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "Data penjualan berhasil diambil",
 		"data":    penjualan,
+	})
+}
+
+func (d *HttpDeliveryPenjualan) GetLaporanPenjualan(c *fiber.Ctx) error {
+	// Parse query parameters
+	tanggalMulai := c.Query("tanggal_mulai")
+	tanggalAkhir := c.Query("tanggal_akhir")
+	idKategori := c.Query("id_kategori")
+	idSubkategori := c.Query("id_subkategori")
+	sort := c.Query("sort")
+
+	// Validate required dates
+	if tanggalMulai == "" || tanggalAkhir == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Tanggal awal dan akhir harus diisi",
+		})
+	}
+
+	// Parse dates
+	startDate, err := time.Parse("2006-01-02", tanggalMulai)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Format tanggal awal tidak valid",
+		})
+	}
+
+	endDate, err := time.Parse("2006-01-02", tanggalAkhir)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Format tanggal akhir tidak valid",
+		})
+	}
+
+	// Convert string IDs to uint if provided
+	var kategoriID, subkategoriID uint
+	if idKategori != "" {
+		id, err := strconv.ParseUint(idKategori, 10, 32)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "ID kategori tidak valid",
+			})
+		}
+		kategoriID = uint(id)
+	}
+
+	if idSubkategori != "" {
+		id, err := strconv.ParseUint(idSubkategori, 10, 32)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "ID subkategori tidak valid",
+			})
+		}
+		subkategoriID = uint(id)
+	}
+
+	// Get sales data
+	penjualanList, err := d.HTTP.GetLaporanPenjualan(c.Context(), startDate, endDate, kategoriID, subkategoriID, sort)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal mengambil data penjualan",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Berhasil mengambil data penjualan",
+		"data":    penjualanList,
 	})
 }
