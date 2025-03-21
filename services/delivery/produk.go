@@ -48,6 +48,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase, kuc doma
 	group.Get("/getbestselling", handler.GetBestSellingProducts)
 	group.Get("/getloweststock", handler.GetProdukWithLowestStock)
 	group.Get("/getnearexpiry/:days", handler.GetProductsNearExpiry)
+	group.Get("/getlaporanproduk", handler.GetLaporanProduk) // Add this line
 }
 
 func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
@@ -862,5 +863,48 @@ func (d *HttpDeliveryProduk) GetProductsNearExpiry(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Data produk yang mendekati kadaluarsa berhasil diambil",
 		"data":    produk,
+	})
+}
+
+func (d *HttpDeliveryProduk) GetLaporanProduk(c *fiber.Ctx) error {
+	// Parse query parameters
+	idKategori := c.Query("id_kategori")
+	idSubkategori := c.Query("id_subkategori")
+	sort := c.Query("sort")
+
+	// Convert string IDs to uint if provided
+	var kategoriID, subkategoriID uint
+	if idKategori != "" {
+		id, err := strconv.ParseUint(idKategori, 10, 32)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "ID kategori tidak valid",
+			})
+		}
+		kategoriID = uint(id)
+	}
+
+	if idSubkategori != "" {
+		id, err := strconv.ParseUint(idSubkategori, 10, 32)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "ID subkategori tidak valid",
+			})
+		}
+		subkategoriID = uint(id)
+	}
+
+	// Get product data
+	produkList, err := d.HTTP.GetLaporanProduk(c.Context(), kategoriID, subkategoriID, sort)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal mengambil data produk",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Berhasil mengambil data produk",
+		"data":    produkList,
 	})
 }

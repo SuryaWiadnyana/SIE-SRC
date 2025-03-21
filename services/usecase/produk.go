@@ -182,3 +182,17 @@ func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshol
 
 	return nearExpiryProducts, nil
 }
+
+// GetLaporanProduk retrieves product report data with filters
+func (uc *ProdukUseCase) GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]domain.Produk, error) {
+    // Get data from repository
+    ctx, cancel := context.WithTimeout(context.Background(), uc.contextTimeout)
+    defer cancel()
+    
+    produkList, err := uc.ProdukRepository.GetLaporanProduk(ctx, kategoriID, subkategoriID, sort)
+    if err != nil {
+        return nil, err
+    }
+
+    return produkList, nil
+}

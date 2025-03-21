@@ -227,3 +227,53 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 
 	return err
 }
+
+// GetLaporanPenjualan retrieves sales report data with filters
+func (r *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
+    collection := r.DB.Collection("penjualan")
+
+    // Build filter
+    filter := bson.M{
+        "tanggal_penjualan": bson.M{
+            "$gte": startDate,
+            "$lte": endDate,
+        },
+    }
+
+    // Add category and subcategory filters if provided
+    if kategoriID > 0 {
+        filter["produk.kategori.id"] = kategoriID
+    }
+    if subkategoriID > 0 {
+        filter["produk.subkategori.id"] = subkategoriID
+    }
+
+    // Build sort options
+    var sortOptions bson.D
+    switch sort {
+    case "date_asc":
+        sortOptions = bson.D{{Key: "tanggal_penjualan", Value: 1}}
+    case "date_desc":
+        sortOptions = bson.D{{Key: "tanggal_penjualan", Value: -1}}
+    case "quantity_asc":
+        sortOptions = bson.D{{Key: "jumlah_produk", Value: 1}}
+    case "quantity_desc":
+        sortOptions = bson.D{{Key: "jumlah_produk", Value: -1}}
+    default:
+        sortOptions = bson.D{{Key: "tanggal_penjualan", Value: -1}} // Default sort by date desc
+    }
+
+    // Execute query
+    cursor, err := collection.Find(ctx, filter, options.Find().SetSort(sortOptions))
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+
+    var penjualanList []domain.Penjualan
+    if err = cursor.All(ctx, &penjualanList); err != nil {
+        return nil, err
+    }
+
+    return penjualanList, nil
+}

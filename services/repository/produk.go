@@ -34,7 +34,7 @@ func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
 
 	// Pastikan menggunakan kolasi untuk pengurutan numerik yang benar
 	opts := options.FindOne().SetSort(bson.M{"id_produk": -1}).SetCollation(&options.Collation{
-		Locale:   "en",
+		Locale:          "en",
 		NumericOrdering: true,
 	})
 	var lastProduct domain.Produk
@@ -711,4 +711,53 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 	}
 
 	return HasilData, nil
+}
+
+// GetLaporanProduk retrieves product report data with filters
+func (rp *mongoRepoProduk) GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]domain.Produk, error) {
+	collection := rp.DB.Collection("produk")
+
+	// Build filter
+	filter := bson.M{"is_deleted": false}
+
+	// Add category and subcategory filters if provided
+	if kategoriID > 0 {
+		filter["kategori.id"] = kategoriID
+	}
+	if subkategoriID > 0 {
+		filter["subkategori.id"] = subkategoriID
+	}
+
+	// Build sort options
+	var sortOptions bson.D
+	switch sort {
+	case "name_asc":
+		sortOptions = bson.D{{Key: "nama_produk", Value: 1}}
+	case "name_desc":
+		sortOptions = bson.D{{Key: "nama_produk", Value: -1}}
+	case "stock_asc":
+		sortOptions = bson.D{{Key: "stok", Value: 1}}
+	case "stock_desc":
+		sortOptions = bson.D{{Key: "stok", Value: -1}}
+	case "price_asc":
+		sortOptions = bson.D{{Key: "harga_produk", Value: 1}}
+	case "price_desc":
+		sortOptions = bson.D{{Key: "harga_produk", Value: -1}}
+	default:
+		sortOptions = bson.D{{Key: "nama_produk", Value: 1}} // Default sort by name asc
+	}
+
+	// Execute query
+	cursor, err := collection.Find(ctx, filter, options.Find().SetSort(sortOptions))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var produkList []domain.Produk
+	if err = cursor.All(ctx, &produkList); err != nil {
+		return nil, err
+	}
+
+	return produkList, nil
 }
