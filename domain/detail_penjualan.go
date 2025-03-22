@@ -13,13 +13,13 @@ type DetailPenjualan struct {
 }
 
 type ResponseSalesReportItem struct {
-	TanggalPenjualan time.Time          `json:"tanggal_penjualan"`
-	KodeProduk       string             `json:"kode_produk"`
-	NamaProduk       string             `json:"nama_produk"`
-	Kategori         Kategori           `json:"kategori"`
-	SubKategori      SubKategori        `json:"subkategori"`
-	JumlahProduk     int                `json:"jumlah_produk"`
-	Total            int                `json:"total"`
+	TanggalPenjualan time.Time   `json:"tanggal_penjualan"`
+	KodeProduk       string      `json:"kode_produk"`
+	NamaProduk       string      `json:"nama_produk"`
+	Kategori         Kategori    `json:"kategori"`
+	SubKategori      SubKategori `json:"subkategori"`
+	JumlahProduk     int         `json:"jumlah_produk"`
+	Total            int         `json:"total"`
 }
 
 type CategoryStats struct {

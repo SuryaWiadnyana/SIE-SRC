@@ -21,6 +21,8 @@ func NewMongoRepoDetailPenjualan(client *mongo.Database) domain.DetailPenjualanR
 }
 
 func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain.DetailPenjualan) (*domain.DetailPenjualan, error) {
+	collection := r.DB.Collection("detail_penjualan")
+	
 	id, err := r.GenerateNextID(ctx)
 	if err != nil {
 		log.Printf("Error generating ID: %v", err)
@@ -31,8 +33,6 @@ func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain
 
 	// Set ID for detail penjualan
 	dp.ID_DetailPenjualan = id
-
-	collection := r.DB.Collection("detail_penjualan")
 
 	// Buat dokumen detail penjualan
 	detailDoc := bson.M{

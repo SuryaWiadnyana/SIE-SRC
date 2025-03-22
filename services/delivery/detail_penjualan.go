@@ -49,8 +49,8 @@ func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {
 		})
 	}
 
-	for _, produk := range detailPenjualan.Produk {
-		if produk.IDProduk == "" {
+	for _, detail := range detailPenjualan.Produk {
+		if detail.IDProduk == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"message": "ID Produk diperlukan untuk semua produk",
 			})
@@ -109,7 +109,7 @@ func (d *HttpDeliveryDetailPenjualan) GetByID(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Detail berhasil diambil",
+		"message": "Detail penjualan berhasil diambil",
 		"data":    detail,
 	})
 }
@@ -137,7 +137,7 @@ func (d *HttpDeliveryDetailPenjualan) GetByPenjualanID(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "Detail berhasil diambil",
+		"message": "Detail penjualan berhasil diambil",
 		"data":    details,
 	})
 }
