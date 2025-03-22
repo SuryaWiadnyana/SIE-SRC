@@ -13,6 +13,7 @@ type DetailPenjualan struct {
 }
 
 type ResponseSalesReportItem struct {
+	IDPenjualan      string      `json:"id_penjualan"`
 	TanggalPenjualan time.Time   `json:"tanggal_penjualan"`
 	KodeProduk       string      `json:"kode_produk"`
 	NamaProduk       string      `json:"nama_produk"`

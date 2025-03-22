@@ -2,168 +2,287 @@ package delivery
 
 import (
 	"SIE-SRC/domain"
-	"SIE-SRC/utils"
 	"SIE-SRC/middleware"
 	"context"
-	"fmt"
+	"log"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type HttpDeliveryLaporan struct {
-	PenjualanUsecase       domain.PenjualanUsecase
-	DetailPenjualanUsecase domain.DetailPenjualanUsecase
-	ProdukUsecase          domain.ProdukUsecase
-	KategoriUsecase        domain.KategoriUsecase
-	SubKategoriUsecase     domain.SubKategoriUsecase
+	PenjualanUC       domain.PenjualanUseCase
+	DetailPenjualanUC domain.DetailPenjualanUseCase
+	ProdukUC          domain.ProdukUseCase
+	KategoriUC        domain.KategoriUseCase
+	SubKategoriUC     domain.SubKategoriUseCase
 }
 
-func NewHttpDeliveryLaporan(router fiber.Router, penjualanUsecase domain.PenjualanUsecase, detailPenjualanUsecase domain.DetailPenjualanUsecase, produkUsecase domain.ProdukUsecase, kategoriUsecase domain.KategoriUsecase, subkategoriUsecase domain.SubKategoriUsecase) {
+func NewHttpDeliveryLaporan(app fiber.Router, penjualanUC domain.PenjualanUseCase, detailPenjualanUC domain.DetailPenjualanUseCase, produkUC domain.ProdukUseCase, kategoriUC domain.KategoriUseCase, subKategoriUC domain.SubKategoriUseCase) {
 	handler := &HttpDeliveryLaporan{
-		PenjualanUsecase:       penjualanUsecase,
-		DetailPenjualanUsecase: detailPenjualanUsecase,
-		ProdukUsecase:          produkUsecase,
-		KategoriUsecase:        kategoriUsecase,
-		SubKategoriUsecase:     subkategoriUsecase,
+		PenjualanUC:       penjualanUC,
+		DetailPenjualanUC: detailPenjualanUC,
+		ProdukUC:          produkUC,
+		KategoriUC:        kategoriUC,
+		SubKategoriUC:     subKategoriUC,
 	}
 
-	laporanRoute := router.Group("/laporan")
-	laporanRoute.Use(middleware.AuthMiddleware("admin", "owner"))
-	laporanRoute.Get("/penjualan", handler.GetLaporanPenjualan)
-	laporanRoute.Get("/produk", handler.GetLaporanProduk)
+	protected := app.Group("/laporan")
+	protected.Use(middleware.AuthMiddleware("admin", "owner"))
+	protected.Get("/penjualan", handler.GetLaporanPenjualan)
+	protected.Get("/produk", handler.GetLaporanProduk)
 }
 
-func (h *HttpDeliveryLaporan) GetLaporanPenjualan(c *fiber.Ctx) error {
-	// Parse query parameters
-	idKategori := c.Query("id_kategori")
-	idSubkategori := c.Query("id_subkategori")
-	tanggalMulai := c.Query("tanggal_mulai")
-	tanggalAkhir := c.Query("tanggal_akhir")
-	sort := c.Query("sort")
-
-	// Validate required parameters
-	if tanggalMulai == "" || tanggalAkhir == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "tanggal_mulai and tanggal_akhir are required",
-		})
-	}
-
-	// Parse dates
-	startDate, err := time.Parse("2006-01-02", tanggalMulai)
+func (d *HttpDeliveryLaporan) GetLaporanPenjualan(c *fiber.Ctx) error {
+	// Parse date range
+	startDate, err := time.Parse("2006-01-02", c.Query("tanggal_mulai"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "invalid tanggal_mulai format",
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format tanggal mulai tidak valid. Gunakan format YYYY-MM-DD",
 		})
 	}
 
-	endDate, err := time.Parse("2006-01-02", tanggalAkhir)
+	endDate, err := time.Parse("2006-01-02", c.Query("tanggal_akhir"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "invalid tanggal_akhir format",
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format tanggal akhir tidak valid. Gunakan format YYYY-MM-DD",
 		})
 	}
 
-	// Get sales data within date range
-	penjualanList, err := h.PenjualanUsecase.GetByDateRange(c.Context(), startDate, endDate)
+	// Validate date range
+	if endDate.Before(startDate) {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Tanggal akhir tidak boleh sebelum tanggal mulai",
+		})
+	}
+
+	// Get optional filters
+	kategoriID := c.Query("id_kategori")
+	subkategoriID := c.Query("id_subkategori")
+	sortOption := c.Query("sort")
+
+	// Get all sales data
+	penjualanList, err := d.PenjualanUC.GetAll(context.Background())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "failed to get sales data",
-			"error":   err.Error(),
+		log.Printf("Error getting sales data: %v", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal mengambil data penjualan: " + err.Error(),
 		})
 	}
 
-	// Filter by kategori and subkategori if provided
-	var filteredPenjualan []domain.Penjualan
-	for _, p := range penjualanList {
-		shouldInclude := true
-		if idKategori != "" || idSubkategori != "" {
-			details, err := h.DetailPenjualanUsecase.GetByPenjualanID(c.Context(), p.IDPenjualan)
-			if err != nil {
-				continue
-			}
+	// Filter and process sales data
+	var filteredData []map[string]interface{}
+	for _, penjualan := range penjualanList {
+		// Apply date filter
+		if penjualan.Tanggal_Penjualan.Before(startDate) || penjualan.Tanggal_Penjualan.After(endDate) {
+			continue
+		}
 
-			for _, detail := range details {
-				for _, produk := range detail.Produk {
-					if (idKategori != "" && produk.Kategori.IDKategori != idKategori) ||
-						(idSubkategori != "" && produk.SubKategori.IDSubKategori != idSubkategori) {
-						shouldInclude = false
-						break
-					}
+		// Get detail penjualan
+		details, err := d.DetailPenjualanUC.GetByPenjualanID(context.Background(), penjualan.IDPenjualan)
+		if err != nil {
+			log.Printf("Error getting sale details for ID %s: %v", penjualan.IDPenjualan, err)
+			continue
+		}
+
+		// Process each detail
+		for _, detail := range details {
+			for _, produk := range detail.Produk {
+				// Get product details
+				produkDetail, err := d.ProdukUC.GetProdukById(context.Background(), produk.IDProduk)
+				if err != nil {
+					log.Printf("Error getting product details for ID %s: %v", produk.IDProduk, err)
+					continue
 				}
+
+				// Apply category filter
+				if kategoriID != "" && produkDetail.Kategori.IDKategori != kategoriID {
+					continue
+				}
+
+				// Apply subcategory filter
+				if subkategoriID != "" && produkDetail.SubKategori.IDSubKategori != subkategoriID {
+					continue
+				}
+
+				// Create report item
+				reportItem := map[string]interface{}{
+					"id_penjualan":      penjualan.IDPenjualan,
+					"tanggal_penjualan": penjualan.Tanggal_Penjualan.Format("2006-01-02"),
+					"kode_produk":       produkDetail.KodeProduk,
+					"nama_produk":       produkDetail.NamaProduk,
+					"kategori":          produkDetail.Kategori.NamaKategori,
+					"subkategori":       produkDetail.SubKategori.NamaSubKategori,
+					"jumlah_produk":     penjualan.JumlahProduk,
+					"total":             penjualan.Total,
+				}
+
+				filteredData = append(filteredData, reportItem)
 			}
 		}
-		if shouldInclude {
-			filteredPenjualan = append(filteredPenjualan, p)
-		}
 	}
 
-	// Sort data if requested
-	if sort != "" {
-		utils.SortPenjualan(filteredPenjualan, sort)
+	// Apply sorting
+	switch sortOption {
+	case "date_asc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			dateI, okI := filteredData[i]["tanggal_penjualan"].(string)
+			dateJ, okJ := filteredData[j]["tanggal_penjualan"].(string)
+			if !okI || !okJ {
+				log.Printf("Error: tanggal_penjualan is not a string for index %d and %d", i, j)
+				return false
+			}
+			return dateI < dateJ
+		})
+	case "date_desc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			dateI, okI := filteredData[i]["tanggal_penjualan"].(string)
+			dateJ, okJ := filteredData[j]["tanggal_penjualan"].(string)
+			if !okI || !okJ {
+				log.Printf("Error: tanggal_penjualan is not a string for index %d and %d", i, j)
+				return false
+			}
+			return dateI > dateJ
+		})
+	case "quantity_asc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			quantityI, okI := filteredData[i]["jumlah_produk"].(int)
+			quantityJ, okJ := filteredData[j]["jumlah_produk"].(int)
+			if !okI || !okJ {
+				log.Printf("Error: jumlah_produk is not an int for index %d and %d", i, j)
+				return false
+			}
+			return quantityI < quantityJ
+		})
+	case "quantity_desc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			quantityI, okI := filteredData[i]["jumlah_produk"].(int)
+			quantityJ, okJ := filteredData[j]["jumlah_produk"].(int)
+			if !okI || !okJ {
+				log.Printf("Error: jumlah_produk is not an int for index %d and %d", i, j)
+				return false
+			}
+			return quantityI > quantityJ
+		})
+	default:
+		// Default sort by date ascending for sales report
+		sort.Slice(filteredData, func(i, j int) bool {
+			dateI, okI := filteredData[i]["tanggal_penjualan"].(string)
+			dateJ, okJ := filteredData[j]["tanggal_penjualan"].(string)
+			if !okI || !okJ {
+				log.Printf("Error: tanggal_penjualan is not a string for index %d and %d", i, j)
+				return false
+			}
+			return dateI < dateJ
+		})
 	}
 
-	// Convert to report format
-	var report []domain.ResponseSalesReportItem
-	for _, p := range filteredPenjualan {
-		item := domain.ResponseSalesReportItem{
-			IDPenjualan:       p.IDPenjualan,
-			TanggalPenjualan: p.Tanggal_Penjualan,
-			Total:            p.Total,
-		}
-		report = append(report, item)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "success",
-		"data":    report,
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status": "success",
+		"data":   filteredData,
 	})
 }
 
-func (h *HttpDeliveryLaporan) GetLaporanProduk(c *fiber.Ctx) error {
-	// Parse query parameters
-	idKategori := c.Query("id_kategori")
-	idSubkategori := c.Query("id_subkategori")
-	sort := c.Query("sort")
+func (d *HttpDeliveryLaporan) GetLaporanProduk(c *fiber.Ctx) error {
+	// Get filters
+	kategoriID := c.Query("id_kategori")
+	subkategoriID := c.Query("id_subkategori")
+	sortOption := c.Query("sort")
 
 	// Get all products
-	produkList, err := h.ProdukUsecase.GetAll(c.Context())
+	products, err := d.ProdukUC.GetAllProduk(context.Background())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "failed to get product data",
-			"error":   err.Error(),
+		log.Printf("Error getting product data: %v", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal mengambil data produk: " + err.Error(),
 		})
 	}
 
-	// Filter by kategori and subkategori if provided
-	var filteredProduk []domain.Produk
-	for _, p := range produkList {
-		if (idKategori == "" || p.Kategori.IDKategori == idKategori) &&
-			(idSubkategori == "" || p.SubKategori.IDSubKategori == idSubkategori) {
-			filteredProduk = append(filteredProduk, p)
+	// Filter and process product data
+	var filteredData []map[string]interface{}
+	for _, product := range products {
+		// Apply category filter
+		if kategoriID != "" && product.Kategori.IDKategori != kategoriID {
+			continue
 		}
-	}
 
-	// Sort data if requested
-	if sort != "" {
-		utils.SortProduk(filteredProduk, sort)
-	}
-
-	// Convert to report format
-	var report []domain.ResponseProductReportItem
-	for _, p := range filteredProduk {
-		item := domain.ResponseProductReportItem{
-			IDProduk:    p.IDProduk,
-			NamaProduk:  p.NamaProduk,
-			HargaProduk: p.HargaProduk,
-			Stok:        p.Stok,
+		// Apply subcategory filter
+		if subkategoriID != "" && product.SubKategori.IDSubKategori != subkategoriID {
+			continue
 		}
-		report = append(report, item)
+
+		// Create report item
+		reportItem := map[string]interface{}{
+			"kode_produk": product.KodeProduk,
+			"nama_produk": product.NamaProduk,
+			"kategori":    product.Kategori.NamaKategori,
+			"subkategori": product.SubKategori.NamaSubKategori,
+			"stok":        product.Stok,
+			"harga":       product.HargaProduk,
+		}
+
+		filteredData = append(filteredData, reportItem)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "success",
-		"data":    report,
+	// Apply sorting
+	switch sortOption {
+	case "name_asc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			nameI, okI := filteredData[i]["nama_produk"].(string)
+			nameJ, okJ := filteredData[j]["nama_produk"].(string)
+			if !okI || !okJ {
+				log.Printf("Error: nama_produk is not a string for index %d and %d", i, j)
+				return false
+			}
+			return nameI < nameJ
+		})
+	case "name_desc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			nameI, okI := filteredData[i]["nama_produk"].(string)
+			nameJ, okJ := filteredData[j]["nama_produk"].(string)
+			if !okI || !okJ {
+				log.Printf("Error: nama_produk is not a string for index %d and %d", i, j)
+				return false
+			}
+			return nameI > nameJ
+		})
+	case "stock_asc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			stockI, okI := filteredData[i]["stok"].(int)
+			stockJ, okJ := filteredData[j]["stok"].(int)
+			if !okI || !okJ {
+				log.Printf("Error: stok is not an int for index %d and %d", i, j)
+				return false
+			}
+			return stockI < stockJ
+		})
+	case "stock_desc":
+		sort.Slice(filteredData, func(i, j int) bool {
+			stockI, okI := filteredData[i]["stok"].(int)
+			stockJ, okJ := filteredData[j]["stok"].(int)
+			if !okI || !okJ {
+				log.Printf("Error: stok is not an int for index %d and %d", i, j)
+				return false
+			}
+			return stockI > stockJ
+		})
+	default:
+		// Default sort by name ascending for product report
+		sort.Slice(filteredData, func(i, j int) bool {
+			nameI, okI := filteredData[i]["nama_produk"].(string)
+			nameJ, okJ := filteredData[j]["nama_produk"].(string)
+			if !okI || !okJ {
+				log.Printf("Error: nama_produk is not a string for index %d and %d", i, j)
+				return false
+			}
+			return nameI < nameJ
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status": "success",
+		"data":   filteredData,
 	})
 }
