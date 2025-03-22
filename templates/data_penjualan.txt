@@ -1,0 +1,378 @@
+{
+    "data": [
+        {
+            "id_details": "DP001",
+            "penjualan": {
+                "id_penjualan": "PJ001",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-01-25T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 13400,
+                "total": 13400,
+                "updated_at": "2025-03-20T14:15:18.717Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
+                    "stok_barang": 39,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "028",
+                    "nama_produk": "Teh Sari Wangi",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Kopi & Teh",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563427",
+                    "harga_produk": 8000,
+                    "tanggal_kadaluarsa": "2025-10-25T00:00:00Z",
+                    "stok_barang": 70,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 13400
+        },
+        {
+            "id_details": "DP002",
+            "penjualan": {
+                "id_penjualan": "PJ002",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-20T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 8700,
+                "total": 8700,
+                "updated_at": "2025-03-20T14:15:43.751Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
+                    "stok_barang": 37,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
+                    "stok_barang": 100,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 8700
+        },
+        {
+            "id_details": "DP003",
+            "penjualan": {
+                "id_penjualan": "PJ003",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-02-14T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 8400,
+                "total": 8400,
+                "updated_at": "2025-03-20T14:21:21.983Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
+                    "stok_barang": 36,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
+                    "stok_barang": 98,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 8400
+        },
+        {
+            "id_details": "DP004",
+            "penjualan": {
+                "id_penjualan": "PJ004",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2024-12-08T00:00:00Z",
+                "jumlah_produk": 6,
+                "subtotal": 23600,
+                "total": 23600,
+                "updated_at": "2025-03-20T14:28:07.313Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
+                    "stok_barang": 34,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
+                    "stok_barang": 97,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "006",
+                    "nama_produk": "Lays Classic",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Snack",
+                        "kategori": null
+                    },
+                    "kode_produk": "8996001600147",
+                    "harga_produk": 9500,
+                    "tanggal_kadaluarsa": "2025-06-15T00:00:00Z",
+                    "stok_barang": 40,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 23600
+        },
+        {
+            "id_details": "DP005",
+            "penjualan": {
+                "id_penjualan": "PJ005",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-01-17T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 8700,
+                "total": 8700,
+                "updated_at": "2025-03-20T14:29:46.755Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
+                    "stok_barang": 31,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
+                    "stok_barang": 95,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 8700
+        },
+        {
+            "id_details": "DP006",
+            "penjualan": {
+                "id_penjualan": "PJ006",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-20T00:00:00Z",
+                "jumlah_produk": 2,
+                "subtotal": 12500,
+                "total": 12500,
+                "updated_at": "2025-03-20T14:41:10.299Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "005",
+                    "nama_produk": "Chitato Sapi Panggang",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Snack",
+                        "kategori": null
+                    },
+                    "kode_produk": "8996001600146",
+                    "harga_produk": 10000,
+                    "tanggal_kadaluarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "023",
+                    "nama_produk": "Pop Ice Coklat",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Minuman Serbuk",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563422",
+                    "harga_produk": 2500,
+                    "tanggal_kadaluarsa": "2025-09-10T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 12500
+        }
+    ],
+    "message": "Data detail penjualan berhasil diambil"
+}

@@ -1,10 +1,16 @@
 // Constants
 const API_URL = "http://localhost:8080";
 const ENDPOINTS = {
-    KATEGORI: '/kategori/getall',
+    KATEGORI: {
+        ALL: '/kategori/getall',
+        BY_ID: '/kategori/getbyid/',
+        BY_NAME: '/kategori/getbyname/'
+    },
     SUBKATEGORI: {
         ALL: '/subkategori/getall',
-        BY_KATEGORI: '/subkategori/getbykategori/' // Perhatikan slash di akhir
+        BY_ID: '/subkategori/getbyid/',
+        BY_NAME: '/subkategori/getbyname/',
+        BY_KATEGORI: '/subkategori/getbykategori/'
     },
     LAPORAN: {
         PENJUALAN: '/laporan/penjualan',
@@ -103,7 +109,7 @@ function getSortLabel(sort) {
 }
 
 function processSalesData(data) {
-    // Kelompokkan data berdasarkan bulan dan hitung total
+    // Group data by month and calculate totals
     const monthlyData = {};
     
     data.forEach(sale => {
@@ -121,21 +127,20 @@ function processSalesData(data) {
         monthlyData[monthKey].total += parseFloat(sale.total) || 0;
     });
 
-    // Urutkan bulan dan konversi ke format yang dibutuhkan Chart.js
+    // Sort months and convert to Chart.js format
     const sortedMonths = Object.keys(monthlyData).sort();
     
     return {
         labels: sortedMonths.map(month => {
             const [year, monthNum] = month.split('-');
             const date = new Date(year, parseInt(monthNum) - 1);
-            return date.toLocaleString('id-ID', { month: 'short' });
+            return date.toLocaleString('id-ID', { month: 'short', year: 'numeric' });
         }),
         units: sortedMonths.map(month => monthlyData[month].units),
         totals: sortedMonths.map(month => monthlyData[month].total)
     };
 }
 
-// Fungsi untuk membuat grafik kombinasi bar dan line
 function createSalesChart(data) {
     const ctx = document.getElementById('salesChart');
     
@@ -144,228 +149,148 @@ function createSalesChart(data) {
         window.salesChart.destroy();
     }
 
-    // Process data for chart
-    const monthlyData = {};
-    data.forEach(item => {
-        const date = new Date(item.tanggal_penjualan);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        
-        if (!monthlyData[monthKey]) {
-            monthlyData[monthKey] = {
-                count: 0,
-                total: 0
-            };
-        }
-        
-        monthlyData[monthKey].count += item.jumlah_produk;
-        monthlyData[monthKey].total += item.total;
-    });
-
-    // Sort months
-    const sortedMonths = Object.keys(monthlyData).sort();
-
-    // Prepare chart data
-    const chartData = {
-        labels: sortedMonths.map(month => {
-            const [year, monthNum] = month.split('-');
-            return new Date(year, monthNum - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-        }),
-        datasets: [
-            {
-                label: 'Jumlah Terjual',
-                type: 'bar',
-                data: sortedMonths.map(month => monthlyData[month].count),
-                backgroundColor: 'rgba(53, 162, 235, 0.7)',
-                borderColor: 'rgba(53, 162, 235, 1)',
-                borderWidth: 1,
-                yAxisID: 'y',
-                barPercentage: 0.6,
-                categoryPercentage: 0.7
-            },
-            {
-                label: 'Total Penjualan (Rp)',
-                type: 'line',
-                data: sortedMonths.map(month => monthlyData[month].total),
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                yAxisID: 'y1',
-                tension: 0.3
-            }
-        ]
-    };
-
     // Create chart
     window.salesChart = new Chart(ctx, {
         type: 'bar',
-        data: chartData,
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Jumlah Terjual',
+                    type: 'bar',
+                    data: data.units,
+                    backgroundColor: 'rgba(53, 162, 235, 0.7)',
+                    borderColor: 'rgba(53, 162, 235, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
+                },
+                {
+                    label: 'Total Penjualan (Rp)',
+                    type: 'line',
+                    data: data.totals,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    yAxisID: 'y1',
+                    tension: 0.3
+                }
+            ]
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             interaction: {
+                mode: 'index',
                 intersect: false,
-                mode: 'index'
             },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        font: {
-                            size: 11
-                        },
-                        maxRotation: 45,
-                        minRotation: 45
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Grafik Penjualan per Bulan',
+                    font: {
+                        size: 16
                     }
                 },
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
                 y: {
                     type: 'linear',
                     display: true,
                     position: 'left',
                     title: {
                         display: true,
-                        text: 'Jumlah Terjual',
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    },
-                    ticks: {
-                        font: {
-                            size: 11
-                        }
+                        text: 'Jumlah Terjual'
                     }
                 },
                 y1: {
                     type: 'linear',
                     display: true,
                     position: 'right',
+                    grid: {
+                        drawOnChartArea: false,
+                    },
                     title: {
                         display: true,
-                        text: 'Total Penjualan (Rp)',
-                        font: {
-                            size: 12,
-                            weight: 'bold'
-                        }
-                    },
-                    grid: {
-                        display: false
+                        text: 'Total Penjualan (Rp)'
                     },
                     ticks: {
                         callback: function(value) {
                             return 'Rp ' + value.toLocaleString('id-ID');
-                        },
-                        font: {
-                            size: 11
                         }
                     }
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Grafik Penjualan Bulanan',
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 20
-                    }
                 },
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        font: {
-                            size: 12
-                        },
-                        usePointStyle: true,
-                        pointStyle: 'circle'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    titleColor: '#000',
-                    bodyColor: '#000',
-                    bodyFont: {
-                        size: 12
-                    },
-                    borderColor: '#ddd',
-                    borderWidth: 1,
-                    padding: 12,
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.datasetIndex === 1) {
-                                label += 'Rp ' + context.parsed.y.toLocaleString('id-ID');
-                            } else {
-                                label += context.parsed.y;
-                            }
-                            return label;
-                        }
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Bulan'
                     }
                 }
             }
         }
     });
-
-    return ctx;
 }
 
 // Update sort options based on report type
 function updateSortOptions() {
     const reportType = document.getElementById('reportType').value;
     const sortSelect = document.getElementById('sortOption');
-    sortSelect.innerHTML = ''; // Clear existing options
+    const dateRangeFields = document.getElementById('dateRangeFields');
     
-    // Default option
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Pilih Urutan';
-    sortSelect.appendChild(defaultOption);
+    if (!sortSelect) return;
     
-    if (reportType === 'produk') {
-        // Sort options for product report
-        const productSortOptions = [
-            { value: 'stock_asc', text: 'Stok: Terendah ke Tertinggi' },
-            { value: 'stock_desc', text: 'Stok: Tertinggi ke Terendah' },
-            { value: 'name_asc', text: 'Nama Produk: A-Z' },
-            { value: 'name_desc', text: 'Nama Produk: Z-A' }
+    sortSelect.innerHTML = '';
+    
+    if (reportType === 'penjualan') {
+        const salesOptions = [
+            { value: '', label: 'Urutan Default' },
+            { value: 'date_asc', label: 'Tanggal (A-Z)' },
+            { value: 'date_desc', label: 'Tanggal (Z-A)' },
+            { value: 'quantity_asc', label: 'Jumlah (Terendah)' },
+            { value: 'quantity_desc', label: 'Jumlah (Tertinggi)' }
         ];
         
-        productSortOptions.forEach(option => {
-            const element = document.createElement('option');
-            element.value = option.value;
-            element.textContent = option.text;
-            sortSelect.appendChild(element);
+        salesOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            sortSelect.appendChild(option);
         });
+
+        // Show date range fields if they exist
+        if (dateRangeFields) {
+            dateRangeFields.style.display = 'block';
+        }
     } else {
-        // Sort options for sales report
-        const salesSortOptions = [
-            { value: 'qty_asc', text: 'Jumlah Terjual: Terendah ke Tertinggi' },
-            { value: 'qty_desc', text: 'Jumlah Terjual: Tertinggi ke Terendah' },
-            { value: 'date_asc', text: 'Tanggal: Terlama ke Terbaru' },
-            { value: 'date_desc', text: 'Tanggal: Terbaru ke Terlama' }
+        const productOptions = [
+            { value: '', label: 'Urutan Default' },
+            { value: 'name_asc', label: 'Nama (A-Z)' },
+            { value: 'name_desc', label: 'Nama (Z-A)' },
+            { value: 'stock_asc', label: 'Stok (Terendah)' },
+            { value: 'stock_desc', label: 'Stok (Tertinggi)' }
         ];
         
-        salesSortOptions.forEach(option => {
-            const element = document.createElement('option');
-            element.value = option.value;
-            element.textContent = option.text;
-            sortSelect.appendChild(element);
+        productOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            sortSelect.appendChild(option);
         });
+
+        // Hide date range fields if they exist
+        if (dateRangeFields) {
+            dateRangeFields.style.display = 'none';
+        }
     }
 }
+
+// Add event listener for report type change
+document.getElementById('reportType')?.addEventListener('change', updateSortOptions);
 
 // Update sorting options based on report type
 function updateSortingOptions() {
@@ -407,37 +332,46 @@ function updateSortingOptions() {
 
 // Fungsi untuk mengupdate subkategori berdasarkan kategori yang dipilih
 async function updateSubkategori() {
-    try {
-        const kategoriId = document.getElementById('kategoriFilter').value;
-        const subkategoriSelect = document.getElementById('subkategoriFilter');
-        
-        // Reset subkategori options
-        subkategoriSelect.innerHTML = '<option value="">Semua Subkategori</option>';
-        
-        if (!kategoriId) return; // Jika tidak ada kategori dipilih, biarkan default
-        
-        const response = await fetch(`${API_URL}${ENDPOINTS.SUBKATEGORI.BY_KATEGORI}${kategoriId}`);
-        const responseData = await response.json();
-        
-        // Ambil data dari properti data jika ada
-        const subkategoriData = responseData.data || responseData;
+    const kategoriId = document.getElementById('kategoriFilter').value;
+    const subkategoriSelect = document.getElementById('subkategoriFilter');
+    
+    // Reset subkategori dropdown
+    subkategoriSelect.innerHTML = '<option value="">Semua Subkategori</option>';
+    
+    if (!kategoriId) return;
 
-        // Loop dan tambahkan setiap subkategori ke dropdown (tanpa Set karena sudah handle di backend)
-        if (Array.isArray(subkategoriData)) {
-            for (const subkategori of subkategoriData) {
-                const option = document.createElement('option');
-                option.value = subkategori.id_subkategori;
-                option.textContent = subkategori.nama_subkategori;
-                subkategoriSelect.appendChild(option);
+    try {
+        const response = await fetch(`${API_URL}/subkategori/getbykategori/${kategoriId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
+        });
+
+        if (!response.ok) {
+            throw new Error('Gagal mengambil data subkategori');
         }
+
+        const responseData = await response.json();
+        const subkategoriData = responseData.data || [];
+        const subkategoriSelect = document.getElementById('subkategoriFilter');
+
+        // Sort subkategori by name
+        subkategoriData.sort((a, b) => a.nama_subkategori.localeCompare(b.nama_subkategori));
+
+        subkategoriData.forEach(subkategori => {
+            const option = document.createElement('option');
+            option.value = subkategori.id_subkategori;
+            option.textContent = subkategori.nama_subkategori;
+            subkategoriSelect.appendChild(option);
+        });
     } catch (error) {
         console.error('Error:', error);
+        showAlert('error', 'Gagal memuat data subkategori');
     }
 }
 
 // Event listener untuk perubahan kategori
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
     // Check authentication
     const token = localStorage.getItem("token");
     if (!token) {
@@ -504,6 +438,11 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = "../login.html";
         });
     }
+
+    // const kategoriFilter = document.getElementById("kategoriFilter");
+    // if (kategoriFilter) {
+    //     kategoriFilter.addEventListener('change', updateSubkategori);
+    // }
 });
 
 // Load kategori saat halaman dimuat
@@ -563,11 +502,55 @@ async function generateReport() {
         `;
         document.body.appendChild(loadingDiv);
 
+        // Get kategori and subkategori details if selected
+        let kategoriName = "Semua Kategori";
+        let subkategoriName = "Semua Subkategori";
+
+        if (kategoriId) {
+            try {
+                const kategoriResponse = await fetch(`${API_URL}${ENDPOINTS.KATEGORI.BY_ID}${kategoriId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (!kategoriResponse.ok) {
+                    throw new Error('Failed to fetch kategori');
+                }
+                const kategoriData = await kategoriResponse.json();
+                if (kategoriData.data) {
+                    kategoriName = kategoriData.data.nama_kategori;
+                }
+            } catch (error) {
+                console.error('Error fetching kategori:', error);
+                showAlert('error', 'Gagal mengambil data kategori');
+            }
+        }
+
+        if (subkategoriId) {
+            try {
+                const subkategoriResponse = await fetch(`${API_URL}${ENDPOINTS.SUBKATEGORI.BY_ID}${subkategoriId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (!subkategoriResponse.ok) {
+                    throw new Error('Failed to fetch subkategori');
+                }
+                const subkategoriData = await subkategoriResponse.json();
+                if (subkategoriData.data) {
+                    subkategoriName = subkategoriData.data.nama_subkategori;
+                }
+            } catch (error) {
+                console.error('Error fetching subkategori:', error);
+                showAlert('error', 'Gagal mengambil data subkategori');
+            }
+        }
+
         // Prepare parameters
         const params = new URLSearchParams();
         if (reportType === 'penjualan') {
-            params.append('tanggal_mulai', startDate);
-            params.append('tanggal_akhir', endDate);
+            params.append('tanggal_mulai', formatDateForAPI(startDate));
+            params.append('tanggal_akhir', formatDateForAPI(endDate));
         }
         if (kategoriId) params.append('id_kategori', kategoriId);
         if (subkategoriId) params.append('id_subkategori', subkategoriId);
@@ -581,13 +564,13 @@ async function generateReport() {
         });
 
         if (!response.ok) {
-            throw new Error('Gagal mengambil data laporan');
+            throw new Error(`Gagal mengambil data laporan: ${response.status} ${response.statusText}`);
         }
 
         const result = await response.json();
         
         if (!result.data || result.data.length === 0) {
-            document.querySelector('.loading-overlay')?.remove();
+            document.body.querySelector('.loading-overlay')?.remove();
             showAlert('warning', 'Tidak ada data untuk periode yang dipilih');
             return;
         }
@@ -599,12 +582,12 @@ async function generateReport() {
             format: 'a4'
         });
 
-        // Tambahkan header
+        // Add header
         doc.setFontSize(16);
         doc.text('SIE SRC Sarin Jagir', doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
         doc.text('Laporan ' + (reportType === 'penjualan' ? 'Penjualan' : 'Produk'), doc.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
 
-        // Informasi filter
+        // Add filter information
         doc.setFontSize(10);
         let yPos = 35;
 
@@ -613,48 +596,39 @@ async function generateReport() {
             yPos += 7;
         }
 
-        if (kategoriId) {
-            const kategoriEl = document.getElementById('kategoriFilter');
-            const kategoriText = kategoriEl.options[kategoriEl.selectedIndex].text;
-            doc.text(`Kategori: ${kategoriText}`, 15, yPos);
-            yPos += 7;
-        }
+        doc.text(`Kategori: ${kategoriName}`, 15, yPos);
+        yPos += 7;
+        doc.text(`Subkategori: ${subkategoriName}`, 15, yPos);
+        yPos += 7;
 
-        if (subkategoriId) {
-            const subkategoriEl = document.getElementById('subkategoriFilter');
-            const subkategoriText = subkategoriEl.options[subkategoriEl.selectedIndex].text;
-            doc.text(`Subkategori: ${subkategoriText}`, 15, yPos);
-            yPos += 7;
-        }
-
-        // Generate tabel
+        // Generate table
         const headers = reportType === 'penjualan' 
             ? ['Tanggal', 'Kode Produk', 'Nama Produk', 'Kategori', 'Subkategori', 'Jumlah', 'Total']
             : ['Kode Produk', 'Nama Produk', 'Kategori', 'Subkategori', 'Stok', 'Harga'];
 
-        // Data untuk tabel
+        // Prepare table data
         const tableData = result.data.map(item => 
             reportType === 'penjualan'
                 ? [
                     formatDate(item.tanggal_penjualan),
                     item.kode_produk || '-',
                     item.nama_produk || '-',
-                    item.kategori?.nama_kategori || '-',
-                    item.subkategori?.nama_subkategori || '-',
+                    item.kategori?.nama_kategori || kategoriName,
+                    item.subkategori?.nama_subkategori || subkategoriName,
                     item.jumlah_produk?.toString() || '0',
                     formatCurrency(item.total || 0)
                 ]
                 : [
                     item.kode_produk || '-',
                     item.nama_produk || '-',
-                    item.kategori?.nama_kategori || '-',
-                    item.subkategori?.nama_subkategori || '-',
+                    item.kategori?.nama_kategori || kategoriName,
+                    item.subkategori?.nama_subkategori || subkategoriName,
                     item.stok?.toString() || '0',
                     formatCurrency(item.harga || 0)
                 ]
         );
 
-        // Tambahkan tabel dengan autoTable
+        // Add table
         doc.autoTable({
             startY: yPos,
             head: [headers],
@@ -676,83 +650,52 @@ async function generateReport() {
             margin: { top: 15 }
         });
 
-        // Tambahkan grafik setelah tabel jika ada
-        if (reportType === 'penjualan') {
+        // Add chart for sales report
+        if (reportType === 'penjualan' && result.data.length > 0) {
             try {
-                // Create and render chart
-                createSalesChart(result.data);
+                const chartData = processSalesData(result.data);
+                createSalesChart(chartData);
                 
-                // Wait for chart animation to complete
+                // Wait for chart animation
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // Get chart canvas
                 const chartCanvas = document.getElementById('salesChart');
-                if (!chartCanvas) {
-                    throw new Error('Chart canvas not found');
-                }
-
-                // Convert chart to image with higher quality
-                const chartImage = chartCanvas.toDataURL('image/png', 1.0);
-                
-                // Add chart to PDF with proper positioning
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = doc.internal.pageSize.getHeight();
-                const chartAspectRatio = chartCanvas.width / chartCanvas.height;
-                const chartWidth = pdfWidth - 40; // 20mm margins on each side
-                const chartHeight = chartWidth / chartAspectRatio;
-                
-                const finalY = doc.previousAutoTable.finalY + 20;
-                
-                // Tambahkan halaman baru jika tidak cukup ruang
-                if (finalY + 100 > doc.internal.pageSize.getHeight()) {
+                if (chartCanvas) {
+                    const chartImage = chartCanvas.toDataURL('image/png', 1.0);
+                    
+                    // Add new page for chart
                     doc.addPage();
-                    yPos = 20;
-                } else {
-                    yPos = finalY;
+                    
+                    // Add chart title
+                    doc.setFontSize(14);
+                    doc.text('Grafik Penjualan', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                    
+                    // Add chart
+                    const chartWidth = doc.internal.pageSize.getWidth() - 30;
+                    const chartHeight = 120;
+                    doc.addImage(chartImage, 'PNG', 15, 30, chartWidth, chartHeight);
                 }
-
-                // Tambahkan judul grafik
-                doc.setFontSize(12);
-                doc.text('Grafik Penjualan', doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-                
-                // Tambahkan grafik
-                const chartWidthPdf = doc.internal.pageSize.getWidth() - 30;
-                const chartHeightPdf = 100;
-                doc.addImage(chartImage, 'PNG', 15, yPos + 10, chartWidthPdf, chartHeightPdf);
             } catch (error) {
                 console.error('Error adding chart:', error);
             }
         }
 
-        // Footer
+        // Add footer with page numbers
         const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
-        for(let i = 1; i <= pageCount; i++) {
+        for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            doc.text(
-                `Halaman ${i} dari ${pageCount}`,
-                doc.internal.pageSize.getWidth() - 20,
-                doc.internal.pageSize.getHeight() - 10,
-                { align: 'right' }
-            );
-            doc.text(
-                `Dicetak pada: ${new Date().toLocaleString('id-ID')}`,
-                15,
-                doc.internal.pageSize.getHeight() - 10
-            );
+            doc.setFontSize(8);
+            doc.text(`Halaman ${i} dari ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
         }
 
-        // Simpan PDF
-        const fileName = `laporan_${reportType}_${new Date().toISOString().split('T')[0]}.pdf`;
-        doc.save(fileName);
-
-        // Hapus loading overlay
-        document.querySelector('.loading-overlay')?.remove();
-        showAlert('success', 'Laporan berhasil dibuat');
+        // Save the PDF
+        doc.save(`Laporan_${reportType}_${formatDateForAPI(new Date())}.pdf`);
 
     } catch (error) {
         console.error('Error generating report:', error);
-        document.querySelector('.loading-overlay')?.remove();
         showAlert('danger', 'Gagal menghasilkan laporan: ' + error.message);
+    } finally {
+        // Remove loading overlay
+        document.body.querySelector('.loading-overlay')?.remove();
     }
 }
