@@ -597,10 +597,30 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				continue
 			}
 
+			// Get kategori by ID
+			kategori, err := d.KategoriUseCase.GetByID(c.Context(), strings.TrimSpace(record[1]))
+			if err != nil {
+				log.Printf("Baris %d: kategori tidak ditemukan: kategori dengan ID %s tidak ditemukan", i+1, strings.TrimSpace(record[1]))
+				continue
+			}
+
+			// Get subkategori by ID
+			subkategori, err := d.SubKategoriUseCase.GetByID(c.Context(), strings.TrimSpace(record[2]))
+			if err != nil {
+				log.Printf("Baris %d: subkategori tidak ditemukan: subkategori dengan ID %s tidak ditemukan", i+1, strings.TrimSpace(record[2]))
+				continue
+			}
+
+			// Verify subkategori belongs to the kategori
+			if subkategori.Kategori.IDKategori != kategori.IDKategori {
+				log.Printf("Baris %d: subkategori tidak sesuai dengan kategori", i+1)
+				continue
+			}
+
 			produk := domain.Produk{
 				NamaProduk:  strings.TrimSpace(record[0]),
-				Kategori:    domain.Kategori{NamaKategori: strings.TrimSpace(record[1])},
-				SubKategori: domain.SubKategori{NamaSubKategori: strings.TrimSpace(record[2])},
+				Kategori:    *kategori,
+				SubKategori: *subkategori,
 				KodeProduk:  strings.TrimSpace(record[3]),
 				HargaProduk: harga,
 				Stok:        stok,
@@ -660,10 +680,30 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				continue
 			}
 
+			// Get kategori by ID
+			kategori, err := d.KategoriUseCase.GetByID(c.Context(), strings.TrimSpace(row[1]))
+			if err != nil {
+				log.Printf("Baris %d: kategori tidak ditemukan: kategori dengan ID %s tidak ditemukan", i+1, strings.TrimSpace(row[1]))
+				continue
+			}
+
+			// Get subkategori by ID
+			subkategori, err := d.SubKategoriUseCase.GetByID(c.Context(), strings.TrimSpace(row[2]))
+			if err != nil {
+				log.Printf("Baris %d: subkategori tidak ditemukan: subkategori dengan ID %s tidak ditemukan", i+1, strings.TrimSpace(row[2]))
+				continue
+			}
+
+			// Verify subkategori belongs to the kategori
+			if subkategori.Kategori.IDKategori != kategori.IDKategori {
+				log.Printf("Baris %d: subkategori tidak sesuai dengan kategori", i+1)
+				continue
+			}
+
 			produk := domain.Produk{
 				NamaProduk:  strings.TrimSpace(row[0]),
-				Kategori:    domain.Kategori{NamaKategori: strings.TrimSpace(row[1])},
-				SubKategori: domain.SubKategori{NamaSubKategori: strings.TrimSpace(row[2])},
+				Kategori:    *kategori,
+				SubKategori: *subkategori,
 				KodeProduk:  strings.TrimSpace(row[3]),
 				HargaProduk: harga,
 				Stok:        stok,
