@@ -1,91 +1,12 @@
-// Memuat opsi kategori
-async function loadKategoriOptions() {
-  try {
-    // Mengambil data kategori dari API
-    const response = await fetch(`${BASE_URL}/kategori/getall`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
+// API Base URL
+const BASE_URL = "http://localhost:8080"; // Adjust this to match your backend URL
 
-    if (!response.ok) {
-      throw new Error("Gagal mengambil data kategori");
-    }
-
-    const data = await response.json();
-    const kategoriFilter = document.getElementById("kategoriFilter");
-
-    // Menambahkan opsi 'Semua Kategori'
-    kategoriFilter.innerHTML = '<option value="">Semua Kategori</option>';
-
-    // Menambahkan opsi untuk setiap kategori
-    if (data.success && data.data) {
-      data.data.forEach((kategori) => {
-        const option = document.createElement("option");
-        option.value = kategori.id_kategori;
-        option.textContent = kategori.nama_kategori;
-        kategoriFilter.appendChild(option);
-      });
-    }
-  } catch (error) {
-    console.error("Error memuat kategori:", error);
-    showError("Gagal memuat data kategori");
-  }
-}
-
-// Memuat opsi tahun
-function loadYearOptions() {
-  const yearFilter = document.getElementById("yearFilter");
-  const currentYear = new Date().getFullYear();
-
-  // Menambahkan opsi untuk 5 tahun terakhir
-  for (let year = currentYear; year >= currentYear - 4; year--) {
-    const option = document.createElement("option");
-    option.value = year;
-    option.textContent = year;
-    if (year === currentYear) {
-      option.selected = true;
-    }
-    yearFilter.appendChild(option);
-  }
-}
-
-// Inisialisasi dashboard
-async function initializeDashboard() {
-  try {
-    // Memeriksa autentikasi
-    if (!checkAuth()) {
-      return;
-    }
-
-    // Memuat opsi filter
-    loadYearOptions();
-    await loadKategoriOptions();
-
-    // Mengambil data dashboard
-    await fetchDashboardData();
-
-    // Menambahkan event listener untuk filter
-    document.getElementById("yearFilter").addEventListener("change", updateChart);
-    document.getElementById("monthFilter").addEventListener("change", updateChart);
-    document.getElementById("kategoriFilter").addEventListener("change", updateChart);
-    document.getElementById("chartTypeFilter").addEventListener("change", updateChart);
-
-  } catch (error) {
-    console.error("Error inisialisasi dashboard:", error);
-    showError("Gagal menginisialisasi dashboard");
-  }
-}
-
-// Konfigurasi URL API
-const BASE_URL = "http://localhost:8080"; // URL dasar untuk API
-
-// Mengambil token dari localStorage
+// Get token from localStorage
 function getToken() {
-  return localStorage.getItem('token'); // Mengambil token dari penyimpanan lokal
+  return localStorage.getItem('token');
 }
 
-// Menampilkan pesan error
+// Show error message
 function showError(message) {
   const errorDiv = document.createElement('div');
   errorDiv.className = 'alert alert-danger alert-dismissible fade show';
@@ -98,49 +19,49 @@ function showError(message) {
   `;
   document.querySelector('.container-fluid').insertBefore(errorDiv, document.querySelector('.container-fluid').firstChild);
   
-  // Otomatis menghilangkan pesan setelah 5 detik
+  // Auto dismiss after 5 seconds
   setTimeout(() => {
     errorDiv.remove();
   }, 5000);
 }
 
-// Menangani respons dari API
+// Handle API Response
 async function handleResponse(response) {
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
     throw new Error(
       errorData?.message ||
         errorData?.error ||
-        `Error HTTP! status: ${response.status}`
+        `HTTP error! status: ${response.status}`
     );
   }
   const data = await response.json();
   return { success: true, data };
 }
 
-// API Autentikasi
+// Authentication API
 async function auth() {
-  console.log("Memulai inisialisasi halaman penjualan...");
+  console.log("Starting penjualan page initialization...");
 
   try {
-    // Menampilkan indikator loading
+    // Show loading indicator
     $(".loading").show();
 
-    // Memeriksa autentikasi
+    // Check authentication
     const token = localStorage.getItem("token");
     let userData = null;
     try {
       userData = JSON.parse(localStorage.getItem("userData"));
     } catch (error) {
       console.error("Error parsing userData:", error);
-      throw new Error("Data pengguna tidak valid");
+      throw new Error("Invalid user data");
     }
 
     if (!token || !userData) {
-      throw new Error("Data autentikasi tidak ditemukan");
+      throw new Error("Missing authentication data");
     }
 
-    // Mengatur nama pengguna jika autentikasi valid
+    // Set username if authentication is valid
     const displayName =
       userData.role === "owner"
         ? "OwnerSRC"
@@ -148,25 +69,25 @@ async function auth() {
     $("#username").text(displayName);
     $("#namaPenjual").val(displayName);
 
-    // Memuat data produk terlebih dahulu
+    // Load products first
     await loadProdukOptions();
 
-    // Inisialisasi DataTable
+    // Initialize DataTable
     await initializeDataTable();
     await setupEventHandlers();
 
-    console.log("Inisialisasi halaman berhasil");
+    console.log("Page initialization completed successfully");
   } catch (error) {
-    console.error("Error Inisialisasi:", error);
+    console.error("Initialization Error:", error);
     alert("Terjadi kesalahan saat memuat halaman: " + error.message);
     window.location.href = "../login.html";
   } finally {
-    // Menyembunyikan indikator loading
+    // Hide loading indicator
     $(".loading").hide();
   }
 }
 
-// Memeriksa status autentikasi
+// Check authentication
 function checkAuth() {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
@@ -178,7 +99,7 @@ function checkAuth() {
   return true;
 }
 
-// Format angka ke format Rupiah Indonesia
+// Format number to Indonesian Rupiah
 function formatRupiah(number) {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -188,10 +109,10 @@ function formatRupiah(number) {
   }).format(number);
 }
 
-// Mengambil data dashboard
+// Fungsi untuk mengambil data dashboard
 async function fetchDashboardData() {
   try {
-    // Mengambil data dashboard
+    // Get dashboard data
     const response = await fetch(`${BASE_URL}/dashboard/getdata`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -203,30 +124,30 @@ async function fetchDashboardData() {
     }
 
     const dashboardResponse = await response.json();
-    console.log("Respons Dashboard:", dashboardResponse);
+    console.log("Dashboard Response:", dashboardResponse); // Debug
 
     if (dashboardResponse.success && dashboardResponse.data) {
       const data = dashboardResponse.data;
 
-      // Memperbarui total penjualan
+      // Update total penjualan
       const salesElement = document.getElementById("totalSales");
       if (salesElement && data.total_sales !== undefined) {
         salesElement.textContent = formatRupiah(data.total_sales);
       }
 
-      // Memperbarui total produk
+      // Update total produk
       const productCountElement = document.getElementById("totalProducts");
       if (productCountElement && data.total_products !== undefined) {
         productCountElement.textContent = data.total_products.toString();
       }
 
-      // Memperbarui total produk terjual
+      // Update total produk terjual
       const soldProductsElement = document.getElementById("totalProductsSales");
       if (soldProductsElement && data.total_sold !== undefined) {
         soldProductsElement.textContent = data.total_sold.toString();
       }
 
-      // Mengambil data stok produk terendah
+      // Get stock data for lowest stock products
       const stockResponse = await fetch(`${BASE_URL}/dashboard/stock`, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -236,14 +157,14 @@ async function fetchDashboardData() {
       if (stockResponse.ok) {
         const stockData = await stockResponse.json();
         if (stockData.success && stockData.data && stockData.data.length > 0) {
-          // Memperbarui tampilan stok
+          // Update sisa stok with the lowest stock value
           const stockElement = document.getElementById("stok_barang");
           const stockDetailElement = document.getElementById("stok_detail");
           
           if (stockElement && stockDetailElement) {
             const lowestStock = Math.min(...stockData.data.map(item => item.stock));
 
-            // Membuat item carousel untuk produk dengan stok rendah
+            // Create carousel items for low stock products
             let carouselHtml = `
               <div id="lowStockCarousel" class="carousel slide" data-ride="carousel">
                 <div class="carousel-inner">
@@ -270,7 +191,7 @@ async function fetchDashboardData() {
 
             stockDetailElement.innerHTML = carouselHtml;
 
-            // Inisialisasi carousel dengan auto-slide dan transisi halus
+            // Initialize carousel with auto-slide and smooth transition
             $('#lowStockCarousel').carousel({
               interval: 3000,
               ride: 'carousel',
@@ -278,10 +199,10 @@ async function fetchDashboardData() {
               pause: 'hover'
             });
 
-            // Memperbarui angka stok
+            // Update the first stock number
             stockElement.textContent = stockData.data[0].stock.toString();
 
-            // Memperbarui angka stok saat carousel bergeser
+            // Update stock number when carousel slides
             $('#lowStockCarousel').on('slide.bs.carousel', function (e) {
               const nextStock = stockData.data[e.to].stock;
               stockElement.textContent = nextStock.toString();
@@ -289,16 +210,11 @@ async function fetchDashboardData() {
           }
         }
       }
-
-      // Memperbarui grafik penjualan
-      await updateChart();
-      
-      // Memperbarui tabel produk terlaris
-      await updateBestSellingProductsTable();
+    } else {
+      throw new Error(dashboardResponse.error || "Data tidak valid");
     }
   } catch (error) {
-    console.error("Error mengambil data dashboard:", error);
-    showError("Gagal memuat data dashboard");
+    console.error("Error fetching dashboard data:", error);
   }
 }
 
@@ -498,7 +414,6 @@ async function updateChart() {
 // Fungsi untuk memuat opsi kategori
 async function loadKategoriOptions() {
   try {
-    // Mengambil data kategori dari API
     const response = await fetch(`${BASE_URL}/kategori/getall`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -510,39 +425,40 @@ async function loadKategoriOptions() {
     }
 
     const data = await response.json();
+    console.log("Kategori Response:", data); // Debug
+
     const kategoriFilter = document.getElementById("kategoriFilter");
+    kategoriFilter.innerHTML = '<option value="">Semua Kategori</option>'; // Reset options
 
-    // Menambahkan opsi 'Semua Kategori'
-    kategoriFilter.innerHTML = '<option value="">Semua Kategori</option>';
-
-    // Menambahkan opsi untuk setiap kategori
-    if (data.success && data.data) {
+    if (data.success && Array.isArray(data.data)) {
       data.data.forEach((kategori) => {
         const option = document.createElement("option");
         option.value = kategori.id_kategori;
         option.textContent = kategori.nama_kategori;
         kategoriFilter.appendChild(option);
       });
+    } else {
+      throw new Error("Data kategori tidak valid");
     }
   } catch (error) {
-    console.error("Error memuat kategori:", error);
-    showError("Gagal memuat data kategori");
+    console.error("Error loading kategori options:", error);
+    showError("Gagal memuat data kategori: " + error.message);
   }
 }
 
 // Fungsi untuk memuat opsi tahun
 function loadYearOptions() {
   const yearFilter = document.getElementById("yearFilter");
-  const currentYear = new Date().getFullYear();
+  yearFilter.innerHTML = ''; // Reset options
 
-  // Menambahkan opsi untuk 5 tahun terakhir
+  // Get current year
+  const currentYear = new Date().getFullYear();
+  
+  // Add last 5 years as options
   for (let year = currentYear; year >= currentYear - 4; year--) {
     const option = document.createElement("option");
     option.value = year;
     option.textContent = year;
-    if (year === currentYear) {
-      option.selected = true;
-    }
     yearFilter.appendChild(option);
   }
 }
@@ -550,72 +466,92 @@ function loadYearOptions() {
 // Fungsi untuk menginisialisasi dashboard
 async function initializeDashboard() {
   try {
-    // Memeriksa autentikasi
-    if (!checkAuth()) {
-      return;
-    }
+    // Inisialisasi grafik
+    initializeCharts();
 
-    // Memuat opsi filter
+    // Muat opsi filter
     loadYearOptions();
     await loadKategoriOptions();
 
-    // Mengambil data dashboard
-    await fetchDashboardData();
+    // Tambahkan event listener untuk filter
+    document
+      .getElementById("chartType")
+      .addEventListener("change", updateChart);
+    document
+      .getElementById("yearFilter")
+      .addEventListener("change", updateChart);
+    document
+      .getElementById("monthFilter")
+      .addEventListener("change", updateChart);
+    document
+      .getElementById("kategoriFilter")
+      .addEventListener("change", updateChart);
 
-    // Menambahkan event listener untuk filter
-    document.getElementById("yearFilter").addEventListener("change", updateChart);
-    document.getElementById("monthFilter").addEventListener("change", updateChart);
-    document.getElementById("kategoriFilter").addEventListener("change", updateChart);
-    document.getElementById("chartTypeFilter").addEventListener("change", updateChart);
-
+    // Update grafik pertama kali
+    await updateChart();
   } catch (error) {
-    console.error("Error inisialisasi dashboard:", error);
-    showError("Gagal menginisialisasi dashboard");
+    console.error("Error initializing dashboard:", error);
   }
 }
 
 // Fungsi untuk memperbarui tabel produk terlaris
 async function updateBestSellingProductsTable() {
   try {
-    // Mengambil filter yang dipilih
-    const selectedYear = document.getElementById("yearFilter").value;
-    const selectedMonth = document.getElementById("monthFilter").value;
-    const selectedKategori = document.getElementById("kategoriFilter").value;
+    if (!checkAuth()) return;
 
-    // Mengambil data produk terlaris
-    const response = await fetch(
-      `${BASE_URL}/dashboard/sales?year=${selectedYear}&month=${selectedMonth}&kategori=${selectedKategori}&limit=5`,
-      {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }
-    );
+    const response = await fetch(`${BASE_URL}/dashboard/sales?limit=10`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error("Gagal mengambil data produk terlaris");
     }
 
-    const data = await response.json();
+    const jsonResponse = await response.json();
+    console.log("Best Selling Products Response:", jsonResponse); // Debug
 
-    // Memperbarui tabel
-    const tableBody = document.getElementById("bestSellingTableBody");
+    if (!jsonResponse.success || !jsonResponse.data) {
+      throw new Error(jsonResponse.error || "Data tidak valid");
+    }
+
+    const tableBody = document.getElementById("produkTerlarisBody");
+    if (!tableBody) {
+      throw new Error("Tabel produk terlaris tidak ditemukan");
+    }
+
     tableBody.innerHTML = "";
 
-    if (data.success && data.data) {
-      data.data.forEach((product, index) => {
+    if (Array.isArray(jsonResponse.data) && jsonResponse.data.length > 0) {
+      jsonResponse.data.forEach((product, index) => {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${index + 1}</td>
-          <td>${product.nama_produk}</td>
-          <td>${product.jumlah_terjual}</td>
+          <td>${product.nama_produk || "Nama Tidak Tersedia"}</td>
+          <td>${product.jumlah_terjual || 0}</td>
         `;
         tableBody.appendChild(row);
       });
+    } else {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="3" class="text-center">Tidak ada data produk terlaris</td>
+        </tr>
+      `;
     }
   } catch (error) {
-    console.error("Error memperbarui tabel:", error);
-    showError("Gagal memuat data produk terlaris");
+    console.error("Error updating best selling products table:", error);
+    const tableBody = document.getElementById("produkTerlarisBody");
+    if (tableBody) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="3" class="text-center text-danger">
+            Gagal memuat data: ${error.message}
+          </td>
+        </tr>
+      `;
+    }
   }
 }
 
