@@ -120,6 +120,9 @@ func startHTTPServer() {
 	// Laporan Use Case route
 	delivery.NewHttpDeliveryLaporan(app, penjualanUseCase, detailPenjualanUC, produkUseCase, kategoriUseCase, subKategoriUseCase)
 
+	// Dashboard Use Case route
+	delivery.NewHttpDeliveryDashboard(app, penjualanUseCase, detailPenjualanUC, produkUseCase, kategoriUseCase, subKategoriUseCase)
+
 	// Signal handling for graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
