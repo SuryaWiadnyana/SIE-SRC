@@ -1,101 +1,43 @@
-nama_produk,kategori,subkategori,kode_produk,harga_produk,stok_barang,tanggal_kadaluarsa
-Indomie Goreng Special,Makanan,Mie Instan,8997035563414,2700,40,2025-04-25
-Indomie Soto,Makanan,Mie Instan,8997035563415,2700,35,2025-04-25
-Mie Sedaap Goreng,Makanan,Mie Instan,8997035563416,2800,45,2025-05-15
-Pop Mie Ayam,Makanan,Mie Instan,8997035563417,5500,30,2025-05-20
-Chitato Sapi Panggang,Makanan,Makanan Ringan,8996001600146,10000,50,2025-06-10
-Lays Classic,Makanan,Makanan Ringan,8996001600147,9500,40,2025-06-15
-Qtela Singkong,Makanan,Makanan Ringan,8996001600148,8500,45,2025-06-20
-Taro Net,Makanan,Makanan Ringan,8996001600149,8000,35,2025-06-25
-Bolu Coklat,Makanan,Kue,8996001600150,13000,30,2025-04-15
-Roti Tawar,Makanan,Kue,8996001600151,12000,25,2025-04-10
-Oreo Original,Makanan,Biskuit,8996001600152,7500,60,2025-07-15
-Roma Malkist,Makanan,Biskuit,8996001600153,8500,55,2025-07-20
-Silverqueen,Makanan,Coklat & Permen,8996001600154,12500,40,2025-08-10
-Cadbury Dairy Milk,Makanan,Coklat & Permen,8996001600155,15000,35,2025-08-15
-Kellogg's Corn Flakes,Makanan,Sereal,8996001600156,25000,20,2025-09-10
-Energen Vanilla,Makanan,Sereal,8996001600157,12000,45,2025-09-15
-Royco Ayam,Makanan,Bumbu Dapur,8996001600158,500,100,2025-10-20
-Masako Sapi,Makanan,Bumbu Dapur,8996001600159,500,100,2025-10-25
-Pocari Sweat,Minuman,Minuman Botol,8997035563418,5000,30,2025-07-18
-Aqua 600ml,Minuman,Air Mineral,8997035563419,3000,100,2025-12-31
-Coca Cola Kaleng,Minuman,Minuman Kaleng,8997035563420,5500,50,2025-08-15
-Sprite Kaleng,Minuman,Minuman Kaleng,8997035563421,5500,45,2025-08-20
-Pop Ice Coklat,Minuman,Minuman Serbuk,8997035563422,2500,80,2025-09-10
-Nutrisari Jeruk,Minuman,Minuman Serbuk,8997035563423,2000,85,2025-09-15
-Ultra Milk Full Cream,Minuman,Susu,8997035563424,7500,40,2025-06-10
-Indomilk Coklat,Minuman,Susu,8997035563425,6500,45,2025-06-15
-Kapal Api Special,Minuman,Kopi & Teh,8997035563426,1500,100,2025-10-20
-Teh Sari Wangi,Minuman,Kopi & Teh,8997035563427,8000,70,2025-10-25
-Lifebuoy Merah,Perlengkapan Mandi,Sabun Mandi,8995555123457,3500,60,2025-08-10
-Dove White,Perlengkapan Mandi,Sabun Mandi,8995555123458,8500,45,2025-08-15
-Head & Shoulders,Perlengkapan Mandi,Sampo,8995555123459,28000,30,2025-09-10
-Pantene Anti Dandruff,Perlengkapan Mandi,Sampo,8995555123460,25000,35,2025-09-15
-Pepsodent White,Perlengkapan Mandi,Pasta Gigi,8995555123461,15000,50,2025-10-20
-Close Up Green,Perlengkapan Mandi,Pasta Gigi,8995555123462,12000,45,2025-10-25
-Formula Sikat Gigi,Perlengkapan Mandi,Sikat Gigi,8995555123463,7500,70,2025-11-10
-Oral-B Classic,Perlengkapan Mandi,Sikat Gigi,8995555123464,12000,60,2025-11-15
-Rexona Men,Perlengkapan Mandi,Deodoran,8995555123465,18000,40,2025-12-10
-Dove Deodorant,Perlengkapan Mandi,Deodoran,8995555123466,20000,35,2025-12-15
-Garnier Face Wash,Perlengkapan Mandi,Perawatan Wajah,8995555123467,25000,30,2026-01-10
-Pond's White Beauty,Perlengkapan Mandi,Perawatan Wajah,8995555123468,30000,25,2026-01-15
-Pilot G2,Alat Tulis,Pulpen,8995179002206,8500,100,2026-02-10
-Snowman Board Marker,Alat Tulis,Pulpen,8995179002207,7500,90,2026-02-15
-Faber Castell 2B,Alat Tulis,Pensil,8995179002208,3500,150,2026-03-10
-Staedtler 2H,Alat Tulis,Pensil,8995179002209,4500,120,2026-03-15
-Sinar Dunia,Alat Tulis,Buku Tulis,8995179002210,4000,200,2026-04-10
-Kiky Campus,Alat Tulis,Buku Tulis,8995179002211,5000,180,2026-04-15
-Steadtler Eraser,Alat Tulis,Penghapus,8995179002212,2500,100,2026-05-10
-Faber Castell Eraser,Alat Tulis,Penghapus,8995179002213,3000,90,2026-05-15
-HVS A4 Sidu,Alat Tulis,Kertas,8995179002214,45000,50,2026-06-10
-Kertas F4 Paper One,Alat Tulis,Kertas,8995179002215,50000,45,2026-06-15
-Crayon Titi 12,Alat Tulis,Alat Gambar,8995179002216,15000,40,2026-07-10
-Pensil Warna Faber,Alat Tulis,Alat Gambar,8995179002217,25000,35,2026-07-15
-ABC Battery AA,Alat Elektronik,Baterai,8997123456790,12000,80,2026-08-10
-Energizer AAA,Alat Elektronik,Baterai,8997123456791,15000,70,2026-08-15
-Stop Kontak T,Alat Elektronik,Colokan,8997123456792,20000,40,2026-09-10
-Stop Kontak USB,Alat Elektronik,Colokan,8997123456793,35000,30,2026-09-15
-Kabel Roll 3m,Alat Elektronik,Kabel,8997123456794,45000,25,2026-10-10
-Kabel USB Type C,Alat Elektronik,Kabel,8997123456795,25000,50,2026-10-15
-Philips LED 5W,Alat Elektronik,Lampu,8997123456796,25000,60,2026-11-10
-Hannochs LED 7W,Alat Elektronik,Lampu,8997123456797,30000,50,2026-11-15
-Charger Samsung,Alat Elektronik,Charger,8997123456798,75000,30,2026-12-10
-Charger Oppo,Alat Elektronik,Charger,8997123456799,65000,35,2026-12-15
-Travel Adapter,Alat Elektronik,Adaptor,8997123456800,45000,40,2027-01-10
-Universal Adapter,Alat Elektronik,Adaptor,8997123456801,55000,35,2027-01-15
-Bimoli 1L,Bumbu Masakan,Minyak Goreng,8995555123469,20000,40,2025-08-20
-Tropical 2L,Bumbu Masakan,Minyak Goreng,8995555123470,38000,35,2025-08-25
-ABC Kecap Manis,Bumbu Masakan,Saus & Kecap,8995555123471,12000,60,2025-09-20
-Indofood Sambal,Bumbu Masakan,Saus & Kecap,8995555123472,8500,70,2025-09-25
-Sajiku Tepung Bumbu,Bumbu Masakan,Bumbu Instan,8995555123473,5500,80,2025-10-20
-Indofood Racik,Bumbu Masakan,Bumbu Instan,8995555123474,4500,90,2025-10-25
-Gulaku 1kg,Bumbu Masakan,Gula & Garam,8995555123475,15000,100,2025-11-20
-Garam Dapur Cap Kapal,Bumbu Masakan,Gula & Garam,8995555123476,5000,120,2025-11-25
-Segitiga Biru 1kg,Bumbu Masakan,Tepung,8995555123477,12000,70,2025-12-20
-Rose Brand Tepung,Bumbu Masakan,Tepung,8995555123478,11000,75,2025-12-25
-Lada Bubuk,Bumbu Masakan,Bumbu Dapur,8995555123479,5000,100,2026-01-20
-Ketumbar Bubuk,Bumbu Masakan,Bumbu Dapur,8995555123480,4500,100,2026-01-25
-Champ Nugget,Makanan Beku,Nugget,8995179002218,25000,40,2025-07-15
-Fiesta Nugget,Makanan Beku,Nugget,8995179002219,23000,45,2025-07-20
-Champ Bakso,Makanan Beku,Bakso,8995179002220,28000,35,2025-08-15
-Fiesta Bakso,Makanan Beku,Bakso,8995179002221,26000,40,2025-08-20
-Kimbo Sosis,Makanan Beku,Sosis,8995179002222,18000,50,2025-09-15
-Champ Sosis,Makanan Beku,Sosis,8995179002223,20000,45,2025-09-20
-Golden Farm Kentang,Makanan Beku,Kentang Goreng,8995179002224,35000,30,2025-10-15
-Fiesta Kentang,Makanan Beku,Kentang Goreng,8995179002225,32000,35,2025-10-20
-Daging Sapi Slice,Makanan Beku,Daging Beku,8995179002226,85000,20,2025-11-15
-Ayam Potong Beku,Makanan Beku,Daging Beku,8995179002227,45000,25,2025-11-20
-Sayur Beku Mix,Makanan Beku,Sayur Beku,8995179002228,15000,40,2025-12-15
-Edamame Beku,Makanan Beku,Sayur Beku,8995179002229,18000,35,2025-12-20
-Sapu Ijuk,Peralatan Rumah,Alat Kebersihan,8995179002230,25000,30,2026-12-31
-Pel Lantai Set,Peralatan Rumah,Alat Kebersihan,8995179002231,45000,25,2026-12-31
-Wajan Teflon,Peralatan Rumah,Alat Dapur,8995179002232,85000,20,2026-12-31
-Panci Stainless,Peralatan Rumah,Alat Dapur,8995179002233,120000,15,2026-12-31
-Tupperware Set,Peralatan Rumah,Plastik & Wadah,8995179002234,150000,20,2026-12-31
-Lion Star Container,Peralatan Rumah,Plastik & Wadah,8995179002235,45000,30,2026-12-31
-Tali Rafia,Peralatan Rumah,Tali & Pengikat,8995179002236,8000,100,2026-12-31
-Karet Gelang,Peralatan Rumah,Tali & Pengikat,8995179002237,5000,150,2026-12-31
-Piring Melamin,Peralatan Rumah,Peralatan Makan,8995179002238,12000,60,2026-12-31
-Sendok Garpu Set,Peralatan Rumah,Peralatan Makan,8995179002239,25000,40,2026-12-31
-Lap Microfiber,Peralatan Rumah,Lap & Serbet,8995179002240,15000,50,2026-12-31
-Serbet Makan,Peralatan Rumah,Lap & Serbet,8995179002241,8000,80,2026-12-31
+nama_produk,id_kategori,id_subkategori,kode_produk,harga_produk,stok_barang,tanggal_kadaluarsa
+Indomie Goreng Special,KT001,SK006,8997035563414,2700,40,2025-04-25
+Indomie Soto,KT001,SK006,8997035563415,2700,35,2025-04-25
+Mie Sedaap Goreng,KT001,SK006,8997035563416,2800,45,2025-05-15
+Pop Mie Ayam,KT001,SK006,8997035563417,5500,30,2025-05-20
+Chitato Sapi Panggang,KT001,SK025,8996001600146,10000,50,2025-06-10
+Lays Classic,KT001,SK025,8996001600147,9500,40,2025-06-15
+Qtela Singkong,KT001,SK025,8996001600148,8500,45,2025-06-20
+Taro Net,KT001,SK025,8996001600149,8000,35,2025-06-25
+Bolu Coklat,KT001,SK002,8996001600150,13000,30,2025-04-15
+Roti Tawar,KT001,SK002,8996001600151,12000,25,2025-04-10
+Oreo Original,KT001,SK004,8996001600152,7500,60,2025-07-15
+Roma Malkist,KT001,SK004,8996001600153,8500,55,2025-07-20
+Silverqueen,KT001,SK005,8996001600154,12500,40,2025-08-10
+Cadbury Dairy Milk,KT001,SK005,8996001600155,15000,35,2025-08-15
+Kellogg's Corn Flakes,KT001,SK001,8996001600156,25000,20,2025-09-10
+Energen Vanilla,KT001,SK001,8996001600157,12000,45,2025-09-15
+Royco Ayam,KT007,SK018,8996001600158,500,100,2025-10-20
+Masako Sapi,KT007,SK018,8996001600159,500,100,2025-10-25
+Pocari Sweat,KT002,SK013,8997035563418,5000,30,2025-07-18
+Aqua 600ml,KT002,SK013,8997035563419,3000,100,2025-12-31
+Coca Cola Kaleng,KT002,SK023,8997035563420,5500,50,2025-08-15
+Sprite Kaleng,KT002,SK023,8997035563421,5500,45,2025-08-20
+Nutrisari Jeruk,KT002,SK012,8997035563423,2000,85,2025-09-15
+Ultra Milk Full Cream,KT002,SK010,8997035563424,7500,40,2025-06-10
+Indomilk Coklat,KT002,SK010,8997035563425,6500,45,2025-06-15
+Kapal Api Special,KT002,SK011,8997035563426,1500,100,2025-10-20
+Teh Sari Wangi,KT002,SK012,8997035563427,8000,70,2025-10-25
+Lifebuoy Merah,KT006,SK020,8995555123457,3500,60,2025-08-10
+Dove White,KT006,SK020,8995555123458,8500,45,2025-08-15
+Head & Shoulders,KT006,SK021,8995555123459,28000,30,2025-09-10
+Pantene Anti Dandruff,KT006,SK021,8995555123460,25000,35,2025-09-15
+Pepsodent White,KT006,SK022,8995555123461,15000,50,2025-10-20
+Close Up Green,KT006,SK022,8995555123462,12000,45,2025-10-25
+Garnier Face Wash,KT006,SK019,8995555123467,25000,30,2026-01-10
+Pond's White Beauty,KT006,SK019,8995555123468,30000,25,2026-01-15
+Bimoli 1L,KT007,SK016,8995555123469,20000,40,2025-08-20
+Tropical 2L,KT007,SK016,8995555123470,38000,35,2025-08-25
+Gulaku 1kg,KT007,SK017,8995555123475,15000,100,2025-11-20
+Champ Bakso,KT003,SK014,8995179002220,28000,35,2025-08-15
+Fiesta Bakso,KT003,SK014,8995179002221,26000,40,2025-08-20
+Kimbo Sosis,KT003,SK015,8995179002222,18000,50,2025-09-15
+Champ Sosis,KT003,SK015,8995179002223,20000,45,2025-09-20

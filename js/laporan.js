@@ -613,16 +613,16 @@ async function generateReport() {
                     formatDate(item.tanggal_penjualan),
                     item.kode_produk || '-',
                     item.nama_produk || '-',
-                    item.kategori?.nama_kategori || kategoriName,
-                    item.subkategori?.nama_subkategori || subkategoriName,
+                    item.kategori || '-',
+                    item.subkategori || '-',
                     item.jumlah_produk?.toString() || '0',
                     formatCurrency(item.total || 0)
                 ]
                 : [
                     item.kode_produk || '-',
                     item.nama_produk || '-',
-                    item.kategori?.nama_kategori || kategoriName,
-                    item.subkategori?.nama_subkategori || subkategoriName,
+                    item.kategori || '-',
+                    item.subkategori || '-',
                     item.stok?.toString() || '0',
                     formatCurrency(item.harga || 0)
                 ]
