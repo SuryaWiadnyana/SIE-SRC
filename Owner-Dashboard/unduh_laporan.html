@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="SIE-SRC Product Management">
     <meta name="author" content="">
 
-    <title>SIE-SRC | Unduh Laporan</title>
+    <title>SIE-SRC | Unduh Penjualan</title>
 
     <!-- Custom fonts for this template-->
     <link href="../vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -48,11 +48,19 @@
                 </a>
             </li>
 
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Menu
+            </div>
+
             <!-- Nav Item - Unduh Laporan -->
             <li class="nav-item active">
                 <a class="nav-link" href="unduh_laporan.html">
                     <i class="fas fa-fw fa-download"></i>
-                    <span>Unduh Laporan</span>
+                    <span>Unduh Penjualan</span>
                 </a>
             </li>
 
@@ -103,7 +111,7 @@
                 <div class="container-fluid">
                     <!-- Page Heading -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Cetak Laporan</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Unduh Penjualan</h1>
                     </div>
 
                     <!-- Filter Laporan -->
@@ -124,9 +132,10 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
+                                        <!-- Category Filter -->
                                         <div class="form-group">
-                                            <label for="kategoriFilter">Kategori</label>
-                                            <select class="form-control" id="kategoriFilter">
+                                            <label for="kategoriFilter" class="form-label">Kategori</label>
+                                            <select class="form-control" id="kategoriFilter" onchange="updateSubkategori()">
                                                 <option value="">Semua Kategori</option>
                                             </select>
                                         </div>
@@ -135,7 +144,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="subkategoriFilter">Subkategori</label>
+                                            <label for="subkategoriFilter" class="form-label">Subkategori</label>
                                             <select class="form-control" id="subkategoriFilter">
                                                 <option value="">Semua Subkategori</option>
                                             </select>
@@ -143,7 +152,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="sortOption">Urutkan Berdasarkan</label>
+                                            <label for="sortOption" class="form-label">Urutkan Berdasarkan</label>
                                             <select class="form-control" id="sortOption">
                                                 <option value="date_desc">Tanggal (Terbaru)</option>
                                                 <option value="date_asc">Tanggal (Terlama)</option>
@@ -174,6 +183,20 @@
                 </div>
                 <!-- /.container-fluid -->
 
+                <!-- Sales Chart Card -->
+                <div class="row mb-4" id="salesChartCard" style="display: none;">
+                    <div class="col-md-12">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <h5 class="card-title">Grafik Penjualan</h5>
+                                <div style="height: 400px;">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div
+
                 <!-- Footer -->
                 <footer class="sticky-footer bg-white">
                     <div class="container my-auto">
@@ -186,29 +209,33 @@
             </div>
             <!-- End of Main Content -->
 
-            <!-- Logout Modal -->
-            <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Siap untuk Keluar?</h5>
-                            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">Apakah Anda yakin ingin keluar?</div>
-                        <div class="modal-footer">
-                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                            <a class="btn btn-primary" href="../login.html" id="logoutButton">Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- End of Content Wrapper -->
+            <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Siap untuk Keluar?
+        </h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin keluar?
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">
+          Batal
+        </button>
+        <button class="btn btn-primary" type="button" id="logoutButton">
+          Keluar
+        </button>
+      </div>
     </div>
-    <!-- End of Page Wrapper -->
+  </div>
+</div>
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
@@ -221,6 +248,9 @@
 
     <!-- Core plugin JavaScript-->
     <script src="../vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Custom scripts for all pages-->
     <script src="../js/sb-admin-2.min.js"></script>
