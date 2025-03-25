@@ -127,8 +127,17 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 	limitInt, _ := strconv.Atoi(limit)
 
 	// Membuat map untuk mengumpulkan data penjualan
-	salesData := make(map[string]float64)
+	monthlySales := make(map[int]fiber.Map)
 	productSales := make(map[string]int)
+
+	// Inisialisasi data bulanan
+	for i := 1; i <= 12; i++ {
+		monthlySales[i] = fiber.Map{
+			"month":         i,
+			"total":        0.0,
+			"jumlah_produk": 0,
+		}
+	}
 
 	// Memproses data penjualan
 	for _, sale := range penjualanList {
@@ -149,21 +158,22 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 			continue
 		}
 
+		monthData := monthlySales[saleMonth]
+		monthData["total"] = monthData["total"].(float64) + float64(sale.Total)
+		monthData["jumlah_produk"] = monthData["jumlah_produk"].(int) + sale.JumlahProduk
+		monthlySales[saleMonth] = monthData
+
 		for _, detail := range details {
 			for _, product := range detail.Produk {
 				// Cek kategori jika filter kategori aktif
 				if kategoriID != "" && product.Kategori.IDKategori != kategoriID {
 					continue
 				}
-
-				dateKey := sale.Tanggal_Penjualan.Format("2006-01-02")
-				salesData[dateKey] += float64(detail.TotalPendapatan)
 				productSales[product.NamaProduk]++
 			}
 		}
 	}
 
-	// Mengubah data penjualan ke array
 	var result []fiber.Map
 	if limitInt > 0 {
 		// Mengembalikan produk terlaris
@@ -194,18 +204,15 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 			})
 		}
 	} else {
-		// Mengembalikan data penjualan harian
-		for date, value := range salesData {
+		// Mengembalikan data penjualan bulanan
+		for month := 1; month <= 12; month++ {
+			data := monthlySales[month]
 			result = append(result, fiber.Map{
-				"date":  date,
-				"value": value,
+				"bulan":         month,
+				"total":         data["total"],
+				"jumlah_produk": data["jumlah_produk"],
 			})
 		}
-
-		// Mengurutkan berdasarkan tanggal
-		sort.Slice(result, func(i, j int) bool {
-			return result[i]["date"].(string) < result[j]["date"].(string)
-		})
 	}
 
 	return c.JSON(fiber.Map{
@@ -292,11 +299,11 @@ func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 	})
 }
 
-// GetStockByCategory mengambil data stok per kategori
+// GetStockByCategory mengambil data 5 produk dengan stok terendah
 func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 	// Mengambil parameter filter dari query
 	kategoriID := c.Query("kategori", "")
-	limit := c.Query("limit", "5") // Default limit 5 produk
+	limit := 5 // Default 5 produk terendah
 
 	// Mengambil semua produk
 	productList, err := d.ProdukUC.GetAllProduk(context.Background())
@@ -320,20 +327,17 @@ func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 		return filteredProducts[i].Stok < filteredProducts[j].Stok
 	})
 
-	// Mengambil limit
-	limitInt, _ := strconv.Atoi(limit)
-	if limitInt > len(filteredProducts) {
-		limitInt = len(filteredProducts)
+	// Mengambil hanya 5 produk dengan stok terendah
+	if len(filteredProducts) > limit {
+		filteredProducts = filteredProducts[:limit]
 	}
-
-	// Mengambil hanya produk yang dibatasi
-	filteredProducts = filteredProducts[:limitInt]
 
 	// Mengubah ke format result
 	var result []fiber.Map
 	for _, product := range filteredProducts {
 		result = append(result, fiber.Map{
 			"category":     product.Kategori.NamaKategori,
+			"subcategory": product.SubKategori.NamaSubKategori,
 			"product_name": product.NamaProduk,
 			"stock":        product.Stok,
 		})
