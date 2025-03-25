@@ -1458,3 +1458,67 @@ const dashboard = {
     }
   },
 };
+
+// Function to update the stock warning card
+async function updateStockWarning() {
+  const stockWarningCard = document.querySelector('#stockWarningCard');
+  if (!stockWarningCard) return;
+
+  const contentElement = stockWarningCard.querySelector('.h5');
+  if (!contentElement) return;
+
+  try {
+    const response = await fetch(`${BASE_URL}/dashboard/lowest-stock`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Lowest stock data:", data);
+
+    if (!data.success || !data.data || data.data.length === 0) {
+      contentElement.innerHTML = `
+        <div class="text-xs font-weight-bold text-danger mb-1">
+          Tidak ada data stok
+        </div>
+        <div class="h5 mb-0 font-weight-bold text-gray-800">
+          0
+        </div>
+      `;
+      return;
+    }
+
+    // Get the product with lowest stock
+    const product = data.data[0];
+    contentElement.innerHTML = `
+      <div class="text-xs font-weight-bold text-danger mb-1">
+        ${product.product_name} (${product.category})
+      </div>
+      <div class="h5 mb-0 font-weight-bold text-gray-800">
+        Stok: ${product.stock}
+      </div>
+    `;
+
+  } catch (error) {
+    console.error('Error updating stock warning:', error);
+    contentElement.innerHTML = `
+      <div class="text-xs font-weight-bold text-danger mb-1">
+        Error memuat data
+      </div>
+      <div class="h5 mb-0 font-weight-bold text-gray-800">
+        -
+      </div>
+    `;
+  }
+}
+
+// Call updateStockWarning when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  updateStockWarning();
+});
