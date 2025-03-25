@@ -25,6 +25,38 @@ function showError(message) {
   }, 5000);
 }
 
+// Show alert message
+function showAlert(type, message) {
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+  alertDiv.role = 'alert';
+  alertDiv.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  
+  // Find alert container
+  const alertContainer = document.getElementById('alert-container');
+  if (!alertContainer) {
+    // Create alert container if it doesn't exist
+    const container = document.createElement('div');
+    container.id = 'alert-container';
+    container.style.position = 'fixed';
+    container.style.top = '20px';
+    container.style.right = '20px';
+    container.style.zIndex = '1050';
+    document.body.appendChild(container);
+    container.appendChild(alertDiv);
+  } else {
+    alertContainer.appendChild(alertDiv);
+  }
+
+  // Auto dismiss after 5 seconds
+  setTimeout(() => {
+    alertDiv.remove();
+  }, 5000);
+}
+
 // Handle API Response
 async function handleResponse(response) {
   if (!response.ok) {
@@ -218,50 +250,455 @@ async function fetchDashboardData() {
   }
 }
 
+// Fungsi untuk memproses data penjualan
+function processSalesData(data) {
+  // Group data by month and calculate totals
+  const monthlyData = {};
+  
+  data.forEach(sale => {
+    const date = new Date(sale.tanggal_penjualan);
+    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = {
+        units: 0,
+        total: 0
+      };
+    }
+    
+    monthlyData[monthKey].units += parseInt(sale.jumlah_produk) || 0;
+    monthlyData[monthKey].total += parseFloat(sale.total) || 0;
+  });
+
+  // Sort months and convert to Chart.js format
+  const sortedMonths = Object.keys(monthlyData).sort();
+  
+  return {
+    labels: sortedMonths.map(month => {
+      const [year, monthNum] = month.split('-');
+      const date = new Date(year, parseInt(monthNum) - 1);
+      return date.toLocaleString('id-ID', { month: 'short', year: 'numeric' });
+    }),
+    units: sortedMonths.map(month => monthlyData[month].units),
+    totals: sortedMonths.map(month => monthlyData[month].total)
+  };
+}
+
+// Konfigurasi Chart.js
+let mainChart = null;
+
+// Fungsi untuk menginisialisasi grafik
+async function initializeCharts() {
+  try {
+    console.log("Initializing chart...");
+    const canvas = document.getElementById('mainChart');
+    if (!canvas) {
+      throw new Error("Canvas element 'mainChart' not found");
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error("Could not get 2D context from canvas");
+    }
+    
+    // Destroy existing chart if it exists
+    if (mainChart) {
+      mainChart.destroy();
+    }
+
+    const config = {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Jumlah Produk',
+            data: [],
+            backgroundColor: 'rgba(78, 115, 223, 0.8)',
+            borderColor: 'rgba(78, 115, 223, 1)',
+            borderWidth: 1,
+            yAxisID: 'y-axis-quantity'
+          },
+          {
+            label: 'Total Penjualan (Rp)',
+            data: [],
+            type: 'line',
+            backgroundColor: 'rgba(231, 74, 59, 0.2)',
+            borderColor: 'rgba(231, 74, 59, 1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            yAxisID: 'y-axis-sales'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        scales: {
+          'y-axis-quantity': {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            grid: {
+              drawOnChartArea: true
+            },
+            ticks: {
+              beginAtZero: true,
+              precision: 0
+            },
+            title: {
+              display: true,
+              text: 'Jumlah Produk'
+            }
+          },
+          'y-axis-sales': {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            grid: {
+              drawOnChartArea: false
+            },
+            ticks: {
+              beginAtZero: true,
+              callback: function(value) {
+                return 'Rp ' + value.toLocaleString('id-ID');
+              }
+            },
+            title: {
+              display: true,
+              text: 'Total Penjualan'
+            }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Grafik Penjualan per Bulan',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 30
+            }
+          },
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              padding: 20
+            }
+          },
+          tooltip: {
+            enabled: true,
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.dataset.yAxisID === 'y-axis-sales') {
+                  label += 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                } else {
+                  label += context.parsed.y.toFixed(0);
+                }
+                return label;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    console.log("Creating new chart with config:", config);
+    mainChart = new Chart(ctx, config);
+    console.log("Chart created successfully");
+    return mainChart;
+  } catch (error) {
+    console.error("Error initializing chart:", error);
+    throw error;
+  }
+}
+
 // Fungsi untuk memperbarui grafik
 async function updateChart() {
   try {
-    const selectedYear = document.getElementById('yearFilter').value;
-    const selectedCategory = document.getElementById('categoryFilter').value;
-
-    // Get sales data from API
-    const response = await fetch(`${BASE_URL}/dashboard/sales?year=${selectedYear}&category=${selectedCategory}`, {
+    const year = document.getElementById("yearFilter")?.value || '';
+    const month = document.getElementById("monthFilter")?.value || '';
+    const kategori = document.getElementById("kategoriFilter")?.value || '';
+    const chartType = document.getElementById("chartType")?.value || 'sales';
+    
+    console.log("Updating chart with params:", { year, month, kategori, chartType });
+    
+    // Map chart type to API endpoint
+    let endpoint;
+    switch (chartType) {
+      case 'sales':
+        endpoint = 'sales';
+        break;
+      case 'category-sales':
+        endpoint = 'category-sales';
+        break;
+      case 'stock':
+        endpoint = 'stock';
+        break;
+      default:
+        endpoint = 'sales';
+    }
+    
+    // Fetch data from API
+    const response = await fetch(`${BASE_URL}/dashboard/${endpoint}?year=${year}&month=${month}&kategori=${kategori}`, {
       headers: {
-        'Authorization': `Bearer ${getToken()}`
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
       }
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch sales data');
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
-
-    const salesData = await response.json();
     
-    if (!salesData.success || !salesData.data) {
-      throw new Error('Invalid sales data format');
+    const data = await response.json();
+    console.log("Received data:", data);
+    
+    if (!mainChart) {
+      console.error("Chart not initialized");
+      return;
     }
 
-    // Process the data
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const quantities = new Array(12).fill(0);
-    const sales = new Array(12).fill(0);
+    if (!data.success || !data.data) {
+      throw new Error('Invalid data format received from server');
+    }
 
-    // Populate data arrays
-    salesData.data.forEach(item => {
-      const monthIndex = new Date(item.tanggal).getMonth();
-      quantities[monthIndex] += parseInt(item.jumlah_produk);
-      sales[monthIndex] += parseFloat(item.total);
-    });
+    // Update chart configuration based on type
+    const config = {
+      sales: {
+        labels: data.data.map(item => {
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+          return monthNames[item.bulan - 1];
+        }),
+        datasets: [
+          {
+            ...mainChart.data.datasets[0],
+            label: 'Jumlah Produk',
+            data: data.data.map(item => item.jumlah_produk)
+          },
+          {
+            ...mainChart.data.datasets[1],
+            label: 'Total Penjualan (Rp)',
+            data: data.data.map(item => item.total)
+          }
+        ]
+      },
+      'category-sales': {
+        labels: data.data.map(item => item.category),
+        datasets: [
+          {
+            ...mainChart.data.datasets[0],
+            label: 'Total Penjualan per Kategori',
+            data: data.data.map(item => item.value)
+          }
+        ]
+      },
+      stock: {
+        labels: data.data.map(item => `${item.category} - ${item.subcategory}`),
+        datasets: [
+          {
+            ...mainChart.data.datasets[0],
+            label: 'Total Stok',
+            backgroundColor: data.data.map(item => {
+              // Use different shades for different categories
+              const colors = {
+                'Makanan': 'rgba(78, 115, 223, 0.8)',
+                'Perlengkapan Mandi': 'rgba(54, 185, 204, 0.8)',
+                'Perlengkapan Rumah': 'rgba(246, 194, 62, 0.8)',
+                'Minuman': 'rgba(231, 74, 59, 0.8)',
+                'Lainnya': 'rgba(133, 135, 150, 0.8)'
+              };
+              return colors[item.category] || colors['Lainnya'];
+            }),
+            borderColor: data.data.map(item => {
+              const colors = {
+                'Makanan': 'rgba(78, 115, 223, 1)',
+                'Perlengkapan Mandi': 'rgba(54, 185, 204, 1)',
+                'Perlengkapan Rumah': 'rgba(246, 194, 62, 1)',
+                'Minuman': 'rgba(231, 74, 59, 1)',
+                'Lainnya': 'rgba(133, 135, 150, 1)'
+              };
+              return colors[item.category] || colors['Lainnya'];
+            }),
+            data: data.data.map(item => item.stock)
+          }
+        ]
+      }
+    };
 
     // Update chart data
-    mainChart.data.labels = months;
-    mainChart.data.datasets[0].data = quantities;
-    mainChart.data.datasets[1].data = sales;
-
+    const chartConfig = config[chartType] || config.sales;
+    mainChart.data.labels = chartConfig.labels;
+    mainChart.data.datasets = chartConfig.datasets;
+    
+    // Update chart title
+    mainChart.options.plugins.title.text = getChartTitle(chartType);
+    
+    // Update axis configuration based on chart type
+    if (chartType === 'category-sales') {
+      // Hide quantity axis, show only sales axis
+      mainChart.options.scales['y-axis-quantity'].display = false;
+      mainChart.options.scales['y-axis-sales'].display = true;
+      mainChart.options.scales['y-axis-sales'].title.text = 'Total Penjualan (Rp)';
+    } else if (chartType === 'stock') {
+      // Show only quantity axis for stock
+      mainChart.options.scales['y-axis-quantity'].display = true;
+      mainChart.options.scales['y-axis-sales'].display = false;
+      mainChart.options.scales['y-axis-quantity'].title.text = 'Jumlah Stok';
+    } else {
+      // Show both axes for sales
+      mainChart.options.scales['y-axis-quantity'].display = true;
+      mainChart.options.scales['y-axis-sales'].display = true;
+      mainChart.options.scales['y-axis-quantity'].title.text = 'Jumlah Produk';
+      mainChart.options.scales['y-axis-sales'].title.text = 'Total Penjualan (Rp)';
+    }
+    
+    console.log("Updating chart with new data");
     mainChart.update();
   } catch (error) {
-    console.error('Error updating chart:', error);
-    showError('Gagal memperbarui grafik: ' + error.message);
+    console.error("Error updating chart:", error);
+    throw error;
+  }
+}
+
+// Helper function to get chart title
+function getChartTitle(chartType) {
+  switch (chartType) {
+    case 'sales':
+      return 'Grafik Penjualan per Bulan';
+    case 'category':
+      return 'Grafik Penjualan per Kategori';
+    case 'stock':
+      return 'Grafik Stok per Kategori';
+    default:
+      return 'Grafik Penjualan';
+  }
+}
+
+// Fungsi untuk menginisialisasi dashboard
+async function initializeDashboard() {
+  try {
+    // Muat opsi filter
+    loadYearOptions();
+    await loadKategoriOptions();
+
+    // Tambahkan event listener untuk filter
+    document.getElementById("chartType")?.addEventListener("change", updateChart);
+    document.getElementById("yearFilter")?.addEventListener("change", updateChart);
+    document.getElementById("monthFilter")?.addEventListener("change", updateChart);
+    document.getElementById("kategoriFilter")?.addEventListener("change", updateChart);
+
+    // Inisialisasi grafik
+    await initializeCharts();
+
+    // Update grafik pertama kali
+    await updateChart();
+  } catch (error) {
+    console.error("Error initializing dashboard:", error);
+  }
+}
+
+// Inisialisasi saat dokumen dimuat
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.location.pathname.includes("index-owner.html")) {
+    try {
+      await initializeDashboard();
+      await fetchDashboardData();
+      await updateBestSellingProductsTable();
+
+      // Set up auto-refresh interval
+      setInterval(async () => {
+        console.log("Auto-refreshing dashboard data...");
+        await fetchDashboardData();
+        await updateBestSellingProductsTable();
+        await updateChart();
+      }, 3600 * 1000); // Refresh every hour
+    } catch (error) {
+      console.error("Error in dashboard initialization:", error);
+    }
+  }
+});
+
+// Helper function to get current filter values
+function getFilters() {
+  return {
+    kategori: document.getElementById("kategoriFilter")?.value || '',
+    tahun: document.getElementById("yearFilter")?.value || '',
+    bulan: document.getElementById("monthFilter")?.value || ''
+  };
+}
+
+// Load kategori options
+async function loadKategori() {
+  try {
+    const response = await fetch(`${BASE_URL}/kategori/getall`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch categories');
+    }
+
+    const data = await response.json();
+    const kategoriFilter = document.getElementById("kategoriFilter");
+    
+    if (kategoriFilter && Array.isArray(data.data)) {
+      // Clear existing options except the first one
+      while (kategoriFilter.options.length > 1) {
+        kategoriFilter.remove(1);
+      }
+
+      // Add new options
+      data.data.forEach(kategori => {
+        const option = document.createElement("option");
+        option.value = kategori.id_kategori;
+        option.textContent = kategori.nama_kategori;
+        kategoriFilter.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error("Error loading categories:", error);
+    showAlert("danger", "Gagal memuat kategori");
+  }
+}
+
+// Load year options
+function loadYearOptions() {
+  const yearFilter = document.getElementById("yearFilter");
+  if (yearFilter) {
+    const currentYear = new Date().getFullYear();
+    const startYear = 2020; // Adjust this based on your needs
+
+    // Clear existing options except the first one
+    while (yearFilter.options.length > 1) {
+      yearFilter.remove(1);
+    }
+
+    // Add year options
+    for (let year = currentYear; year >= startYear; year--) {
+      const option = document.createElement("option");
+      option.value = year;
+      option.textContent = year;
+      yearFilter.appendChild(option);
+    }
   }
 }
 
@@ -279,10 +716,10 @@ async function loadKategoriOptions() {
     }
 
     const data = await response.json();
-    console.log("Kategori Response:", data); // Debug
+    console.log("Kategori Response:", data);
 
     const kategoriFilter = document.getElementById("kategoriFilter");
-    kategoriFilter.innerHTML = '<option value="">Semua Kategori</option>'; // Reset options
+    kategoriFilter.innerHTML = '<option value="">Semua Kategori</option>';
 
     if (data.success && Array.isArray(data.data)) {
       data.data.forEach((kategori) => {
@@ -297,54 +734,6 @@ async function loadKategoriOptions() {
   } catch (error) {
     console.error("Error loading kategori options:", error);
     showError("Gagal memuat data kategori: " + error.message);
-  }
-}
-
-// Fungsi untuk memuat opsi tahun
-function loadYearOptions() {
-  const yearFilter = document.getElementById("yearFilter");
-  yearFilter.innerHTML = ''; // Reset options
-
-  // Get current year
-  const currentYear = new Date().getFullYear();
-  
-  // Add last 5 years as options
-  for (let year = currentYear; year >= currentYear - 4; year--) {
-    const option = document.createElement("option");
-    option.value = year;
-    option.textContent = year;
-    yearFilter.appendChild(option);
-  }
-}
-
-// Fungsi untuk menginisialisasi dashboard
-async function initializeDashboard() {
-  try {
-    // Inisialisasi grafik
-    await initializeCharts();
-
-    // Muat opsi filter
-    loadYearOptions();
-    await loadKategoriOptions();
-
-    // Tambahkan event listener untuk filter
-    document
-      .getElementById("chartType")
-      .addEventListener("change", updateChart);
-    document
-      .getElementById("yearFilter")
-      .addEventListener("change", updateChart);
-    document
-      .getElementById("monthFilter")
-      .addEventListener("change", updateChart);
-    document
-      .getElementById("kategoriFilter")
-      .addEventListener("change", updateChart);
-
-    // Update grafik pertama kali
-    await updateChart();
-  } catch (error) {
-    console.error("Error initializing dashboard:", error);
   }
 }
 
@@ -364,7 +753,7 @@ async function updateBestSellingProductsTable() {
     }
 
     const jsonResponse = await response.json();
-    console.log("Best Selling Products Response:", jsonResponse); // Debug
+    console.log("Best Selling Products Response:", jsonResponse);
 
     if (!jsonResponse.success || !jsonResponse.data) {
       throw new Error(jsonResponse.error || "Data tidak valid");
@@ -408,23 +797,6 @@ async function updateBestSellingProductsTable() {
     }
   }
 }
-
-// Inisialisasi saat dokumen dimuat
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.location.pathname.includes("index-owner.html")) {
-    initializeDashboard();
-    fetchDashboardData();
-    updateBestSellingProductsTable();
-
-    // Set up auto-refresh interval
-    setInterval(async () => {
-      console.log("Auto-refreshing dashboard data...");
-      await fetchDashboardData();
-      await updateBestSellingProductsTable();
-      await updateChart();
-    }, 3600 * 1000); // Refresh every hour
-  }
-});
 
 // Users API
 const users = {
@@ -1086,141 +1458,3 @@ const dashboard = {
     }
   },
 };
-
-// Konfigurasi Chart.js
-let mainChart = null;
-
-// Fungsi untuk menginisialisasi grafik
-async function initializeCharts() {
-  const ctx = document.getElementById('salesChart').getContext('2d');
-  
-  // Destroy existing chart if it exists
-  if (mainChart) {
-    mainChart.destroy();
-  }
-
-  mainChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Jumlah Terjual',
-          data: [],
-          backgroundColor: 'rgba(78, 115, 223, 0.8)',
-          borderColor: 'rgba(78, 115, 223, 1)',
-          borderWidth: 1,
-          yAxisID: 'y-axis-quantity'
-        },
-        {
-          label: 'Total Penjualan (Rp)',
-          data: [],
-          type: 'line',
-          borderColor: 'rgba(231, 74, 59, 1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.4,
-          yAxisID: 'y-axis-sales'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: {
-        intersect: false,
-        mode: 'index'
-      },
-      scales: {
-        x: {
-          grid: {
-            display: true,
-            drawBorder: true,
-            drawOnChartArea: true,
-            drawTicks: true,
-          },
-          ticks: {
-            maxRotation: 0,
-            minRotation: 0
-          }
-        },
-        'y-axis-quantity': {
-          type: 'linear',
-          position: 'left',
-          grid: {
-            drawOnChartArea: true
-          },
-          ticks: {
-            beginAtZero: true,
-            callback: function(value) {
-              if (Math.floor(value) === value) {
-                return value;
-              }
-            }
-          }
-        },
-        'y-axis-sales': {
-          type: 'linear',
-          position: 'right',
-          grid: {
-            drawOnChartArea: false
-          },
-          ticks: {
-            beginAtZero: true,
-            callback: function(value) {
-              return 'Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
-          }
-        }
-      },
-      plugins: {
-        title: {
-          display: true,
-          text: 'Grafik Penjualan per Bulan',
-          font: {
-            size: 16
-          }
-        },
-        legend: {
-          display: true,
-          position: 'bottom'
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              if (context.dataset.yAxisID === 'y-axis-sales') {
-                label += 'Rp ' + context.parsed.y.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-              } else {
-                label += context.parsed.y;
-              }
-              return label;
-            }
-          }
-        }
-      },
-    }
-  });
-
-  // Initial update
-  await updateChart();
-}
-
-// Inisialisasi saat dokumen dimuat
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.location.pathname.includes("index-owner.html")) {
-    initializeDashboard();
-    fetchDashboardData();
-    updateBestSellingProductsTable();
-
-    // Set up auto-refresh interval
-    setInterval(async () => {
-      console.log("Auto-refreshing dashboard data...");
-      await fetchDashboardData();
-      await updateBestSellingProductsTable();
-      await updateChart();
-    }, 3600 * 1000); // Refresh every hour
-  }
-});
