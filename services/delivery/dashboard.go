@@ -35,6 +35,7 @@ func NewHttpDeliveryDashboard(app fiber.Router, penjualanUC domain.PenjualanUseC
 	protected.Get("/sales", handler.GetSalesData)
 	protected.Get("/category-sales", handler.GetCategorySales)
 	protected.Get("/stock", handler.GetStockByCategory)
+	protected.Get("/lowest-stock", handler.GetLowestStock)
 }
 
 // GetDashboardData mengambil data untuk dashboard
@@ -134,7 +135,7 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 	for i := 1; i <= 12; i++ {
 		monthlySales[i] = fiber.Map{
 			"month":         i,
-			"total":        0.0,
+			"total":         0.0,
 			"jumlah_produk": 0,
 		}
 	}
@@ -329,7 +330,7 @@ func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 		}
 	}
 
-	// Mengubah ke format result
+	// Format data stok per subkategori
 	var result []fiber.Map
 	for kategori, subCategories := range subCategoryStock {
 		for subKategori, stock := range subCategories {
@@ -345,6 +346,45 @@ func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 	sort.Slice(result, func(i, j int) bool {
 		return result[i]["stock"].(int) > result[j]["stock"].(int)
 	})
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    result,
+	})
+}
+
+// GetLowestStock mengambil 5 produk dengan stok terendah
+func (d *HttpDeliveryDashboard) GetLowestStock(c *fiber.Ctx) error {
+	// Mengambil semua produk
+	productList, err := d.ProdukUC.GetAllProduk(context.Background())
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"error":   "Gagal mengambil data produk",
+		})
+	}
+
+	// Mengurutkan produk berdasarkan stok (ascending)
+	sort.Slice(productList, func(i, j int) bool {
+		return productList[i].Stok < productList[j].Stok
+	})
+
+	// Ambil 5 produk dengan stok terendah
+	lowestStockProducts := productList
+	if len(lowestStockProducts) > 5 {
+		lowestStockProducts = lowestStockProducts[:5]
+	}
+
+	// Format data produk stok terendah
+	var result []fiber.Map
+	for _, product := range lowestStockProducts {
+		result = append(result, fiber.Map{
+			"product_name": product.NamaProduk,
+			"category":     product.Kategori.NamaKategori,
+			"subcategory": product.SubKategori.NamaSubKategori,
+			"stock":        product.Stok,
+		})
+	}
 
 	return c.JSON(fiber.Map{
 		"success": true,
