@@ -299,11 +299,10 @@ func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 	})
 }
 
-// GetStockByCategory mengambil data 5 produk dengan stok terendah
+// GetStockByCategory mengambil data stok per kategori dan subkategori
 func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 	// Mengambil parameter filter dari query
 	kategoriID := c.Query("kategori", "")
-	limit := 5 // Default 5 produk terendah
 
 	// Mengambil semua produk
 	productList, err := d.ProdukUC.GetAllProduk(context.Background())
@@ -314,34 +313,38 @@ func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 		})
 	}
 
-	// Filter produk berdasarkan kategori
-	var filteredProducts []domain.Produk
+	// Inisialisasi map untuk menyimpan total stok per subkategori
+	subCategoryStock := make(map[string]map[string]int) // map[kategori]map[subkategori]stok
+
+	// Menghitung total stok per subkategori
 	for _, product := range productList {
 		if kategoriID == "" || product.Kategori.IDKategori == kategoriID {
-			filteredProducts = append(filteredProducts, product)
+			// Inisialisasi map untuk kategori jika belum ada
+			if _, exists := subCategoryStock[product.Kategori.NamaKategori]; !exists {
+				subCategoryStock[product.Kategori.NamaKategori] = make(map[string]int)
+			}
+			
+			// Tambahkan stok ke subkategori
+			subCategoryStock[product.Kategori.NamaKategori][product.SubKategori.NamaSubKategori] += product.Stok
 		}
-	}
-
-	// Mengurutkan produk berdasarkan stok (ascending)
-	sort.Slice(filteredProducts, func(i, j int) bool {
-		return filteredProducts[i].Stok < filteredProducts[j].Stok
-	})
-
-	// Mengambil hanya 5 produk dengan stok terendah
-	if len(filteredProducts) > limit {
-		filteredProducts = filteredProducts[:limit]
 	}
 
 	// Mengubah ke format result
 	var result []fiber.Map
-	for _, product := range filteredProducts {
-		result = append(result, fiber.Map{
-			"category":     product.Kategori.NamaKategori,
-			"subcategory": product.SubKategori.NamaSubKategori,
-			"product_name": product.NamaProduk,
-			"stock":        product.Stok,
-		})
+	for kategori, subCategories := range subCategoryStock {
+		for subKategori, stock := range subCategories {
+			result = append(result, fiber.Map{
+				"category":    kategori,
+				"subcategory": subKategori,
+				"stock":       stock,
+			})
+		}
 	}
+
+	// Mengurutkan hasil berdasarkan stok (descending)
+	sort.Slice(result, func(i, j int) bool {
+		return result[i]["stock"].(int) > result[j]["stock"].(int)
+	})
 
 	return c.JSON(fiber.Map{
 		"success": true,
