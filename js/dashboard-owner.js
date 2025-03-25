@@ -510,11 +510,11 @@ async function updateChart() {
         ]
       },
       stock: {
-        labels: data.data.map(item => `${item.product_name} (${item.category})`),
+        labels: data.data.map(item => `${item.category} - ${item.subcategory}`),
         datasets: [
           {
             ...mainChart.data.datasets[0],
-            label: 'Stok Tersedia',
+            label: 'Total Stok',
             backgroundColor: data.data.map(item => {
               // Use different shades for different categories
               const colors = {
@@ -560,7 +560,7 @@ async function updateChart() {
       // Show only quantity axis for stock
       mainChart.options.scales['y-axis-quantity'].display = true;
       mainChart.options.scales['y-axis-sales'].display = false;
-      mainChart.options.scales['y-axis-quantity'].title.text = 'Stok Tersedia';
+      mainChart.options.scales['y-axis-quantity'].title.text = 'Total Stok';
     } else {
       // Show both axes for sales
       mainChart.options.scales['y-axis-quantity'].display = true;
@@ -585,7 +585,7 @@ function getChartTitle(chartType) {
     case 'category-sales':
       return 'Grafik Penjualan per Kategori';
     case 'stock':
-      return '5 Produk dengan Stok Terendah';
+      return 'Grafik Stok per Subkategori';
     default:
       return 'Grafik Penjualan';
   }
