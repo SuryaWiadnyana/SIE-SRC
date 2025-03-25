@@ -207,7 +207,7 @@ async function fetchDashboardData() {
               carouselHtml += `
                 <div class="carousel-item ${index === 0 ? 'active' : ''}" data-interval="3000">
                   <div class="text-xs font-weight-bold ${stockClass} mb-1">
-                    ${item.product_name}
+                    ${item.product_name} (${item.category})
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
                     Stok: ${item.stock}
@@ -510,11 +510,11 @@ async function updateChart() {
         ]
       },
       stock: {
-        labels: data.data.map(item => `${item.category} - ${item.subcategory}`),
+        labels: data.data.map(item => `${item.product_name} (${item.category})`),
         datasets: [
           {
             ...mainChart.data.datasets[0],
-            label: 'Total Stok',
+            label: 'Stok Tersedia',
             backgroundColor: data.data.map(item => {
               // Use different shades for different categories
               const colors = {
@@ -560,7 +560,7 @@ async function updateChart() {
       // Show only quantity axis for stock
       mainChart.options.scales['y-axis-quantity'].display = true;
       mainChart.options.scales['y-axis-sales'].display = false;
-      mainChart.options.scales['y-axis-quantity'].title.text = 'Jumlah Stok';
+      mainChart.options.scales['y-axis-quantity'].title.text = 'Stok Tersedia';
     } else {
       // Show both axes for sales
       mainChart.options.scales['y-axis-quantity'].display = true;
@@ -582,10 +582,10 @@ function getChartTitle(chartType) {
   switch (chartType) {
     case 'sales':
       return 'Grafik Penjualan per Bulan';
-    case 'category':
+    case 'category-sales':
       return 'Grafik Penjualan per Kategori';
     case 'stock':
-      return 'Grafik Stok per Kategori';
+      return '5 Produk dengan Stok Terendah';
     default:
       return 'Grafik Penjualan';
   }
