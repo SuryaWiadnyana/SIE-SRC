@@ -121,13 +121,18 @@
 }
 
 /* Modal delete confirmation */
-.modal-footer {
+.delete-confirmation .modal-footer {
     justify-content: flex-start !important;
     gap: 10px;
 }
 
-.modal-footer .btn {
+.delete-confirmation .modal-footer .btn {
     margin: 0;
+}
+
+/* Success modal - keep centered */
+.swal2-popup .swal2-actions {
+    justify-content: center !important;
 }
 
 /* Button group spacing */

@@ -5,7 +5,7 @@ function showDeleteConfirmation(title, message, onConfirm) {
 
     // Buat modal baru
     const modalHtml = `
-        <div class="modal fade delete-confirmation-modal" tabindex="-1" role="dialog">
+        <div class="modal fade delete-confirmation-modal delete-confirmation" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-danger text-white">
