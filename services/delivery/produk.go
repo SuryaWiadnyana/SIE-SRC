@@ -208,13 +208,16 @@ func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
 		})
 	}
 
+	// Trim whitespace dari nama produk
+	body.NamaProduk = strings.TrimSpace(body.NamaProduk)
+
 	if body.KodeProduk == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "Kode produk harus diisi",
 		})
 	}
 
-	// Cek apakah kode produk sudah ada
+	// Cek apakah kode produk atau nama produk sudah ada
 	allProducts, err := d.HTTP.GetAllProduk(context.Background())
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -222,10 +225,27 @@ func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
 		})
 	}
 
+	// Debug log
+	log.Printf("Checking for duplicate products. New product name: '%s'", body.NamaProduk)
+
 	for _, prod := range allProducts {
+		// Debug log
+		log.Printf("Comparing with existing product: '%s'", prod.NamaProduk)
+		
 		if prod.KodeProduk == body.KodeProduk {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 				"error": "Kode produk sudah ada",
+			})
+		}
+		
+		// Trim whitespace dan bandingkan nama produk (case insensitive)
+		existingName := strings.TrimSpace(prod.NamaProduk)
+		newName := strings.TrimSpace(body.NamaProduk)
+		
+		if strings.EqualFold(existingName, newName) {
+			log.Printf("Duplicate product name found: '%s' matches '%s'", existingName, newName)
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Nama produk '%s' sudah ada", body.NamaProduk),
 			})
 		}
 	}
