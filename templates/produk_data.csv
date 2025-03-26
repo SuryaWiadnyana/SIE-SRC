@@ -1,4 +1,4 @@
-nama_produk,id_kategori,id_subkategori,kode_produk,harga_produk,stok_barang,tanggal_kadaluarsa
+nama_produk,id_kategori,id_subkategori,kode_produk,harga_produk,stok_barang,tanggal_kedaluwarsa
 Indomie Goreng Special,KT001,SK006,8997035563414,2700,40,2025-04-25
 Indomie Soto,KT001,SK006,8997035563415,2700,35,2025-04-25
 Mie Sedaap Goreng,KT001,SK006,8997035563416,2800,45,2025-05-15

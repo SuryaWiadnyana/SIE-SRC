@@ -218,11 +218,11 @@ const products = {
 
         // Pastikan format data sesuai dengan yang diharapkan backend
         // Konversi tanggal ke format yang benar
-        if (productData.tanggal_kadaluarsa) {
+        if (productData.tanggal_kedaluwarsa) {
           // Pastikan tanggal dalam format yang benar (ISO string)
-          const date = new Date(productData.tanggal_kadaluarsa);
+          const date = new Date(productData.tanggal_kedaluwarsa);
           if (!isNaN(date.getTime())) {
-            productData.tanggal_kadaluarsa = date.toISOString();
+            productData.tanggal_kedaluwarsa = date.toISOString();
           }
         }
 
@@ -268,7 +268,7 @@ const products = {
           kode_produk: productData.kode_produk,
           harga_produk: parseInt(productData.harga_produk),
           stok_barang: parseInt(productData.stok_barang),
-          tanggal_kadaluarsa: productData.tanggal_kadaluarsa
+          tanggal_kedaluwarsa: productData.tanggal_kedaluwarsa
         };
 
         console.log("Data produk yang akan dikirim:", finalProductData);
@@ -1044,14 +1044,14 @@ function displayProducts(products = []) {
         // Function to get row color based on expiry date
         function getRowColorClass(daysUntilExpiry) {
             if (daysUntilExpiry === null) return '';
-            if (daysUntilExpiry <= 0) return 'table-danger';  // Sudah kadaluarsa
-            if (daysUntilExpiry <= 10) return 'table-danger'; // Akan kadaluarsa dalam 10 hari
-            if (daysUntilExpiry <= 30) return 'table-warning'; // Akan kadaluarsa dalam 30 hari
+            if (daysUntilExpiry <= 0) return 'table-danger';  // Sudah kedaluwarsa
+            if (daysUntilExpiry <= 10) return 'table-danger'; // Akan kedaluwarsa dalam 10 hari
+            if (daysUntilExpiry <= 30) return 'table-warning'; // Akan kedaluwarsa dalam 30 hari
             return '';
         }
 
         // Calculate days until expiry and set row color
-        const daysUntilExpiry = getDaysUntilExpiry(product.tanggal_kadaluarsa);
+        const daysUntilExpiry = getDaysUntilExpiry(product.tanggal_kedaluwarsa);
         const rowColorClass = getRowColorClass(daysUntilExpiry);
         if (rowColorClass) {
             row.className = rowColorClass;
@@ -1073,13 +1073,13 @@ function displayProducts(products = []) {
             subKategoriDisplay = product.nama_subkategori;
         }
         
-        // Format tanggal kadaluarsa
-        let tanggalKadaluarsa = '-';
+        // Format tanggal kedaluwarsa
+        let tanggalkedaluwarsa = '-';
         let infoButton = '';
-        if (product.tanggal_kadaluarsa) {
-            const date = new Date(product.tanggal_kadaluarsa);
+        if (product.tanggal_kedaluwarsa) {
+            const date = new Date(product.tanggal_kedaluwarsa);
             if (!isNaN(date.getTime())) {
-                tanggalKadaluarsa = date.toLocaleDateString('id-ID', {
+                tanggalkedaluwarsa = date.toLocaleDateString('id-ID', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric'
@@ -1088,13 +1088,13 @@ function displayProducts(products = []) {
                 // Add info button if product has expiry date
                 let tooltipText = '';
                 if (daysUntilExpiry <= 0) {
-                    tooltipText = 'Produk sudah kadaluarsa';
+                    tooltipText = 'Produk sudah kedaluwarsa';
                 } else if (daysUntilExpiry <= 10) {
-                    tooltipText = `Produk akan kadaluarsa dalam ${daysUntilExpiry} hari`;
+                    tooltipText = `Produk akan kedaluwarsa dalam ${daysUntilExpiry} hari`;
                 } else if (daysUntilExpiry <= 30) {
-                    tooltipText = `Produk akan kadaluarsa dalam ${daysUntilExpiry} hari`;
+                    tooltipText = `Produk akan kedaluwarsa dalam ${daysUntilExpiry} hari`;
                 } else {
-                    tooltipText = `${daysUntilExpiry} hari menuju kadaluarsa`;
+                    tooltipText = `${daysUntilExpiry} hari menuju kedaluwarsa`;
                 }
                 
                 infoButton = `
@@ -1115,7 +1115,7 @@ function displayProducts(products = []) {
             <td>${product.kode_produk || '-'}</td>
             <td>${formatCurrency(parseFloat(product.harga_produk)) || 'Rp0'}</td>
             <td>${product.stok_barang || '0'}</td>
-            <td>${tanggalKadaluarsa}</td>
+            <td>${tanggalkedaluwarsa}</td>
             <td>
                 <div class="btn-group" role="group">
                     <button class="btn btn-info btn-sm edit-product" data-id="${product.id_produk}">
@@ -1290,11 +1290,11 @@ async function handleAddProduct(event) {
         return;
     }
     
-    // Format tanggal kadaluarsa ke ISO string jika ada
-    if (productData.tanggal_kadaluarsa) {
-        const expDate = new Date(productData.tanggal_kadaluarsa);
+    // Format tanggal kedaluwarsa ke ISO string jika ada
+    if (productData.tanggal_kedaluwarsa) {
+        const expDate = new Date(productData.tanggal_kedaluwarsa);
         if (!isNaN(expDate.getTime())) {
-            formattedData.tanggal_kadaluarsa = expDate.toISOString();
+            formattedData.tanggal_kedaluwarsa = expDate.toISOString();
         }
     }
     
@@ -1355,11 +1355,11 @@ async function handleUpdateProduct(e) {
         const kodeProduk = document.getElementById('update_kode_produk').value;
         const hargaProduk = document.getElementById('update_harga_produk').value;
         const stokBarang = document.getElementById('update_stok_barang').value;
-        const tanggalKadaluarsaInput = document.getElementById('update_tanggal_kadaluarsa').value;
+        const tanggalkedaluwarsaInput = document.getElementById('update_tanggal_kedaluwarsa').value;
 
         // Validasi input dasar
         if (!namaProduk || !kategoriSelect.value || !subKategoriSelect.value || !kodeProduk || !hargaProduk || !stokBarang) {
-            showAlert('Semua field harus diisi kecuali tanggal kadaluarsa', 'danger');
+            showAlert('Semua field harus diisi kecuali tanggal kedaluwarsa', 'danger');
             return;
         }
         
@@ -1374,11 +1374,11 @@ async function handleUpdateProduct(e) {
             return;
         }
         
-        // Format tanggal kadaluarsa ke ISO string
-        let formattedTanggalKadaluarsa = null;
-        if (tanggalKadaluarsaInput) {
-            const expDate = new Date(tanggalKadaluarsaInput);
-            formattedTanggalKadaluarsa = expDate.toISOString();
+        // Format tanggal kedaluwarsa ke ISO string
+        let formattedTanggalkedaluwarsa = null;
+        if (tanggalkedaluwarsaInput) {
+            const expDate = new Date(tanggalkedaluwarsaInput);
+            formattedTanggalkedaluwarsa = expDate.toISOString();
         }
         
         // Siapkan data produk dengan format yang benar
@@ -1398,9 +1398,9 @@ async function handleUpdateProduct(e) {
             stok_barang: parseInt(stokBarang)
         };
 
-        // Tambahkan tanggal kadaluarsa jika ada
-        if (formattedTanggalKadaluarsa) {
-            productData.tanggal_kadaluarsa = formattedTanggalKadaluarsa;
+        // Tambahkan tanggal kedaluwarsa jika ada
+        if (formattedTanggalkedaluwarsa) {
+            productData.tanggal_kedaluwarsa = formattedTanggalkedaluwarsa;
         }
 
         console.log('Data produk yang akan diupdate:', productData);
@@ -1485,12 +1485,12 @@ async function populateUpdateForm(product) {
         document.getElementById('update_harga_produk').value = product.harga_produk;
         document.getElementById('update_stok_barang').value = product.stok_barang;
         
-        // Format tanggal kadaluarsa
-        if (product.tanggal_kadaluarsa) {
-            const date = new Date(product.tanggal_kadaluarsa);
+        // Format tanggal kedaluwarsa
+        if (product.tanggal_kedaluwarsa) {
+            const date = new Date(product.tanggal_kedaluwarsa);
             if (!isNaN(date.getTime())) {
                 const formattedDate = date.toISOString().split('T')[0];
-                document.getElementById('update_tanggal_kadaluarsa').value = formattedDate;
+                document.getElementById('update_tanggal_kedaluwarsa').value = formattedDate;
             }
         }
         

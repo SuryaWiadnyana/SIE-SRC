@@ -1,0 +1,326 @@
+[
+  {
+    "penjualan": {
+      "produk_terjual": 15,
+      "tanggal_penjualan": "15-01-2020"
+    },
+    "produk": {
+      "id_produk": "001",
+      "nama_produk": "Indomie Goreng",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK006",
+        "nama_subkategori": "Mie Instan",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8999999037574",
+      "harga_produk": 3500,
+      "stok_barang": 200,
+      "tanggal_kadaluarsa": "2025-05-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 10,
+      "tanggal_penjualan": "20-01-2020"
+    },
+    "produk": {
+      "id_produk": "002",
+      "nama_produk": "Pocari Sweat",
+      "kategori": {
+        "id_kategori": "KT002",
+        "nama_kategori": "Minuman"
+      },
+      "subkategori": {
+        "id_subkategori": "SK023",
+        "nama_subkategori": "Minuman Isotonik",
+        "kategori": {
+          "id_kategori": "KT002",
+          "nama_kategori": "Minuman"
+        }
+      },
+      "kode_produk": "8999999037383",
+      "harga_produk": 7000,
+      "stok_barang": 100,
+      "tanggal_kadaluarsa": "2025-08-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 8,
+      "tanggal_penjualan": "05-02-2020"
+    },
+    "produk": {
+      "id_produk": "003",
+      "nama_produk": "Chitato Sapi Panggang",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK025",
+        "nama_subkategori": "Makanan Ringan",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8999999037666",
+      "harga_produk": 10000,
+      "stok_barang": 50,
+      "tanggal_kadaluarsa": "2025-06-10T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 20,
+      "tanggal_penjualan": "15-02-2020"
+    },
+    "produk": {
+      "id_produk": "004",
+      "nama_produk": "Ultra Milk Chocolate",
+      "kategori": {
+        "id_kategori": "KT002",
+        "nama_kategori": "Minuman"
+      },
+      "subkategori": {
+        "id_subkategori": "SK010",
+        "nama_subkategori": "Susu",
+        "kategori": {
+          "id_kategori": "KT002",
+          "nama_kategori": "Minuman"
+        }
+      },
+      "kode_produk": "8999999037529",
+      "harga_produk": 7000,
+      "stok_barang": 80,
+      "tanggal_kadaluarsa": "2025-06-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 12,
+      "tanggal_penjualan": "01-03-2020"
+    },
+    "produk": {
+      "id_produk": "005",
+      "nama_produk": "Beng Beng",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK005",
+        "nama_subkategori": "Coklat",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8999999037956",
+      "harga_produk": 2500,
+      "stok_barang": 200,
+      "tanggal_kadaluarsa": "2025-08-10T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 5,
+      "tanggal_penjualan": "20-03-2020"
+    },
+    "produk": {
+      "id_produk": "006",
+      "nama_produk": "Dettol Body Wash Fresh",
+      "kategori": {
+        "id_kategori": "KT006",
+        "nama_kategori": "Perawatan Tubuh"
+      },
+      "subkategori": {
+        "id_subkategori": "SK020",
+        "nama_subkategori": "Sabun Mandi",
+        "kategori": {
+          "id_kategori": "KT006",
+          "nama_kategori": "Perawatan Tubuh"
+        }
+      },
+      "kode_produk": "8993560027216",
+      "harga_produk": 25000,
+      "stok_barang": 45,
+      "tanggal_kadaluarsa": "2025-10-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 25,
+      "tanggal_penjualan": "05-04-2020"
+    },
+    "produk": {
+      "id_produk": "007",
+      "nama_produk": "Indomie Soto",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK006",
+        "nama_subkategori": "Mie Instan",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8999999037598",
+      "harga_produk": 3000,
+      "stok_barang": 190,
+      "tanggal_kadaluarsa": "2025-05-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 15,
+      "tanggal_penjualan": "15-04-2020"
+    },
+    "produk": {
+      "id_produk": "008",
+      "nama_produk": "Pocky Cokelat",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK004",
+        "nama_subkategori": "Wafer",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8999999037826",
+      "harga_produk": 10000,
+      "stok_barang": 70,
+      "tanggal_kadaluarsa": "2025-07-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 18,
+      "tanggal_penjualan": "01-05-2020"
+    },
+    "produk": {
+      "id_produk": "009",
+      "nama_produk": "Greenfields Full Cream",
+      "kategori": {
+        "id_kategori": "KT002",
+        "nama_kategori": "Minuman"
+      },
+      "subkategori": {
+        "id_subkategori": "SK010",
+        "nama_subkategori": "Susu",
+        "kategori": {
+          "id_kategori": "KT002",
+          "nama_kategori": "Minuman"
+        }
+      },
+      "kode_produk": "8999999037543",
+      "harga_produk": 16000,
+      "stok_barang": 40,
+      "tanggal_kadaluarsa": "2025-06-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 30,
+      "tanggal_penjualan": "15-05-2020"
+    },
+    "produk": {
+      "id_produk": "010",
+      "nama_produk": "Extra Joss",
+      "kategori": {
+        "id_kategori": "KT002",
+        "nama_kategori": "Minuman"
+      },
+      "subkategori": {
+        "id_subkategori": "SK023",
+        "nama_subkategori": "Minuman Energi",
+        "kategori": {
+          "id_kategori": "KT002",
+          "nama_kategori": "Minuman"
+        }
+      },
+      "kode_produk": "8999999037444",
+      "harga_produk": 5000,
+      "stok_barang": 120,
+      "tanggal_kadaluarsa": "2025-08-15T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 8,
+      "tanggal_penjualan": "01-06-2020"
+    },
+    "produk": {
+      "id_produk": "011",
+      "nama_produk": "Rinso Cair",
+      "kategori": {
+        "id_kategori": "KT005",
+        "nama_kategori": "Pembersih"
+      },
+      "subkategori": {
+        "id_subkategori": "SK038",
+        "nama_subkategori": "Deterjen",
+        "kategori": {
+          "id_kategori": "KT005",
+          "nama_kategori": "Pembersih"
+        }
+      },
+      "kode_produk": "8999999038168",
+      "harga_produk": 18000,
+      "stok_barang": 60,
+      "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
+      "is_deleted": null
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 22,
+      "tanggal_penjualan": "15-06-2020"
+    },
+    "produk": {
+      "id_produk": "012",
+      "nama_produk": "Biskuat Original",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK002",
+        "nama_subkategori": "Biskuit",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8999999037741",
+      "harga_produk": 7000,
+      "stok_barang": 80,
+      "tanggal_kadaluarsa": "2025-04-15T00:00:00Z",
+      "is_deleted": null
+    }
+  }
+]

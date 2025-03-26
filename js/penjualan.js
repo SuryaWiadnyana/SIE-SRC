@@ -131,12 +131,12 @@ async function loadProdukOptions() {
 
             const product = item.produk;
             
-            // Format tanggal kadaluarsa
-            let tanggalKadaluarsa = null;
-            if (product.tanggal_kadaluarsa && product.tanggal_kadaluarsa !== "0001-01-01T00:00:00Z") {
-                const date = new Date(product.tanggal_kadaluarsa);
+            // Format tanggal kedaluwarsa
+            let tanggalKedaluwarsa = null;
+            if (product.tanggal_kedaluwarsa && product.tanggal_kedaluwarsa !== "0001-01-01T00:00:00Z") {
+                const date = new Date(product.tanggal_kedaluwarsa);
                 if (!isNaN(date.getTime())) {
-                    tanggalKadaluarsa = date.toISOString();
+                    tanggalKedaluwarsa = date.toISOString();
                 }
             }
 
@@ -158,7 +158,7 @@ async function loadProdukOptions() {
                 kode_produk: product.kode_produk || '',
                 harga_produk: parseInt(product.harga_produk) || 0,
                 stok_barang: parseInt(product.stok_barang) || 0,
-                tanggal_kadaluarsa: tanggalKadaluarsa
+                tanggal_kedaluwarsa: tanggalKedaluwarsa
             };
         }).filter(product => product !== null);
 
@@ -171,8 +171,8 @@ async function loadProdukOptions() {
         // Generate options untuk dropdown
         const options = produkList.map(product => {
             const hargaFormatted = formatRupiah(product.harga_produk).replace('IDR', 'Rp');
-            const kadaluarsaText = product.tanggal_kadaluarsa ? 
-                new Date(product.tanggal_kadaluarsa).toLocaleDateString('id-ID', {
+            const kedaluwarsaText = product.tanggal_kedaluwarsa ? 
+                new Date(product.tanggal_kedaluwarsa).toLocaleDateString('id-ID', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
@@ -181,7 +181,7 @@ async function loadProdukOptions() {
             return `<option value="${product.id_produk}" 
                 data-harga="${product.harga_produk}"
                 data-nama="${product.nama_produk}"
-                data-kadaluarsa="${product.tanggal_kadaluarsa || ''}"
+                data-kedaluwarsa="${product.tanggal_kedaluwarsa || ''}"
                 data-stok="${product.stok_barang}">
                 ${product.nama_produk} (${hargaFormatted})
             </option>`;
@@ -502,7 +502,7 @@ async function setupEventHandlers() {
                                 kode_produk: selectedProduct.kode_produk,
                                 harga_produk: selectedProduct.harga_produk,
                                 stok_barang: selectedProduct.stok_barang,
-                                tanggal_kadaluarsa: selectedProduct.tanggal_kadaluarsa,
+                                tanggal_kedaluwarsa: selectedProduct.tanggal_kedaluwarsa,
                                 is_deleted: null
                             }
                         });
@@ -669,9 +669,9 @@ async function setupEventHandlers() {
             if (produk) {
                 quantityInput.attr('max', produk.stok_barang);
                 
-                // Format tanggal kadaluarsa
-                const kadaluarsaText = produk.tanggal_kadaluarsa ? 
-                    new Date(produk.tanggal_kadaluarsa).toLocaleDateString('id-ID', {
+                // Format tanggal kedaluwarsa
+                const kedaluwarsaText = produk.tanggal_kedaluwarsa ? 
+                    new Date(produk.tanggal_kedaluwarsa).toLocaleDateString('id-ID', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
@@ -683,7 +683,7 @@ async function setupEventHandlers() {
                         <div>Kode: ${produk.kode_produk || '-'}</div>
                         <div>Kategori: ${produk.kategori?.nama_kategori || '-'}</div>
                         <div>Subkategori: ${produk.subkategori?.nama_subkategori || '-'}</div>
-                        <div>Kadaluarsa: ${kadaluarsaText}</div>
+                        <div>Kedaluwarsa: ${kedaluwarsaText}</div>
                         <div>Harga: ${formatRupiah(produk.harga_produk)}</div>
                         <div>Stok: ${produk.stok_barang}</div>
                     </div>

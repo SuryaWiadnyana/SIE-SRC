@@ -202,14 +202,14 @@ async function updateUI(detail) {
                     subKategoriDisplay = produk.nama_subkategori;
                 }
                 
-                // Format tanggal kadaluarsa jika ada
-                let tanggalKadaluarsa = '-';
-                if (produk.tanggal_kadaluarsa) {
-                    const date = new Date(produk.tanggal_kadaluarsa);
+                // Format tanggal kedaluwarsa jika ada
+                let tanggalKedaluwarsa = '-';
+                if (produk.tanggal_kedaluwarsa) {
+                    const date = new Date(produk.tanggal_kedaluwarsa);
                     if (!isNaN(date.getTime())) {
                         // Pastikan tanggal valid sebelum memformat
                         if (date.getFullYear() > 1970) {
-                            tanggalKadaluarsa = date.toLocaleDateString('id-ID', {
+                            tanggalKedaluwarsa = date.toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric'
@@ -226,7 +226,7 @@ async function updateUI(detail) {
                     produk.kode_produk || '-',
                     formatRupiah(produk.harga_produk || 0),
                     produk.stok_barang || '0',
-                    tanggalKadaluarsa
+                    tanggalKedaluwarsa
                 ]);
             });
         } else {
