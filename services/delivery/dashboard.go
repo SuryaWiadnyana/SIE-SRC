@@ -4,6 +4,7 @@ import (
 	"SIE-SRC/domain"
 	"SIE-SRC/middleware"
 	"context"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -36,6 +37,9 @@ func NewHttpDeliveryDashboard(app fiber.Router, penjualanUC domain.PenjualanUseC
 	protected.Get("/category-sales", handler.GetCategorySales)
 	protected.Get("/stock", handler.GetStockByCategory)
 	protected.Get("/lowest-stock", handler.GetLowestStock)
+	protected.Get("/years", handler.GetYears)
+	protected.Get("/categories", handler.GetCategories)
+	protected.Post("/sales/best-selling", handler.GetBestSellingProducts)
 }
 
 // GetDashboardData mengambil data untuk dashboard
@@ -358,6 +362,7 @@ func (d *HttpDeliveryDashboard) GetLowestStock(c *fiber.Ctx) error {
 	// Mengambil semua produk
 	productList, err := d.ProdukUC.GetAllProduk(context.Background())
 	if err != nil {
+		log.Printf("Error getting product data: %v", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"error":   "Gagal mengambil data produk",
@@ -386,8 +391,141 @@ func (d *HttpDeliveryDashboard) GetLowestStock(c *fiber.Ctx) error {
 		})
 	}
 
+	// If no products found, return empty array
+	if result == nil {
+		result = []fiber.Map{}
+	}
+
 	return c.JSON(fiber.Map{
 		"success": true,
 		"data":    result,
+	})
+}
+
+// GetYears mengambil daftar tahun yang tersedia dari data penjualan
+func (d *HttpDeliveryDashboard) GetYears(c *fiber.Ctx) error {
+	// Mengambil semua data penjualan
+	penjualanList, err := d.PenjualanUC.GetAll(context.Background())
+	if err != nil {
+		log.Printf("Error getting sales data: %v", err)
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"error":   "Gagal mengambil data penjualan",
+		})
+	}
+
+	// Mengumpulkan tahun unik
+	yearsMap := make(map[int]bool)
+	for _, sale := range penjualanList {
+		year := sale.Tanggal_Penjualan.Year()
+		yearsMap[year] = true
+	}
+
+	// Konversi ke slice dan urutkan
+	years := make([]int, 0, len(yearsMap))
+	for year := range yearsMap {
+		years = append(years, year)
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(years)))
+
+	// If no years found, return current year
+	if len(years) == 0 {
+		years = append(years, time.Now().Year())
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    years,
+	})
+}
+
+// GetCategories mengambil daftar kategori yang tersedia
+func (d *HttpDeliveryDashboard) GetCategories(c *fiber.Ctx) error {
+	// Mengambil semua kategori
+	kategoriList, err := d.KategoriUC.GetAll(context.Background())
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"error":   "Gagal mengambil data kategori",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    kategoriList,
+	})
+}
+
+// GetBestSellingProducts mengambil data produk terlaris berdasarkan tahun
+func (d *HttpDeliveryDashboard) GetBestSellingProducts(c *fiber.Ctx) error {
+	// Parse request body
+	var req struct {
+		Year int `json:"year"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"error":   "Invalid request body",
+		})
+	}
+
+	// If year is not provided, use current year
+	if req.Year == 0 {
+		req.Year = time.Now().Year()
+	}
+
+	// Get all sales
+	penjualanList, err := d.PenjualanUC.GetAll(context.Background())
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"error":   "Gagal mengambil data penjualan",
+		})
+	}
+
+	// Create a map to store product sales data
+	type ProductSales struct {
+		IDProduk        string  `json:"id_produk"`
+		NamaProduk     string  `json:"nama_produk"`
+		JumlahTerjual  int     `json:"jumlah_terjual"`
+		TotalPenjualan float64 `json:"total_penjualan"`
+	}
+	productSalesMap := make(map[string]*ProductSales)
+
+	// Calculate sales for each product
+	for _, sale := range penjualanList {
+		if sale.Tanggal_Penjualan.Year() == req.Year {
+			details, err := d.DetailPenjualanUC.GetByPenjualanID(context.Background(), sale.IDPenjualan)
+			if err != nil {
+				log.Printf("Error getting sale details for ID %s: %v", sale.IDPenjualan, err)
+				continue
+			}
+
+			for _, detail := range details {
+				for _, produk := range detail.Produk {
+					if _, exists := productSalesMap[produk.IDProduk]; !exists {
+						productSalesMap[produk.IDProduk] = &ProductSales{
+							IDProduk:    produk.IDProduk,
+							NamaProduk:  produk.NamaProduk,
+						}
+					}
+					
+					productSalesMap[produk.IDProduk].JumlahTerjual++
+					productSalesMap[produk.IDProduk].TotalPenjualan += float64(produk.HargaProduk)
+				}
+			}
+		}
+	}
+
+	// Convert map to slice for sorting
+	var productSalesList []ProductSales
+	for _, ps := range productSalesMap {
+		productSalesList = append(productSalesList, *ps)
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    productSalesList,
 	})
 }

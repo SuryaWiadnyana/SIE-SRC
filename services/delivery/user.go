@@ -381,7 +381,7 @@ func GenerateToken(username, role string) (string, error) {
 	expiration, err := strconv.Atoi(expirationHours)
 	if err != nil {
 		log.Printf("Error parsing expiration hours: %v", err) // Log jika parsing gagal
-		return "", fmt.Errorf("jam kadaluarsa tidak valid: %v", err)
+		return "", fmt.Errorf("jam kedaluwarsa tidak valid: %v", err)
 	}
 
 	expirationTime := time.Now().Add(time.Hour * time.Duration(expiration))

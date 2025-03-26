@@ -136,8 +136,8 @@ func (uc *ProdukUseCase) GenerateNextID(ctx context.Context) (string, error) {
 	return uc.ProdukRepository.GenerateNextID(ctx)
 }
 
-// GetProductsNearExpiry mengembalikan daftar produk yang mendekati tanggal kadaluarsa
-// daysThreshold adalah jumlah hari sebelum kadaluarsa untuk memberikan peringatan
+// GetProductsNearExpiry mengembalikan daftar produk yang mendekati tanggal kedaluwarsa
+// daysThreshold adalah jumlah hari sebelum kedaluwarsa untuk memberikan peringatan
 func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshold int) ([]domain.ProdukExpiryResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, uc.contextTimeout)
 	defer cancel()
@@ -148,14 +148,14 @@ func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshol
 		return nil, err
 	}
 
-	// Filter produk yang mendekati kadaluarsa
+	// Filter produk yang mendekati kedaluwarsa
 	var nearExpiryProducts []domain.ProdukExpiryResponse
 	now := time.Now()
 	thresholdDate := now.AddDate(0, 0, daysThreshold)
 
 	for _, product := range allProducts {
-		// Lewati produk yang tidak memiliki tanggal kadaluarsa (zero time)
-		if product.TanggalKadaluarsa.IsZero() {
+		// Lewati produk yang tidak memiliki tanggal kedaluwarsa (zero time)
+		if product.TanggalKedaluwarsa.IsZero() {
 			continue
 		}
 
@@ -164,17 +164,17 @@ func (uc *ProdukUseCase) GetProductsNearExpiry(ctx context.Context, daysThreshol
 			Produk: product,
 		}
 
-		// Jika produk sudah kadaluarsa, tambahkan ke daftar
-		if product.TanggalKadaluarsa.Before(now) {
+		// Jika produk sudah kedaluwarsa, tambahkan ke daftar
+		if product.TanggalKedaluwarsa.Before(now) {
 			produkExpiry.IsExpired = true
 			produkExpiry.DaysUntilExpiry = 0
 			nearExpiryProducts = append(nearExpiryProducts, produkExpiry)
 			continue
 		}
 
-		// Jika produk mendekati kadaluarsa (dalam threshold hari), tambahkan ke daftar
-		if product.TanggalKadaluarsa.Before(thresholdDate) {
-			daysUntil := int(product.TanggalKadaluarsa.Sub(now).Hours() / 24)
+		// Jika produk mendekati kedaluwarsa (dalam threshold hari), tambahkan ke daftar
+		if product.TanggalKedaluwarsa.Before(thresholdDate) {
+			daysUntil := int(product.TanggalKedaluwarsa.Sub(now).Hours() / 24)
 			produkExpiry.DaysUntilExpiry = daysUntil
 			nearExpiryProducts = append(nearExpiryProducts, produkExpiry)
 		}

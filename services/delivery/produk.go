@@ -45,7 +45,7 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase, kuc doma
 	group.Post("/importdata", handler.ImportProduk)
 	group.Post("/importJSON", handler.ImportProdukJSON)
 	group.Get("/getfrequentitemsets", handler.GetFrequentItemsets)
-	group.Get("/getbestselling", handler.GetBestSellingProducts)
+	// group.Get("/getbestselling", handler.GetBestSellingProducts)
 	group.Get("/getloweststock", handler.GetProdukWithLowestStock)
 	group.Get("/getnearexpiry/:days", handler.GetProductsNearExpiry)
 }
@@ -626,13 +626,13 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				Stok:        stok,
 			}
 
-			// Proses tanggal kadaluarsa jika ada
+			// Proses tanggal kedaluwarsa jika ada
 			if len(record) > 6 && strings.TrimSpace(record[6]) != "" {
-				tanggalKadaluarsa, err := time.Parse("2006-01-02", strings.TrimSpace(record[6]))
+				tanggalKedaluwarsa, err := time.Parse("2006-01-02", strings.TrimSpace(record[6]))
 				if err == nil {
-					produk.TanggalKadaluarsa = tanggalKadaluarsa
+					produk.TanggalKedaluwarsa = tanggalKedaluwarsa
 				} else {
-					log.Printf("Baris %d: format tanggal kadaluarsa tidak valid, gunakan format YYYY-MM-DD", i+1)
+					log.Printf("Baris %d: format tanggal kedaluwarsa tidak valid, gunakan format YYYY-MM-DD", i+1)
 				}
 			}
 
@@ -709,13 +709,13 @@ func (d *HttpDeliveryProduk) ImportProduk(c *fiber.Ctx) error {
 				Stok:        stok,
 			}
 
-			// Proses tanggal kadaluarsa jika ada
+			// Proses tanggal kedaluwarsa jika ada
 			if len(row) > 6 && strings.TrimSpace(row[6]) != "" {
-				tanggalKadaluarsa, err := time.Parse("2006-01-02", strings.TrimSpace(row[6]))
+				tanggalKedaluwarsa, err := time.Parse("2006-01-02", strings.TrimSpace(row[6]))
 				if err == nil {
-					produk.TanggalKadaluarsa = tanggalKadaluarsa
+					produk.TanggalKedaluwarsa = tanggalKedaluwarsa
 				} else {
-					log.Printf("Baris %d: format tanggal kadaluarsa tidak valid, gunakan format YYYY-MM-DD", i+1)
+					log.Printf("Baris %d: format tanggal kedaluwarsa tidak valid, gunakan format YYYY-MM-DD", i+1)
 				}
 			}
 
@@ -837,30 +837,30 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 	})
 }
 
-func (d *HttpDeliveryProduk) GetBestSellingProducts(c *fiber.Ctx) error {
-	// Ambil parameter limit dari query, default 10 jika tidak ada
-	limitStr := c.Query("limit", "10")
-	limitProduk, err := strconv.Atoi(limitStr)
-	if err != nil || limitProduk <= 0 {
-		limitProduk = 10 // Default limit jika parameter tidak valid
-	}
+// func (d *HttpDeliveryProduk) GetBestSellingProducts(c *fiber.Ctx) error {
+// 	// Ambil parameter limit dari query, default 10 jika tidak ada
+// 	limitStr := c.Query("limit", "10")
+// 	limitProduk, err := strconv.Atoi(limitStr)
+// 	if err != nil || limitProduk <= 0 {
+// 		limitProduk = 10 // Default limit jika parameter tidak valid
+// 	}
 
-	// Panggil use case untuk mendapatkan produk terlaris
-	bestSellingProducts, err := d.HTTP.GetBestSellingProducts(c.Context(), limitProduk)
-	if err != nil {
-		log.Printf("Error getting best selling products: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   "Gagal mendapatkan data produk terlaris",
-		})
-	}
+// 	// Panggil use case untuk mendapatkan produk terlaris
+// 	bestSellingProducts, err := d.HTTP.GetBestSellingProducts(c.Context(), limitProduk)
+// 	if err != nil {
+// 		log.Printf("Error getting best selling products: %v", err)
+// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+// 			"success": false,
+// 			"error":   "Gagal mendapatkan data produk terlaris",
+// 		})
+// 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": "Data produk terlaris berhasil diambil",
-		"data":    bestSellingProducts,
-	})
-}
+// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+// 		"success": true,
+// 		"message": "Data produk terlaris berhasil diambil",
+// 		"data":    bestSellingProducts,
+// 	})
+// }
 
 func (d *HttpDeliveryProduk) GetProdukWithLowestStock(c *fiber.Ctx) error {
 	// Default limit 5 produk dengan stok terendah
@@ -895,12 +895,12 @@ func (d *HttpDeliveryProduk) GetProductsNearExpiry(c *fiber.Ctx) error {
 	produk, err := d.HTTP.GetProductsNearExpiry(c.Context(), days)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal mendapatkan produk yang mendekati kadaluarsa",
+			"error": "Gagal mendapatkan produk yang mendekati kedaluwarsa",
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Data produk yang mendekati kadaluarsa berhasil diambil",
+		"message": "Data produk yang mendekati kedaluwarsa berhasil diambil",
 		"data":    produk,
 	})
 }

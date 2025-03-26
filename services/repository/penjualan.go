@@ -150,29 +150,26 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 
 // GetAll mendapatkan semua produk dari koleksi.
 func (rp *mongoRepoPenjualan) GetAll(ctx context.Context) ([]domain.Penjualan, error) {
-	penjualanProduk := rp.DB.Collection(_Penjualan)
+	ListPenjualan := rp.DB.Collection(_Penjualan)
+	var penjualanList []domain.Penjualan
 
-	var ListPenjualan []domain.Penjualan
-	data, err := penjualanProduk.Find(ctx, bson.M{})
+	cursor, err := ListPenjualan.Find(ctx, bson.M{})
 	if err != nil {
-		return nil, err
+		log.Printf("Error getting all penjualan: %v", err)
+		return nil, fmt.Errorf("error getting all penjualan: %v", err)
 	}
-	defer data.Close(ctx)
+	defer cursor.Close(ctx)
 
-	for data.Next(ctx) {
-		var Sells domain.Penjualan
-		if err := data.Decode(&Sells); err != nil {
-			log.Println("Error decoding product:", err)
-			continue
-		}
-		ListPenjualan = append(ListPenjualan, Sells)
+	if err = cursor.All(ctx, &penjualanList); err != nil {
+		log.Printf("Error decoding penjualan: %v", err)
+		return nil, fmt.Errorf("error decoding penjualan: %v", err)
 	}
 
-	if err := data.Err(); err != nil {
-		return nil, err
+	if penjualanList == nil {
+		penjualanList = []domain.Penjualan{} // Return empty slice instead of nil
 	}
 
-	return ListPenjualan, err
+	return penjualanList, nil
 }
 
 // GetByID mendapatkan produk berdasarkan ID.

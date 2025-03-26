@@ -12,7 +12,7 @@ type Produk struct {
 	SubKategori       SubKategori `json:"subkategori" bson:"subkategori"`
 	KodeProduk        string      `json:"kode_produk" bson:"kode_produk"`
 	HargaProduk       int         `json:"harga_produk" bson:"harga_produk"`
-	TanggalKadaluarsa time.Time   `json:"tanggal_kadaluarsa" bson:"tanggal_kadaluarsa"`
+	TanggalKedaluwarsa time.Time   `json:"tanggal_kedaluwarsa" bson:"tanggal_kedaluwarsa"`
 	Stok              int         `json:"stok_barang" bson:"stok_barang"`
 	UpdatedAt         time.Time   `json:"updated_at" bson:"updated_at"`
 	IsDeleted         *time.Time  `json:"is_deleted" bson:"is_deleted"`

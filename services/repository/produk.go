@@ -99,27 +99,26 @@ func (rp *mongoRepoProduk) CreateProduk(ctx context.Context, bd *domain.Produk) 
 
 // Memunculkan Semua Data Produk
 func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, error) {
-	DataProduk := rp.DB.Collection(_Produk)
+	ListProduk := rp.DB.Collection(_Produk)
+	var produkList []domain.Produk
 
-	// Add sort options for id_produk
-	opts := options.Find().SetSort(bson.D{{Key: "id_produk", Value: 1}})
-
-	filter := bson.M{
-		"is_deleted": nil, // Only get non-deleted products
-	}
-
-	cursor, err := DataProduk.Find(ctx, filter, opts)
+	cursor, err := ListProduk.Find(ctx, bson.M{"is_deleted": nil})
 	if err != nil {
-		return nil, err
+		log.Printf("Error getting all products: %v", err)
+		return nil, fmt.Errorf("error getting all products: %v", err)
 	}
 	defer cursor.Close(ctx)
 
-	var products []domain.Produk
-	if err = cursor.All(ctx, &products); err != nil {
-		return nil, err
+	if err = cursor.All(ctx, &produkList); err != nil {
+		log.Printf("Error decoding products: %v", err)
+		return nil, fmt.Errorf("error decoding products: %v", err)
 	}
 
-	return products, nil
+	if produkList == nil {
+		produkList = []domain.Produk{} // Return empty slice instead of nil
+	}
+
+	return produkList, nil
 }
 
 // Mencari Data Produk Berdasarkan ID Produk
@@ -206,7 +205,7 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 			"kode_produk":        bd.KodeProduk,
 			"harga_produk":       bd.HargaProduk,
 			"stok_barang":        bd.Stok,
-			"tanggal_kadaluarsa": bd.TanggalKadaluarsa,
+			"tanggal_kedaluwarsa": bd.TanggalKedaluwarsa,
 			"updated_at":         bd.UpdatedAt,
 		},
 	}
@@ -406,7 +405,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 			{Key: "kode_produk", Value: produk.KodeProduk},
 			{Key: "harga_produk", Value: produk.HargaProduk},
 			{Key: "stok_barang", Value: produk.Stok},
-			{Key: "tanggal_kadaluarsa", Value: produk.TanggalKadaluarsa},
+			{Key: "tanggal_kedaluwarsa", Value: produk.TanggalKedaluwarsa},
 			{Key: "updated_at", Value: now},
 			{Key: "is_deleted", Value: nil},
 		}
