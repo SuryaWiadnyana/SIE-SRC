@@ -259,8 +259,8 @@
                 "kode_produk": "7622210640994",
                 "harga_produk": 20000,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 19,
-                "updated_at": "2025-03-25T16:23:26.115Z",
+                "stok_barang": 11,
+                "updated_at": "2025-03-26T04:14:57.294Z",
                 "is_deleted": null
             }
         },
@@ -307,8 +307,8 @@
                 "kode_produk": "8996001600162",
                 "harga_produk": 3500,
                 "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
-                "stok_barang": 100,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 87,
+                "updated_at": "2025-03-26T04:27:25.465Z",
                 "is_deleted": null
             }
         },
@@ -379,8 +379,8 @@
                 "kode_produk": "8996001600165",
                 "harga_produk": 7500,
                 "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
-                "stok_barang": 60,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 49,
+                "updated_at": "2025-03-26T04:27:25.579Z",
                 "is_deleted": null
             }
         },

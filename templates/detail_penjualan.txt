@@ -1,0 +1,2231 @@
+{
+    "data": [
+        {
+            "id_details": "DP001",
+            "penjualan": {
+                "id_penjualan": "PJ001",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-01-25T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 13400,
+                "total": 13400,
+                "updated_at": "2025-03-20T14:15:18.717Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 39,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "028",
+                    "nama_produk": "Teh Sari Wangi",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Kopi & Teh",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563427",
+                    "harga_produk": 8000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 70,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 13400
+        },
+        {
+            "id_details": "DP002",
+            "penjualan": {
+                "id_penjualan": "PJ002",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-20T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 8700,
+                "total": 8700,
+                "updated_at": "2025-03-20T14:15:43.751Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 37,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 100,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 8700
+        },
+        {
+            "id_details": "DP003",
+            "penjualan": {
+                "id_penjualan": "PJ003",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-02-14T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 8400,
+                "total": 8400,
+                "updated_at": "2025-03-20T14:21:21.983Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 36,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 98,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 8400
+        },
+        {
+            "id_details": "DP004",
+            "penjualan": {
+                "id_penjualan": "PJ004",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2024-12-08T00:00:00Z",
+                "jumlah_produk": 6,
+                "subtotal": 23600,
+                "total": 23600,
+                "updated_at": "2025-03-20T14:28:07.313Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 34,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 97,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "006",
+                    "nama_produk": "Lays Classic",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Snack",
+                        "kategori": null
+                    },
+                    "kode_produk": "8996001600147",
+                    "harga_produk": 9500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 40,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 23600
+        },
+        {
+            "id_details": "DP005",
+            "penjualan": {
+                "id_penjualan": "PJ005",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-01-17T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 8700,
+                "total": 8700,
+                "updated_at": "2025-03-20T14:29:46.755Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 31,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Aqua 600ml",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Air Mineral",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563419",
+                    "harga_produk": 3000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 95,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 8700
+        },
+        {
+            "id_details": "DP006",
+            "penjualan": {
+                "id_penjualan": "PJ006",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-20T00:00:00Z",
+                "jumlah_produk": 2,
+                "subtotal": 12500,
+                "total": 12500,
+                "updated_at": "2025-03-20T14:41:10.299Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "005",
+                    "nama_produk": "Chitato Sapi Panggang",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Snack",
+                        "kategori": null
+                    },
+                    "kode_produk": "8996001600146",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "023",
+                    "nama_produk": "Pop Ice Coklat",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Minuman Serbuk",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563422",
+                    "harga_produk": 2500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 12500
+        },
+        {
+            "id_details": "DP007",
+            "penjualan": {
+                "id_penjualan": "PJ007",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-22T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 7900,
+                "total": 7900,
+                "updated_at": "2025-03-22T09:46:45.355Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563414",
+                    "harga_produk": 2700,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 30,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "023",
+                    "nama_produk": "Pop Ice Coklat",
+                    "kategori": {
+                        "id_kategori": "",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "",
+                        "nama_subkategori": "Minuman Serbuk",
+                        "kategori": null
+                    },
+                    "kode_produk": "8997035563422",
+                    "harga_produk": 2500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 79,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 7900
+        },
+        {
+            "id_details": "DP008",
+            "penjualan": {
+                "id_penjualan": "PJ008",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-17T00:00:00Z",
+                "jumlah_produk": 5,
+                "subtotal": 17500,
+                "total": 17500,
+                "updated_at": "2025-03-25T09:12:23.851Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "004",
+                    "nama_produk": "Indomie Goreng Special",
+                    "kategori": {
+                        "id_kategori": "KTG001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KTG001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "P001",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 100,
+                    "updated_at": "2025-03-17T06:03:47.684Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 17500
+        },
+        {
+            "id_details": "DP009",
+            "penjualan": {
+                "id_penjualan": "PJ009",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-01-15T00:00:00Z",
+                "jumlah_produk": 188,
+                "subtotal": 1458500,
+                "total": 1458500,
+                "updated_at": "2025-03-25T16:12:55.661Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037574",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 200,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "002",
+                    "nama_produk": "Pocari Sweat",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK023",
+                        "nama_subkategori": "Minuman Isotonik",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037383",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 100,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "003",
+                    "nama_produk": "Chitato Sapi Panggang",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Makanan Ringan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037666",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "004",
+                    "nama_produk": "Ultra Milk Chocolate",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037529",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "005",
+                    "nama_produk": "Beng Beng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK005",
+                        "nama_subkategori": "Coklat",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037956",
+                    "harga_produk": 2500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 200,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "006",
+                    "nama_produk": "Dettol Body Wash Fresh",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perawatan Tubuh"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK020",
+                        "nama_subkategori": "Sabun Mandi",
+                        "kategori": {
+                            "id_kategori": "KT006",
+                            "nama_kategori": "Perawatan Tubuh"
+                        }
+                    },
+                    "kode_produk": "8993560027216",
+                    "harga_produk": 25000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 45,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "007",
+                    "nama_produk": "Indomie Soto",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037598",
+                    "harga_produk": 3000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 190,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "008",
+                    "nama_produk": "Pocky Cokelat",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK004",
+                        "nama_subkategori": "Wafer",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037826",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 70,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "009",
+                    "nama_produk": "Greenfields Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037543",
+                    "harga_produk": 16000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 40,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "010",
+                    "nama_produk": "Extra Joss",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK023",
+                        "nama_subkategori": "Minuman Energi",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037444",
+                    "harga_produk": 5000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 120,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "011",
+                    "nama_produk": "Rinso Cair",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038168",
+                    "harga_produk": 18000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 60,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "012",
+                    "nama_produk": "Biskuat Original",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK002",
+                        "nama_subkategori": "Biskuit",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037741",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 1458500
+        },
+        {
+            "id_details": "DP010",
+            "penjualan": {
+                "id_penjualan": "PJ009",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-01-15T00:00:00Z",
+                "jumlah_produk": 15,
+                "subtotal": 52500,
+                "total": 52500,
+                "updated_at": "2025-03-25T16:16:47.331Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037574",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 200,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 52500
+        },
+        {
+            "id_details": "DP011",
+            "penjualan": {
+                "id_penjualan": "PJ010",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-01-20T00:00:00Z",
+                "jumlah_produk": 10,
+                "subtotal": 70000,
+                "total": 70000,
+                "updated_at": "2025-03-25T16:18:07.868Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "002",
+                    "nama_produk": "Pocari Sweat",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK023",
+                        "nama_subkategori": "Minuman Isotonik",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037383",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 100,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 70000
+        },
+        {
+            "id_details": "DP012",
+            "penjualan": {
+                "id_penjualan": "PJ011",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-05T00:00:00Z",
+                "jumlah_produk": 8,
+                "subtotal": 80000,
+                "total": 80000,
+                "updated_at": "2025-03-25T16:19:02.969Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "003",
+                    "nama_produk": "Chitato Sapi Panggang",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Makanan Ringan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037666",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 80000
+        },
+        {
+            "id_details": "DP013",
+            "penjualan": {
+                "id_penjualan": "PJ012",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-15T00:00:00Z",
+                "jumlah_produk": 20,
+                "subtotal": 140000,
+                "total": 140000,
+                "updated_at": "2025-03-25T16:20:31.236Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "004",
+                    "nama_produk": "Ultra Milk Chocolate",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037529",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 140000
+        },
+        {
+            "id_details": "DP014",
+            "penjualan": {
+                "id_penjualan": "PJ013",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-03-01T00:00:00Z",
+                "jumlah_produk": 12,
+                "subtotal": 30000,
+                "total": 30000,
+                "updated_at": "2025-03-25T16:20:45.993Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "005",
+                    "nama_produk": "Beng Beng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK005",
+                        "nama_subkategori": "Coklat",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037956",
+                    "harga_produk": 2500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 200,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 30000
+        },
+        {
+            "id_details": "DP015",
+            "penjualan": {
+                "id_penjualan": "PJ014",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-03-20T00:00:00Z",
+                "jumlah_produk": 5,
+                "subtotal": 125000,
+                "total": 125000,
+                "updated_at": "2025-03-25T16:22:15.98Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "006",
+                    "nama_produk": "Dettol Body Wash Fresh",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perawatan Tubuh"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK020",
+                        "nama_subkategori": "Sabun Mandi",
+                        "kategori": {
+                            "id_kategori": "KT006",
+                            "nama_kategori": "Perawatan Tubuh"
+                        }
+                    },
+                    "kode_produk": "8993560027216",
+                    "harga_produk": 25000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 45,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 125000
+        },
+        {
+            "id_details": "DP016",
+            "penjualan": {
+                "id_penjualan": "PJ015",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-04-05T00:00:00Z",
+                "jumlah_produk": 25,
+                "subtotal": 75000,
+                "total": 75000,
+                "updated_at": "2025-03-25T16:22:30.681Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "007",
+                    "nama_produk": "Indomie Soto",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037598",
+                    "harga_produk": 3000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 190,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 75000
+        },
+        {
+            "id_details": "DP017",
+            "penjualan": {
+                "id_penjualan": "PJ016",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-04-15T00:00:00Z",
+                "jumlah_produk": 15,
+                "subtotal": 150000,
+                "total": 150000,
+                "updated_at": "2025-03-25T16:22:53.807Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "008",
+                    "nama_produk": "Pocky Cokelat",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK004",
+                        "nama_subkategori": "Wafer",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037826",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 70,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 150000
+        },
+        {
+            "id_details": "DP018",
+            "penjualan": {
+                "id_penjualan": "PJ017",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-05-01T00:00:00Z",
+                "jumlah_produk": 18,
+                "subtotal": 288000,
+                "total": 288000,
+                "updated_at": "2025-03-25T16:23:05.165Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "009",
+                    "nama_produk": "Greenfields Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037543",
+                    "harga_produk": 16000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 40,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 288000
+        },
+        {
+            "id_details": "DP019",
+            "penjualan": {
+                "id_penjualan": "PJ018",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-05-15T00:00:00Z",
+                "jumlah_produk": 30,
+                "subtotal": 150000,
+                "total": 150000,
+                "updated_at": "2025-03-25T16:23:16.738Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "010",
+                    "nama_produk": "Extra Joss",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK023",
+                        "nama_subkategori": "Minuman Energi",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037444",
+                    "harga_produk": 5000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 120,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 150000
+        },
+        {
+            "id_details": "DP020",
+            "penjualan": {
+                "id_penjualan": "PJ019",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-06-01T00:00:00Z",
+                "jumlah_produk": 8,
+                "subtotal": 144000,
+                "total": 144000,
+                "updated_at": "2025-03-25T16:23:26.037Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "011",
+                    "nama_produk": "Rinso Cair",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038168",
+                    "harga_produk": 18000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 60,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 144000
+        },
+        {
+            "id_details": "DP021",
+            "penjualan": {
+                "id_penjualan": "PJ020",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-06-15T00:00:00Z",
+                "jumlah_produk": 22,
+                "subtotal": 154000,
+                "total": 154000,
+                "updated_at": "2025-03-25T16:23:38.1Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "012",
+                    "nama_produk": "Biskuat Original",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK002",
+                        "nama_subkategori": "Biskuit",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037741",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 154000
+        },
+        {
+            "id_details": "DP022",
+            "penjualan": {
+                "id_penjualan": "PJ021",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-01-25T00:00:00Z",
+                "jumlah_produk": 8,
+                "subtotal": 32000,
+                "total": 32000,
+                "updated_at": "2025-03-25T16:28:16.112Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "003",
+                    "nama_produk": "Fruit Tea Apple",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK012",
+                        "nama_subkategori": "Teh",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999038076",
+                    "harga_produk": 4000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 130,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 32000
+        },
+        {
+            "id_details": "DP023",
+            "penjualan": {
+                "id_penjualan": "PJ022",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-05T00:00:00Z",
+                "jumlah_produk": 12,
+                "subtotal": 180000,
+                "total": 180000,
+                "updated_at": "2025-03-25T16:28:27.38Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "004",
+                    "nama_produk": "Molto Pewangi Blue",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038120",
+                    "harga_produk": 15000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 180000
+        },
+        {
+            "id_details": "DP024",
+            "penjualan": {
+                "id_penjualan": "PJ023",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-10T00:00:00Z",
+                "jumlah_produk": 20,
+                "subtotal": 400000,
+                "total": 400000,
+                "updated_at": "2025-03-25T16:28:38.624Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "005",
+                    "nama_produk": "Downy Mystique",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038144",
+                    "harga_produk": 20000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 40,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 400000
+        },
+        {
+            "id_details": "DP025",
+            "penjualan": {
+                "id_penjualan": "PJ024",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-15T00:00:00Z",
+                "jumlah_produk": 15,
+                "subtotal": 270000,
+                "total": 270000,
+                "updated_at": "2025-03-25T16:29:04.576Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "006",
+                    "nama_produk": "Rinso Cair",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038168",
+                    "harga_produk": 18000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 60,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 270000
+        },
+        {
+            "id_details": "DP026",
+            "penjualan": {
+                "id_penjualan": "PJ025",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-20T00:00:00Z",
+                "jumlah_produk": 25,
+                "subtotal": 425000,
+                "total": 425000,
+                "updated_at": "2025-03-25T16:29:12.853Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "007",
+                    "nama_produk": "Attack Easy",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038182",
+                    "harga_produk": 17000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 55,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 425000
+        },
+        {
+            "id_details": "DP027",
+            "penjualan": {
+                "id_penjualan": "PJ026",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-25T00:00:00Z",
+                "jumlah_produk": 18,
+                "subtotal": 180000,
+                "total": 180000,
+                "updated_at": "2025-03-25T16:29:21.896Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "008",
+                    "nama_produk": "Bayclin",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038205",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 180000
+        },
+        {
+            "id_details": "DP028",
+            "penjualan": {
+                "id_penjualan": "PJ027",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-03-01T00:00:00Z",
+                "jumlah_produk": 30,
+                "subtotal": 450000,
+                "total": 450000,
+                "updated_at": "2025-03-25T16:29:30.187Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "009",
+                    "nama_produk": "Wipol Karbol",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038212",
+                    "harga_produk": 15000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 65,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 450000
+        },
+        {
+            "id_details": "DP029",
+            "penjualan": {
+                "id_penjualan": "PJ028",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-03-05T00:00:00Z",
+                "jumlah_produk": 22,
+                "subtotal": 99000,
+                "total": 99000,
+                "updated_at": "2025-03-25T16:29:56.529Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "010",
+                    "nama_produk": "Nu Green Tea Original",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK012",
+                        "nama_subkategori": "Teh",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999038106",
+                    "harga_produk": 4500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 110,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 99000
+        },
+        {
+            "id_details": "DP030",
+            "penjualan": {
+                "id_penjualan": "PJ029",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-05T00:00:00Z",
+                "jumlah_produk": 8,
+                "subtotal": 80000,
+                "total": 80000,
+                "updated_at": "2025-03-25T16:30:07.08Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "003",
+                    "nama_produk": "Chitato Sapi Panggang",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK025",
+                        "nama_subkategori": "Makanan Ringan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037666",
+                    "harga_produk": 10000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 80000
+        },
+        {
+            "id_details": "DP031",
+            "penjualan": {
+                "id_penjualan": "PJ030",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-02-15T00:00:00Z",
+                "jumlah_produk": 20,
+                "subtotal": 140000,
+                "total": 140000,
+                "updated_at": "2025-03-25T16:30:20.492Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "004",
+                    "nama_produk": "Ultra Milk Chocolate",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8999999037529",
+                    "harga_produk": 7000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 80,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 140000
+        },
+        {
+            "id_details": "DP032",
+            "penjualan": {
+                "id_penjualan": "PJ031",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-03-01T00:00:00Z",
+                "jumlah_produk": 12,
+                "subtotal": 30000,
+                "total": 30000,
+                "updated_at": "2025-03-25T16:30:48.818Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "005",
+                    "nama_produk": "Beng Beng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK005",
+                        "nama_subkategori": "Coklat",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8999999037956",
+                    "harga_produk": 2500,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 200,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 30000
+        },
+        {
+            "id_details": "DP033",
+            "penjualan": {
+                "id_penjualan": "PJ032",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2024-08-20T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 14500,
+                "total": 14500,
+                "updated_at": "2025-03-26T03:44:30.63Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 100,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 60,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 14500
+        },
+        {
+            "id_details": "DP034",
+            "penjualan": {
+                "id_penjualan": "PJ033",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2024-11-23T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 18500,
+                "total": 18500,
+                "updated_at": "2025-03-26T03:44:54.709Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 98,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 59,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 18500
+        },
+        {
+            "id_details": "DP035",
+            "penjualan": {
+                "id_penjualan": "PJ034",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2024-10-31T00:00:00Z",
+                "jumlah_produk": 5,
+                "subtotal": 25500,
+                "total": 25500,
+                "updated_at": "2025-03-26T03:45:34.301Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 97,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 57,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 25500
+        },
+        {
+            "id_details": "DP036",
+            "penjualan": {
+                "id_penjualan": "PJ035",
+                "user": {
+                    "id_user": "US002",
+                    "username": "OwnerSRC",
+                    "password": "$2a$10$uQuoBP8cOJDuQcbUzPOGq.qI8INKS./typeIUjEMyH5oEOewHSr7S",
+                    "role": "owner",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-02-12T00:00:00Z",
+                "jumlah_produk": 4,
+                "subtotal": 22000,
+                "total": 22000,
+                "updated_at": "2025-03-26T03:57:08.155Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 94,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 55,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 22000
+        },
+        {
+            "id_details": "DP037",
+            "penjualan": {
+                "id_penjualan": "PJ036",
+                "user": {
+                    "id_user": "US001",
+                    "username": "AdminSRC",
+                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                    "role": "admin",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2020-06-01T00:00:00Z",
+                "jumlah_produk": 8,
+                "subtotal": 144000,
+                "total": 144000,
+                "updated_at": "2025-03-26T04:14:57.219Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "011",
+                    "nama_produk": "Rinso Cair",
+                    "kategori": {
+                        "id_kategori": "KT005",
+                        "nama_kategori": "Pembersih"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK038",
+                        "nama_subkategori": "Deterjen",
+                        "kategori": {
+                            "id_kategori": "KT005",
+                            "nama_kategori": "Pembersih"
+                        }
+                    },
+                    "kode_produk": "8999999038168",
+                    "harga_produk": 18000,
+                    "tanggal_kedaluwarsa": "0001-01-01T00:00:00Z",
+                    "stok_barang": 60,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 144000
+        },
+        {
+            "id_details": "DP038",
+            "penjualan": {
+                "id_penjualan": "PJ037",
+                "user": {
+                    "id_user": "US002",
+                    "username": "OwnerSRC",
+                    "password": "$2a$10$uQuoBP8cOJDuQcbUzPOGq.qI8INKS./typeIUjEMyH5oEOewHSr7S",
+                    "role": "owner",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-16T00:00:00Z",
+                "jumlah_produk": 3,
+                "subtotal": 14500,
+                "total": 14500,
+                "updated_at": "2025-03-26T04:26:31.151Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 92,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 53,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 14500
+        },
+        {
+            "id_details": "DP039",
+            "penjualan": {
+                "id_penjualan": "PJ038",
+                "user": {
+                    "id_user": "US002",
+                    "username": "OwnerSRC",
+                    "password": "$2a$10$uQuoBP8cOJDuQcbUzPOGq.qI8INKS./typeIUjEMyH5oEOewHSr7S",
+                    "role": "owner",
+                    "status": "Aktif"
+                },
+                "tanggal_penjualan": "2025-03-01T00:00:00Z",
+                "jumlah_produk": 6,
+                "subtotal": 33000,
+                "total": 33000,
+                "updated_at": "2025-03-26T04:27:25.161Z"
+            },
+            "produk": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 90,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 52,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 90,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 52,
+                    "updated_at": "0001-01-01T00:00:00Z",
+                    "is_deleted": null
+                }
+            ],
+            "total_pendapatan": 33000
+        }
+    ],
+    "message": "Data detail penjualan berhasil diambil"
+}
