@@ -284,6 +284,9 @@ function processSalesData(data) {
   };
 }
 
+// Register Chart.js plugins
+Chart.register(ChartDataLabels);
+
 // Konfigurasi Chart.js
 let mainChart = null;
 
@@ -299,63 +302,35 @@ async function initializeCharts() {
         datasets: [
           {
             label: 'Jumlah Produk',
-            yAxisID: 'y-axis-quantity',
-            backgroundColor: 'rgba(78, 115, 223, 0.8)',
-            borderColor: 'rgba(78, 115, 223, 1)',
+            data: [],
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
-            data: []
+            yAxisID: 'y-axis-quantity'
           },
           {
             label: 'Total Penjualan (Rp)',
-            yAxisID: 'y-axis-sales',
-            backgroundColor: 'rgba(231, 74, 59, 0.8)',
-            borderColor: 'rgba(231, 74, 59, 1)',
+            data: [],
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1,
-            data: []
+            yAxisID: 'y-axis-sales'
           }
         ]
       },
       options: {
-        maintainAspectRatio: false,
         responsive: true,
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        },
+        maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: function(context) {
-              // Only show legend for sales chart
-              const chartType = document.getElementById('chartType')?.value;
-              return chartType === 'sales';
-            },
-            position: 'top'
-          },
           title: {
             display: true,
-            text: 'Grafik Penjualan',
+            text: 'Grafik Penjualan per Bulan',
             font: {
               size: 16,
               weight: 'bold'
             }
           },
-          datalabels: {
-            anchor: 'end',
-            align: 'top',
-            formatter: function(value, context) {
-              if (context.dataset.yAxisID === 'y-axis-sales') {
-                return formatRupiah(value.y);
-              }
-              return value.y.toLocaleString('id-ID');
-            },
-            color: '#666',
-            font: {
-              weight: 'bold'
-            },
-            padding: 6
-          },
           tooltip: {
-            enabled: true,
             mode: 'index',
             intersect: false,
             callbacks: {
@@ -364,13 +339,31 @@ async function initializeCharts() {
                 if (label) {
                   label += ': ';
                 }
-                if (context.dataset.yAxisID === 'y-axis-sales') {
+                if (context.datasetIndex === 1) { // Total Penjualan
                   label += formatRupiah(context.parsed.y);
-                } else {
-                  label += context.parsed.y.toLocaleString('id-ID');
+                } else { // Jumlah Produk
+                  label += context.parsed.y;
                 }
                 return label;
               }
+            }
+          },
+          datalabels: {
+            display: true,
+            align: 'end',
+            anchor: 'end',
+            formatter: function(value, context) {
+              if (context.datasetIndex === 1) { // Total Penjualan
+                return formatRupiah(value);
+              } else { // Jumlah Produk
+                return value;
+              }
+            },
+            color: function(context) {
+              return context.dataset.borderColor;
+            },
+            font: {
+              weight: 'bold'
             }
           }
         },
@@ -617,7 +610,7 @@ async function updateChart() {
     mainChart.options.plugins.datalabels = {
       anchor: 'end',
       align: 'top',
-      formatter: function(value) {
+      formatter: function(value, context) {
         if (chartType === 'sales' && this.datasetIndex === 1) {
           return formatRupiah(value.y);
         }
