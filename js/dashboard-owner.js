@@ -858,13 +858,15 @@ async function updateBestSellingProductsTable() {
     const selectedYear = parseInt(document.getElementById('yearFilter')?.value) || new Date().getFullYear();
     const sortOption = document.getElementById('bestSellingSort')?.value || 'quantity_desc';
 
+    console.log("Fetching best selling products for year:", selectedYear);
+
     const response = await fetch(`${BASE_URL}/dashboard/sales/best-selling`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
         'Content-Type': 'application/json'
       },
       method: 'POST',
-      body: JSON.stringify({ year: selectedYear })
+      body: JSON.stringify({ tahun: selectedYear })
     });
 
     if (!response.ok) {
