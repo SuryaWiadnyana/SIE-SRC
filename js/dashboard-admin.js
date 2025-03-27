@@ -86,7 +86,6 @@ async function fetchDashboardData() {
 
     /// Fetch sales
     const salesResponse = await sales.getAll();
-
     const salesElement = document.getElementById("totalSales");
 
     if (salesResponse.success && salesResponse.data) {
@@ -96,8 +95,17 @@ async function fetchDashboardData() {
         ? salesResponse.data.data
         : [];
 
-      // Calculate total sales
-      const totalSales = sales.reduce((total, sale) => {
+      // Get current year
+      const currentYear = new Date().getFullYear();
+
+      // Filter sales for current year
+      const currentYearSales = sales.filter(sale => {
+        const saleYear = new Date(sale.tanggal_penjualan).getFullYear();
+        return saleYear === currentYear;
+      });
+
+      // Calculate total sales for current year
+      const totalSales = currentYearSales.reduce((total, sale) => {
         return total + (sale.total || 0);
       }, 0);
 

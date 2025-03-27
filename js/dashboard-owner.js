@@ -144,8 +144,12 @@ function formatRupiah(number) {
 // Fungsi untuk mengambil data dashboard
 async function fetchDashboardData() {
   try {
-    // Get dashboard data
-    const response = await fetch(`${BASE_URL}/dashboard/getdata`, {
+    // Get current filters
+    const filters = getFilters();
+    console.log("Current filters:", filters); // Debug log
+    
+    // Get dashboard data with filters
+    const response = await fetch(`${BASE_URL}/dashboard/getdata?tahun=${filters.tahun || ''}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -247,6 +251,7 @@ async function fetchDashboardData() {
     }
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
+    showError("Gagal memuat data dashboard: " + error.message);
   }
 }
 
@@ -1835,3 +1840,10 @@ async function loadProdukOptions() {
     showError('Gagal memuat daftar produk');
   }
 }
+
+// Add event listener for year filter to update all dashboard data
+document.getElementById('yearFilter')?.addEventListener('change', () => {
+  fetchDashboardData(); // Update dashboard data when year changes
+  updateBestSellingProductsTable();
+  updateChart();
+});
