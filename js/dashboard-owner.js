@@ -466,7 +466,7 @@ async function updateChart() {
     let response;
     while (retries > 0) {
       try {
-        response = await fetch(`${BASE_URL}/dashboard/${endpoint}?year=${year}&month=${month}&kategori=${kategori}`, {
+        response = await fetch(`${BASE_URL}/dashboard/${endpoint}?tahun=${year}&bulan=${month}&kategori=${kategori}`, {
           headers: {
             'Authorization': `Bearer ${getToken()}`,
             'Content-Type': 'application/json'
@@ -493,11 +493,36 @@ async function updateChart() {
       return;
     }
 
-    // Check for empty or invalid data
+    // Create empty data for all months if chart type is sales
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    
     if (!responseData.success || !responseData.data || !Array.isArray(responseData.data) || responseData.data.length === 0) {
       console.log("No data found for current filters");
       toggleNoDataMessage(true);
-      if (mainChart) {
+      
+      if (chartType === 'sales') {
+        // Show all months with zero values
+        mainChart.data.labels = monthNames;
+        mainChart.data.datasets = [
+          {
+            ...mainChart.data.datasets[0],
+            label: 'Jumlah Produk',
+            data: monthNames.map((_, index) => ({
+              x: index + 1,
+              y: 0
+            }))
+          },
+          {
+            ...mainChart.data.datasets[1],
+            label: 'Total Penjualan (Rp)',
+            data: monthNames.map((_, index) => ({
+              x: index + 1,
+              y: 0
+            }))
+          }
+        ];
+        mainChart.update();
+      } else {
         mainChart.data.labels = [];
         mainChart.data.datasets.forEach(dataset => {
           dataset.data = [];
@@ -513,26 +538,29 @@ async function updateChart() {
     // Update chart configuration based on type
     const config = {
       sales: {
-        labels: responseData.data.map(item => {
-          const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-          return monthNames[item.bulan - 1];
-        }),
+        labels: monthNames,
         datasets: [
           {
             ...mainChart.data.datasets[0],
             label: 'Jumlah Produk',
-            data: responseData.data.map(item => ({
-              x: item.bulan,
-              y: item.jumlah_produk || 0
-            }))
+            data: monthNames.map((_, index) => {
+              const monthData = responseData.data.find(item => item.bulan === index + 1);
+              return {
+                x: index + 1,
+                y: monthData ? monthData.jumlah_produk || 0 : 0
+              };
+            })
           },
           {
             ...mainChart.data.datasets[1],
             label: 'Total Penjualan (Rp)',
-            data: responseData.data.map(item => ({
-              x: item.bulan,
-              y: item.total || 0
-            }))
+            data: monthNames.map((_, index) => {
+              const monthData = responseData.data.find(item => item.bulan === index + 1);
+              return {
+                x: index + 1,
+                y: monthData ? monthData.total || 0 : 0
+              };
+            })
           }
         ]
       },
@@ -586,7 +614,9 @@ async function updateChart() {
 
     // Get the chart config for current type and sort it
     let chartConfig = config[chartType] || config.sales;
-    chartConfig = sortChartData(chartConfig, sortOrder);
+    if (chartType !== 'sales') {
+      chartConfig = sortChartData(chartConfig, sortOrder);
+    }
 
     // Update chart data
     mainChart.data.labels = chartConfig.labels;
@@ -629,6 +659,7 @@ async function updateChart() {
     
     console.log("Updating chart with new data");
     mainChart.update();
+
   } catch (error) {
     console.error("Error updating chart:", error);
     showError("Terjadi kesalahan saat memperbarui grafik");
@@ -712,9 +743,21 @@ async function initializeDashboard() {
 
     // Tambahkan event listener untuk filter
     document.getElementById("chartType")?.addEventListener("change", updateChart);
-    document.getElementById("yearFilter")?.addEventListener("change", updateChart);
-    document.getElementById("monthFilter")?.addEventListener("change", updateChart);
-    document.getElementById("kategoriFilter")?.addEventListener("change", updateChart);
+    document.getElementById("yearFilter")?.addEventListener("change", () => {
+      fetchDashboardData(); // Update dashboard data when year changes
+      updateBestSellingProductsTable();
+      updateChart();
+    });
+    document.getElementById("monthFilter")?.addEventListener("change", () => {
+      fetchDashboardData(); // Update dashboard data when month changes
+      updateBestSellingProductsTable();
+      updateChart();
+    });
+    document.getElementById("kategoriFilter")?.addEventListener("change", () => {
+      fetchDashboardData(); // Update dashboard data when kategori changes
+      updateBestSellingProductsTable();
+      updateChart();
+    });
 
     // Inisialisasi grafik
     await initializeCharts();
@@ -1846,6 +1889,18 @@ async function loadProdukOptions() {
 // Add event listener for year filter to update all dashboard data
 document.getElementById('yearFilter')?.addEventListener('change', () => {
   fetchDashboardData(); // Update dashboard data when year changes
+  updateBestSellingProductsTable();
+  updateChart();
+});
+
+document.getElementById('monthFilter')?.addEventListener('change', () => {
+  fetchDashboardData(); // Update dashboard data when month changes
+  updateBestSellingProductsTable();
+  updateChart();
+});
+
+document.getElementById('kategoriFilter')?.addEventListener('change', () => {
+  fetchDashboardData(); // Update dashboard data when kategori changes
   updateBestSellingProductsTable();
   updateChart();
 });
