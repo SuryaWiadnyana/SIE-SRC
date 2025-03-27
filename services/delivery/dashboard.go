@@ -45,9 +45,12 @@ func NewHttpDeliveryDashboard(app fiber.Router, penjualanUC domain.PenjualanUseC
 // GetDashboardData mengambil data untuk dashboard
 func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 	// Mengambil filter dari parameter query
-	year := c.Query("year", strconv.Itoa(time.Now().Year()))
-	month := c.Query("month", "")
+	year := c.Query("tahun", strconv.Itoa(time.Now().Year()))
+	month := c.Query("bulan", "")
 	kategoriID := c.Query("kategori", "")
+
+	// Log untuk debugging
+	log.Printf("Filter: tahun=%s, bulan=%s, kategori=%s", year, month, kategoriID)
 
 	// Mengambil semua data penjualan
 	penjualanList, err := d.PenjualanUC.GetAll(context.Background())
@@ -76,10 +79,17 @@ func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 	yearInt, _ := strconv.Atoi(year)
 	monthInt, _ := strconv.Atoi(month)
 
+	// Log untuk debugging
+	log.Printf("Converting year string '%s' to int: %d", year, yearInt)
+
 	// Menghitung total penjualan
 	for _, sale := range penjualanList {
 		saleYear := sale.Tanggal_Penjualan.Year()
 		saleMonth := int(sale.Tanggal_Penjualan.Month())
+
+		// Log untuk debugging
+		log.Printf("Checking sale: year=%d (target=%d), month=%d (target=%d)", 
+			saleYear, yearInt, saleMonth, monthInt)
 
 		if saleYear == yearInt {
 			if month == "" || saleMonth == monthInt {
@@ -97,6 +107,10 @@ func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 		}
 	}
 
+	// Log hasil perhitungan
+	log.Printf("Calculated totals: sales=%.2f, products=%d, stock=%d, sold=%d",
+		totalSales, totalProducts, totalStock, totalSold)
+
 	// Menyiapkan response
 	return c.JSON(fiber.Map{
 		"success": true,
@@ -112,8 +126,8 @@ func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 // GetSalesData mengambil data penjualan berdasarkan filter
 func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 	// Mengambil parameter filter dari query
-	year := c.Query("year", strconv.Itoa(time.Now().Year()))
-	month := c.Query("month", "")
+	year := c.Query("tahun", strconv.Itoa(time.Now().Year()))
+	month := c.Query("bulan", "")
 	kategoriID := c.Query("kategori", "")
 	limit := c.Query("limit", "0")
 
@@ -229,8 +243,8 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 // GetCategorySales mengambil data penjualan per kategori
 func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 	// Mengambil parameter filter dari query
-	year := c.Query("year", strconv.Itoa(time.Now().Year()))
-	month := c.Query("month", "")
+	year := c.Query("tahun", strconv.Itoa(time.Now().Year()))
+	month := c.Query("bulan", "")
 
 	// Mengambil semua data penjualan
 	penjualanList, err := d.PenjualanUC.GetAll(context.Background())
@@ -460,7 +474,7 @@ func (d *HttpDeliveryDashboard) GetCategories(c *fiber.Ctx) error {
 func (d *HttpDeliveryDashboard) GetBestSellingProducts(c *fiber.Ctx) error {
 	// Parse request body
 	var req struct {
-		Year int `json:"year"`
+		Year int `json:"tahun"`
 	}
 
 	if err := c.BodyParser(&req); err != nil {
