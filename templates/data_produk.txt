@@ -11,18 +11,61 @@
                 "subkategori": {
                     "id_subkategori": "SK001",
                     "nama_subkategori": "Sereal",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "8996001600156",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-09-10T00:00:00Z",
-                "stok_barang": 10,
-                "updated_at": "2025-03-25T16:16:47.42Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T09:06:33.18Z",
                 "is_deleted": null
-            }
+            },
+            "produk_terkait": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 63,
+                    "updated_at": "2025-03-31T10:01:49.341Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "020",
+                    "nama_produk": "Kapal Api Special",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK011",
+                        "nama_subkategori": "Kopi",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600169",
+                    "harga_produk": 15000,
+                    "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
+                    "stok_barang": 33,
+                    "updated_at": "2025-03-31T10:01:06.791Z",
+                    "is_deleted": null
+                }
+            ]
         },
         {
             "produk": {
@@ -43,8 +86,8 @@
                 "kode_produk": "8996001600157",
                 "harga_produk": 12000,
                 "tanggal_kedaluwarsa": "2025-09-15T00:00:00Z",
-                "stok_barang": 15,
-                "updated_at": "2025-03-25T16:18:07.953Z",
+                "stok_barang": 8,
+                "updated_at": "2025-03-31T10:01:06.53Z",
                 "is_deleted": null
             }
         },
@@ -59,16 +102,13 @@
                 "subkategori": {
                     "id_subkategori": "SK001",
                     "nama_subkategori": "Sereal",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "8996001600158",
                 "harga_produk": 28000,
                 "tanggal_kedaluwarsa": "2025-09-20T00:00:00Z",
-                "stok_barang": 6,
-                "updated_at": "2025-03-25T16:28:16.201Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T09:06:45.306Z",
                 "is_deleted": null
             }
         },
@@ -83,16 +123,13 @@
                 "subkategori": {
                     "id_subkategori": "SK002",
                     "nama_subkategori": "Kue",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "8996001600150",
                 "harga_produk": 13000,
                 "tanggal_kedaluwarsa": "2025-04-15T00:00:00Z",
-                "stok_barang": 10,
-                "updated_at": "2025-03-25T16:20:31.331Z",
+                "stok_barang": 18,
+                "updated_at": "2025-03-31T10:01:49.113Z",
                 "is_deleted": null
             }
         },
@@ -107,16 +144,13 @@
                 "subkategori": {
                     "id_subkategori": "SK002",
                     "nama_subkategori": "Kue",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "8996001302248",
                 "harga_produk": 8000,
-                "tanggal_kedaluwarsa": "2025-04-10T00:00:00Z",
-                "stok_barang": 1,
-                "updated_at": "2025-03-25T16:28:38.707Z",
+                "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                "stok_barang": 48,
+                "updated_at": "2025-03-31T10:03:56.699Z",
                 "is_deleted": null
             }
         },
@@ -139,8 +173,8 @@
                 "kode_produk": "8888166607392",
                 "harga_produk": 12000,
                 "tanggal_kedaluwarsa": "2025-04-20T00:00:00Z",
-                "stok_barang": 15,
-                "updated_at": "2025-03-25T16:29:04.661Z",
+                "stok_barang": 13,
+                "updated_at": "2025-03-31T09:13:57.395Z",
                 "is_deleted": null
             }
         },
@@ -163,8 +197,8 @@
                 "kode_produk": "8996001600153",
                 "harga_produk": 7500,
                 "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
-                "stok_barang": 10,
-                "updated_at": "2025-03-25T16:22:30.757Z",
+                "stok_barang": 8,
+                "updated_at": "2025-03-26T13:46:40.698Z",
                 "is_deleted": null
             }
         },
@@ -187,8 +221,8 @@
                 "kode_produk": "8996001600154",
                 "harga_produk": 8500,
                 "tanggal_kedaluwarsa": "2025-07-20T00:00:00Z",
-                "stok_barang": 7,
-                "updated_at": "2025-03-25T16:29:21.974Z",
+                "stok_barang": 0,
+                "updated_at": "2025-03-31T10:07:22.698Z",
                 "is_deleted": null
             }
         },
@@ -211,8 +245,8 @@
                 "kode_produk": "8996001600155",
                 "harga_produk": 9500,
                 "tanggal_kedaluwarsa": "2025-07-25T00:00:00Z",
-                "stok_barang": 14,
-                "updated_at": "2025-03-25T16:23:05.242Z",
+                "stok_barang": 12,
+                "updated_at": "2025-03-26T13:40:21.209Z",
                 "is_deleted": null
             }
         },
@@ -259,8 +293,8 @@
                 "kode_produk": "7622210640994",
                 "harga_produk": 20000,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 11,
-                "updated_at": "2025-03-26T04:14:57.294Z",
+                "stok_barang": 3,
+                "updated_at": "2025-03-26T04:50:54.52Z",
                 "is_deleted": null
             }
         },
@@ -275,16 +309,13 @@
                 "subkategori": {
                     "id_subkategori": "SK005",
                     "nama_subkategori": "Cokelat",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "9556182023258",
                 "harga_produk": 20000,
                 "tanggal_kedaluwarsa": "2025-08-20T00:00:00Z",
-                "stok_barang": 8,
-                "updated_at": "2025-03-25T16:12:57.117Z",
+                "stok_barang": 20,
+                "updated_at": "2025-03-31T11:25:44.954Z",
                 "is_deleted": null
             }
         },
@@ -307,10 +338,53 @@
                 "kode_produk": "8996001600162",
                 "harga_produk": 3500,
                 "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
-                "stok_barang": 87,
-                "updated_at": "2025-03-26T04:27:25.465Z",
+                "stok_barang": 63,
+                "updated_at": "2025-03-31T10:01:49.341Z",
                 "is_deleted": null
-            }
+            },
+            "produk_terkait": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Kellogg's Corn Flakes",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK001",
+                        "nama_subkategori": "Sereal",
+                        "kategori": null
+                    },
+                    "kode_produk": "8996001600156",
+                    "harga_produk": 25000,
+                    "tanggal_kedaluwarsa": "2025-09-10T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "2025-03-31T09:06:33.18Z",
+                    "is_deleted": null
+                },
+                {
+                    "id_produk": "016",
+                    "nama_produk": "Ultra Milk Full Cream",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK010",
+                        "nama_subkategori": "Susu",
+                        "kategori": {
+                            "id_kategori": "KT002",
+                            "nama_kategori": "Minuman"
+                        }
+                    },
+                    "kode_produk": "8996001600165",
+                    "harga_produk": 7500,
+                    "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                    "stok_barang": 47,
+                    "updated_at": "2025-03-31T09:04:00.363Z",
+                    "is_deleted": null
+                }
+            ]
         },
         {
             "produk": {
@@ -379,10 +453,34 @@
                 "kode_produk": "8996001600165",
                 "harga_produk": 7500,
                 "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
-                "stok_barang": 49,
-                "updated_at": "2025-03-26T04:27:25.579Z",
+                "stok_barang": 47,
+                "updated_at": "2025-03-31T09:04:00.363Z",
                 "is_deleted": null
-            }
+            },
+            "produk_terkait": [
+                {
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK006",
+                        "nama_subkategori": "Mie Instan",
+                        "kategori": {
+                            "id_kategori": "KT001",
+                            "nama_kategori": "Makanan"
+                        }
+                    },
+                    "kode_produk": "8996001600162",
+                    "harga_produk": 3500,
+                    "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                    "stok_barang": 63,
+                    "updated_at": "2025-03-31T10:01:49.341Z",
+                    "is_deleted": null
+                }
+            ]
         },
         {
             "produk": {
@@ -403,8 +501,8 @@
                 "kode_produk": "8996001600166",
                 "harga_produk": 6500,
                 "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
-                "stok_barang": 55,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 54,
+                "updated_at": "2025-03-31T10:01:49.231Z",
                 "is_deleted": null
             }
         },
@@ -427,8 +525,8 @@
                 "kode_produk": "8996001600167",
                 "harga_produk": 9500,
                 "tanggal_kedaluwarsa": "2025-06-20T00:00:00Z",
-                "stok_barang": 50,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 45,
+                "updated_at": "2025-03-31T11:30:28.054Z",
                 "is_deleted": null
             }
         },
@@ -451,8 +549,8 @@
                 "kode_produk": "8996001600168",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-07-10T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 38,
+                "updated_at": "2025-03-31T11:30:28.169Z",
                 "is_deleted": null
             }
         },
@@ -475,10 +573,31 @@
                 "kode_produk": "8996001600169",
                 "harga_produk": 15000,
                 "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
-                "stok_barang": 35,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 33,
+                "updated_at": "2025-03-31T10:01:06.791Z",
                 "is_deleted": null
-            }
+            },
+            "produk_terkait": [
+                {
+                    "id_produk": "001",
+                    "nama_produk": "Kellogg's Corn Flakes",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    },
+                    "subkategori": {
+                        "id_subkategori": "SK001",
+                        "nama_subkategori": "Sereal",
+                        "kategori": null
+                    },
+                    "kode_produk": "8996001600156",
+                    "harga_produk": 25000,
+                    "tanggal_kedaluwarsa": "2025-09-10T00:00:00Z",
+                    "stok_barang": 50,
+                    "updated_at": "2025-03-31T09:06:33.18Z",
+                    "is_deleted": null
+                }
+            ]
         },
         {
             "produk": {
@@ -547,8 +666,8 @@
                 "kode_produk": "8996001600172",
                 "harga_produk": 4000,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 39,
+                "updated_at": "2025-03-31T10:04:33.422Z",
                 "is_deleted": null
             }
         },
@@ -571,8 +690,8 @@
                 "kode_produk": "8996001600173",
                 "harga_produk": 3500,
                 "tanggal_kedaluwarsa": "2025-08-20T00:00:00Z",
-                "stok_barang": 35,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 33,
+                "updated_at": "2025-03-31T09:11:42.911Z",
                 "is_deleted": null
             }
         },
@@ -619,8 +738,8 @@
                 "kode_produk": "8996001600175",
                 "harga_produk": 3000,
                 "tanggal_kedaluwarsa": "2025-12-31T00:00:00Z",
-                "stok_barang": 90,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 88,
+                "updated_at": "2025-03-31T10:01:49.454Z",
                 "is_deleted": null
             }
         },
@@ -667,8 +786,8 @@
                 "kode_produk": "8996001600177",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-04-10T00:00:00Z",
-                "stok_barang": 30,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 26,
+                "updated_at": "2025-03-31T11:29:23.314Z",
                 "is_deleted": null
             }
         },
@@ -691,8 +810,8 @@
                 "kode_produk": "8996001600178",
                 "harga_produk": 20000,
                 "tanggal_kedaluwarsa": "2025-04-15T00:00:00Z",
-                "stok_barang": 25,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 20,
+                "updated_at": "2025-03-31T11:29:23.425Z",
                 "is_deleted": null
             }
         },
@@ -715,8 +834,8 @@
                 "kode_produk": "8996001600179",
                 "harga_produk": 22000,
                 "tanggal_kedaluwarsa": "2025-04-20T00:00:00Z",
-                "stok_barang": 20,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 12,
+                "updated_at": "2025-03-31T09:09:34.446Z",
                 "is_deleted": null
             }
         },
@@ -739,8 +858,8 @@
                 "kode_produk": "8996001600180",
                 "harga_produk": 18000,
                 "tanggal_kedaluwarsa": "2025-04-25T00:00:00Z",
-                "stok_barang": 35,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 28,
+                "updated_at": "2025-03-31T09:09:34.562Z",
                 "is_deleted": null
             }
         },
@@ -763,8 +882,8 @@
                 "kode_produk": "8996001600181",
                 "harga_produk": 15000,
                 "tanggal_kedaluwarsa": "2025-04-30T00:00:00Z",
-                "stok_barang": 30,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 28,
+                "updated_at": "2025-03-31T11:36:43.155Z",
                 "is_deleted": null
             }
         },
@@ -883,8 +1002,8 @@
                 "kode_produk": "8996001600186",
                 "harga_produk": 15000,
                 "tanggal_kedaluwarsa": "2025-11-10T00:00:00Z",
-                "stok_barang": 60,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 58,
+                "updated_at": "2025-03-31T10:03:43.472Z",
                 "is_deleted": null
             }
         },
@@ -931,8 +1050,8 @@
                 "kode_produk": "8996001600188",
                 "harga_produk": 13000,
                 "tanggal_kedaluwarsa": "2025-11-20T00:00:00Z",
-                "stok_barang": 50,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 48,
+                "updated_at": "2025-03-31T10:03:43.243Z",
                 "is_deleted": null
             }
         },
@@ -1123,8 +1242,8 @@
                 "kode_produk": "8996001600196",
                 "harga_produk": 6000,
                 "tanggal_kedaluwarsa": "2025-10-20T00:00:00Z",
-                "stok_barang": 45,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 43,
+                "updated_at": "2025-03-31T09:10:06.488Z",
                 "is_deleted": null
             }
         },
@@ -1195,8 +1314,8 @@
                 "kode_produk": "8996001600199",
                 "harga_produk": 20000,
                 "tanggal_kedaluwarsa": "2025-11-20T00:00:00Z",
-                "stok_barang": 30,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 29,
+                "updated_at": "2025-03-31T09:10:06.627Z",
                 "is_deleted": null
             }
         },
@@ -1267,8 +1386,8 @@
                 "kode_produk": "8996001600202",
                 "harga_produk": 7000,
                 "tanggal_kedaluwarsa": "2025-12-20T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 36,
+                "updated_at": "2025-03-31T11:32:36.836Z",
                 "is_deleted": null
             }
         },
@@ -1315,8 +1434,8 @@
                 "kode_produk": "8996001600204",
                 "harga_produk": 5500,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 50,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 47,
+                "updated_at": "2025-03-31T09:10:06.878Z",
                 "is_deleted": null
             }
         },
@@ -1339,8 +1458,8 @@
                 "kode_produk": "8996001600205",
                 "harga_produk": 5500,
                 "tanggal_kedaluwarsa": "2025-08-20T00:00:00Z",
-                "stok_barang": 45,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 39,
+                "updated_at": "2025-03-31T10:05:46.814Z",
                 "is_deleted": null
             }
         },
@@ -1459,8 +1578,8 @@
                 "kode_produk": "8996001600210",
                 "harga_produk": 10000,
                 "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
-                "stok_barang": 60,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 59,
+                "updated_at": "2025-03-31T10:04:33.306Z",
                 "is_deleted": null
             }
         },
@@ -1483,8 +1602,8 @@
                 "kode_produk": "8996001600211",
                 "harga_produk": 9500,
                 "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
-                "stok_barang": 55,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 53,
+                "updated_at": "2025-03-31T11:36:09.222Z",
                 "is_deleted": null
             }
         },
@@ -1507,8 +1626,8 @@
                 "kode_produk": "8996001600212",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-06-20T00:00:00Z",
-                "stok_barang": 50,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 48,
+                "updated_at": "2025-03-31T10:04:33.538Z",
                 "is_deleted": null
             }
         },
@@ -1627,8 +1746,8 @@
                 "kode_produk": "8996001600214",
                 "harga_produk": 2000,
                 "tanggal_kedaluwarsa": "2025-12-31T00:00:00Z",
-                "stok_barang": 200,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 199,
+                "updated_at": "2025-03-31T10:03:43.358Z",
                 "is_deleted": null
             }
         },
@@ -1723,8 +1842,8 @@
                 "kode_produk": "8996001600216",
                 "harga_produk": 15000,
                 "tanggal_kedaluwarsa": "2025-11-10T00:00:00Z",
-                "stok_barang": 60,
-                "updated_at": "2025-03-25T15:43:01.524Z",
+                "stok_barang": 58,
+                "updated_at": "2025-03-31T11:36:43.04Z",
                 "is_deleted": null
             }
         },
@@ -2107,8 +2226,8 @@
                 "kode_produk": "749921030085",
                 "harga_produk": 7000,
                 "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
-                "stok_barang": 2,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 0,
+                "updated_at": "2025-03-31T11:02:21.215Z",
                 "is_deleted": null
             }
         },
@@ -2251,8 +2370,8 @@
                 "kode_produk": "8991001111296",
                 "harga_produk": 10000,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 13,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 9,
+                "updated_at": "2025-03-31T10:05:47.055Z",
                 "is_deleted": null
             }
         },
@@ -2371,8 +2490,8 @@
                 "kode_produk": "8993560027223",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-10-15T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 39,
+                "updated_at": "2025-03-31T11:32:36.605Z",
                 "is_deleted": null
             }
         },
@@ -2419,8 +2538,8 @@
                 "kode_produk": "8999999037222",
                 "harga_produk": 32000,
                 "tanggal_kedaluwarsa": "2025-11-15T00:00:00Z",
-                "stok_barang": 25,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 24,
+                "updated_at": "2025-03-31T11:32:36.72Z",
                 "is_deleted": null
             }
         },
@@ -2659,8 +2778,8 @@
                 "kode_produk": "8999999037383",
                 "harga_produk": 7000,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 100,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 99,
+                "updated_at": "2025-03-31T09:13:57.756Z",
                 "is_deleted": null
             }
         },
@@ -2803,8 +2922,8 @@
                 "kode_produk": "8999999037444",
                 "harga_produk": 5000,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 120,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 100,
+                "updated_at": "2025-03-31T11:29:57.414Z",
                 "is_deleted": null
             }
         },
@@ -2875,8 +2994,8 @@
                 "kode_produk": "8999999037475",
                 "harga_produk": 12000,
                 "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
-                "stok_barang": 50,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 48,
+                "updated_at": "2025-03-31T10:04:33.655Z",
                 "is_deleted": null
             }
         },
@@ -3019,8 +3138,8 @@
                 "kode_produk": "8999999037536",
                 "harga_produk": 7000,
                 "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
-                "stok_barang": 75,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 68,
+                "updated_at": "2025-03-31T11:02:21.331Z",
                 "is_deleted": null
             }
         },
@@ -3043,8 +3162,8 @@
                 "kode_produk": "8999999037543",
                 "harga_produk": 16000,
                 "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 37,
+                "updated_at": "2025-03-31T09:17:54.41Z",
                 "is_deleted": null
             }
         },
@@ -3091,8 +3210,8 @@
                 "kode_produk": "8999999037567",
                 "harga_produk": 15000,
                 "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
-                "stok_barang": 45,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T09:17:54.541Z",
                 "is_deleted": null
             }
         },
@@ -3211,8 +3330,8 @@
                 "kode_produk": "8999999037611",
                 "harga_produk": 3000,
                 "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
-                "stok_barang": 185,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 183,
+                "updated_at": "2025-03-31T10:07:22.464Z",
                 "is_deleted": null
             }
         },
@@ -3379,8 +3498,8 @@
                 "kode_produk": "8999999037680",
                 "harga_produk": 9500,
                 "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 38,
+                "updated_at": "2025-03-31T10:05:18.888Z",
                 "is_deleted": null
             }
         },
@@ -3403,8 +3522,8 @@
                 "kode_produk": "8999999037697",
                 "harga_produk": 9500,
                 "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
-                "stok_barang": 35,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T09:02:21.486Z",
                 "is_deleted": null
             }
         },
@@ -3427,8 +3546,8 @@
                 "kode_produk": "8999999037703",
                 "harga_produk": 9000,
                 "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
-                "stok_barang": 55,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 45,
+                "updated_at": "2025-03-31T10:01:06.665Z",
                 "is_deleted": null
             }
         },
@@ -3547,8 +3666,8 @@
                 "kode_produk": "8999999037758",
                 "harga_produk": 7000,
                 "tanggal_kedaluwarsa": "2025-04-15T00:00:00Z",
-                "stok_barang": 75,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 65,
+                "updated_at": "2025-03-31T11:30:27.937Z",
                 "is_deleted": null
             }
         },
@@ -3595,8 +3714,8 @@
                 "kode_produk": "8999999037772",
                 "harga_produk": 8500,
                 "tanggal_kedaluwarsa": "2025-04-15T00:00:00Z",
-                "stok_barang": 55,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 52,
+                "updated_at": "2025-03-31T09:11:42.791Z",
                 "is_deleted": null
             }
         },
@@ -3691,8 +3810,8 @@
                 "kode_produk": "8999999037819",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-04-15T00:00:00Z",
-                "stok_barang": 25,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 23,
+                "updated_at": "2025-03-31T11:36:08.992Z",
                 "is_deleted": null
             }
         },
@@ -3835,8 +3954,8 @@
                 "kode_produk": "8999999037871",
                 "harga_produk": 8000,
                 "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
-                "stok_barang": 80,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 77,
+                "updated_at": "2025-03-31T09:04:00.239Z",
                 "is_deleted": null
             }
         },
@@ -3859,8 +3978,8 @@
                 "kode_produk": "8999999037888",
                 "harga_produk": 8000,
                 "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
-                "stok_barang": 75,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 65,
+                "updated_at": "2025-03-31T09:02:21.601Z",
                 "is_deleted": null
             }
         },
@@ -3979,8 +4098,8 @@
                 "kode_produk": "8999999037932",
                 "harga_produk": 25000,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 30,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 26,
+                "updated_at": "2025-03-31T09:12:30.115Z",
                 "is_deleted": null
             }
         },
@@ -4003,8 +4122,8 @@
                 "kode_produk": "8999999037949",
                 "harga_produk": 20000,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 35,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 31,
+                "updated_at": "2025-03-31T09:12:30.226Z",
                 "is_deleted": null
             }
         },
@@ -4027,8 +4146,8 @@
                 "kode_produk": "8999999037956",
                 "harga_produk": 2500,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 200,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 180,
+                "updated_at": "2025-03-31T11:29:57.533Z",
                 "is_deleted": null
             }
         },
@@ -4051,8 +4170,8 @@
                 "kode_produk": "8999999037963",
                 "harga_produk": 2500,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 190,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 185,
+                "updated_at": "2025-03-31T11:02:21.1Z",
                 "is_deleted": null
             }
         },
@@ -4099,8 +4218,8 @@
                 "kode_produk": "8999999037987",
                 "harga_produk": 5000,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 100,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 95,
+                "updated_at": "2025-03-31T11:36:09.108Z",
                 "is_deleted": null
             }
         },
@@ -4147,8 +4266,8 @@
                 "kode_produk": "8999999038007",
                 "harga_produk": 12000,
                 "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 40,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 39,
+                "updated_at": "2025-03-31T10:05:46.935Z",
                 "is_deleted": null
             }
         },
@@ -4363,8 +4482,8 @@
                 "kode_produk": "8999999038090",
                 "harga_produk": 4000,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 120,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 119,
+                "updated_at": "2025-03-31T10:07:22.583Z",
                 "is_deleted": null
             }
         },
@@ -4394,8 +4513,413 @@
         },
         {
             "produk": {
-                "id_produk": "184",
-                "nama_produk": "Nu Green Tea Honey",
+                "id_produk": "188",
+                "nama_produk": "le minerale",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK013",
+                    "nama_subkategori": "Air Mineral",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "912343433312331",
+                "harga_produk": 2000,
+                "tanggal_kedaluwarsa": "2025-05-30T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T09:22:30.941Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "190",
+                "nama_produk": "Kue Bolu Keju Sari Murni",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK002",
+                    "nama_subkategori": "Kue",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "91102022882913",
+                "harga_produk": 24000,
+                "tanggal_kedaluwarsa": "2025-04-10T00:00:00Z",
+                "stok_barang": 10,
+                "updated_at": "2025-03-31T09:47:42.29Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "191",
+                "nama_produk": "Kue Bolu Pandan Sari Murni",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK002",
+                    "nama_subkategori": "Kue",
+                    "kategori": null
+                },
+                "kode_produk": "91234343331231",
+                "harga_produk": 20000,
+                "tanggal_kedaluwarsa": "2025-04-14T00:00:00Z",
+                "stok_barang": 10,
+                "updated_at": "2025-03-31T10:03:02.265Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "192",
+                "nama_produk": "Kue Bolu Coklat Sari Murni",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK002",
+                    "nama_subkategori": "Kue",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "91234343331234",
+                "harga_produk": 25000,
+                "tanggal_kedaluwarsa": "2025-04-14T00:00:00Z",
+                "stok_barang": 10,
+                "updated_at": "2025-03-31T09:59:47.547Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "193",
+                "nama_produk": "Indomie Goreng Special",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK006",
+                    "nama_subkategori": "Mie Instan",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8997035563414",
+                "harga_produk": 2700,
+                "tanggal_kedaluwarsa": "2025-04-25T00:00:00Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "194",
+                "nama_produk": "Indomie Soto",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK006",
+                    "nama_subkategori": "Mie Instan",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8997035563415",
+                "harga_produk": 2700,
+                "tanggal_kedaluwarsa": "2025-04-25T00:00:00Z",
+                "stok_barang": 35,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "195",
+                "nama_produk": "Mie Sedaap Goreng",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK006",
+                    "nama_subkategori": "Mie Instan",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8997035563416",
+                "harga_produk": 2800,
+                "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
+                "stok_barang": 42,
+                "updated_at": "2025-03-31T11:36:43.266Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "196",
+                "nama_produk": "Pop Mie Ayam",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK006",
+                    "nama_subkategori": "Mie Instan",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8997035563417",
+                "harga_produk": 5500,
+                "tanggal_kedaluwarsa": "2025-05-20T00:00:00Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "197",
+                "nama_produk": "Chitato Sapi Panggang",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK025",
+                    "nama_subkategori": "Snack",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8996001600146",
+                "harga_produk": 10000,
+                "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "198",
+                "nama_produk": "Lays Classic",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK025",
+                    "nama_subkategori": "Snack",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8996001600147",
+                "harga_produk": 9500,
+                "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "199",
+                "nama_produk": "Qtela Singkong",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK025",
+                    "nama_subkategori": "Snack",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8996001600148",
+                "harga_produk": 8500,
+                "tanggal_kedaluwarsa": "2025-06-20T00:00:00Z",
+                "stok_barang": 45,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "200",
+                "nama_produk": "Taro Net",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK025",
+                    "nama_subkategori": "Snack",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8996001600149",
+                "harga_produk": 8000,
+                "tanggal_kedaluwarsa": "2025-06-25T00:00:00Z",
+                "stok_barang": 35,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "201",
+                "nama_produk": "Roti Tawar",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK002",
+                    "nama_subkategori": "Kue",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8996001600151",
+                "harga_produk": 12000,
+                "tanggal_kedaluwarsa": "2025-04-10T00:00:00Z",
+                "stok_barang": 25,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "202",
+                "nama_produk": "Oreo Original",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK004",
+                    "nama_subkategori": "Biskuit",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "8996001600152",
+                "harga_produk": 7500,
+                "tanggal_kedaluwarsa": "2025-07-15T00:00:00Z",
+                "stok_barang": 60,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "203",
+                "nama_produk": "Pocari Sweat",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK013",
+                    "nama_subkategori": "Air Mineral",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563418",
+                "harga_produk": 5000,
+                "tanggal_kedaluwarsa": "2025-07-18T00:00:00Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "205",
+                "nama_produk": "Coca Cola Kaleng",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK023",
+                    "nama_subkategori": "Soda",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563420",
+                "harga_produk": 5500,
+                "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "206",
+                "nama_produk": "Sprite Kaleng",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK023",
+                    "nama_subkategori": "Soda",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563421",
+                "harga_produk": 5500,
+                "tanggal_kedaluwarsa": "2025-08-20T00:00:00Z",
+                "stok_barang": 45,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "207",
+                "nama_produk": "Nutrisari Jeruk",
                 "kategori": {
                     "id_kategori": "KT002",
                     "nama_kategori": "Minuman"
@@ -4408,11 +4932,515 @@
                         "nama_kategori": "Minuman"
                     }
                 },
-                "kode_produk": "8999999038113",
-                "harga_produk": 4500,
+                "kode_produk": "8997035563423",
+                "harga_produk": 2000,
+                "tanggal_kedaluwarsa": "2025-09-15T00:00:00Z",
+                "stok_barang": 85,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "208",
+                "nama_produk": "Ultra Milk Full Cream",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK010",
+                    "nama_subkategori": "Susu",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563424",
+                "harga_produk": 7500,
+                "tanggal_kedaluwarsa": "2025-06-10T00:00:00Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "209",
+                "nama_produk": "Indomilk Coklat",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK010",
+                    "nama_subkategori": "Susu",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563425",
+                "harga_produk": 6500,
+                "tanggal_kedaluwarsa": "2025-06-15T00:00:00Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T11:36:09.336Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "210",
+                "nama_produk": "Kapal Api Special",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK011",
+                    "nama_subkategori": "Kopi",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563426",
+                "harga_produk": 1500,
+                "tanggal_kedaluwarsa": "2025-10-20T00:00:00Z",
+                "stok_barang": 100,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "211",
+                "nama_produk": "Teh Sari Wangi",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK012",
+                    "nama_subkategori": "Teh",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "8997035563427",
+                "harga_produk": 8000,
+                "tanggal_kedaluwarsa": "2025-10-25T00:00:00Z",
+                "stok_barang": 70,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "212",
+                "nama_produk": "Lifebuoy Merah",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK020",
+                    "nama_subkategori": "Sabun Mandi",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123457",
+                "harga_produk": 3500,
+                "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
+                "stok_barang": 60,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "213",
+                "nama_produk": "Dove White",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK020",
+                    "nama_subkategori": "Sabun Mandi",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123458",
+                "harga_produk": 8500,
                 "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
-                "stok_barang": 105,
-                "updated_at": "2025-03-25T15:59:24.691Z",
+                "stok_barang": 45,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "214",
+                "nama_produk": "Head & Shoulders",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK021",
+                    "nama_subkategori": "Shampoo",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123459",
+                "harga_produk": 28000,
+                "tanggal_kedaluwarsa": "2025-09-10T00:00:00Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "215",
+                "nama_produk": "Pantene Anti Dandruff",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK021",
+                    "nama_subkategori": "Shampoo",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123460",
+                "harga_produk": 25000,
+                "tanggal_kedaluwarsa": "2025-09-15T00:00:00Z",
+                "stok_barang": 35,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "216",
+                "nama_produk": "Pepsodent White",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK022",
+                    "nama_subkategori": "Sikat Gigi",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123461",
+                "harga_produk": 15000,
+                "tanggal_kedaluwarsa": "2025-10-20T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "217",
+                "nama_produk": "Close Up Green",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK022",
+                    "nama_subkategori": "Sikat Gigi",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123462",
+                "harga_produk": 12000,
+                "tanggal_kedaluwarsa": "2025-10-25T00:00:00Z",
+                "stok_barang": 45,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "218",
+                "nama_produk": "Garnier Face Wash",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK019",
+                    "nama_subkategori": "Sabun Wajah",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123467",
+                "harga_produk": 25000,
+                "tanggal_kedaluwarsa": "2026-01-10T00:00:00Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "219",
+                "nama_produk": "Pond's White Beauty",
+                "kategori": {
+                    "id_kategori": "KT006",
+                    "nama_kategori": "Perlengkapan Mandi"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK019",
+                    "nama_subkategori": "Sabun Wajah",
+                    "kategori": {
+                        "id_kategori": "KT006",
+                        "nama_kategori": "Perlengkapan Mandi"
+                    }
+                },
+                "kode_produk": "8995555123468",
+                "harga_produk": 30000,
+                "tanggal_kedaluwarsa": "2026-01-15T00:00:00Z",
+                "stok_barang": 25,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "220",
+                "nama_produk": "Bimoli 1L",
+                "kategori": {
+                    "id_kategori": "KT007",
+                    "nama_kategori": "Bumbu Masakan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK016",
+                    "nama_subkategori": "Minyak Goreng",
+                    "kategori": {
+                        "id_kategori": "KT007",
+                        "nama_kategori": "Bumbu Masakan"
+                    }
+                },
+                "kode_produk": "8995555123469",
+                "harga_produk": 20000,
+                "tanggal_kedaluwarsa": "2025-08-20T00:00:00Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "221",
+                "nama_produk": "Tropical 2L",
+                "kategori": {
+                    "id_kategori": "KT007",
+                    "nama_kategori": "Bumbu Masakan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK016",
+                    "nama_subkategori": "Minyak Goreng",
+                    "kategori": {
+                        "id_kategori": "KT007",
+                        "nama_kategori": "Bumbu Masakan"
+                    }
+                },
+                "kode_produk": "8995555123470",
+                "harga_produk": 38000,
+                "tanggal_kedaluwarsa": "2025-08-25T00:00:00Z",
+                "stok_barang": 35,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "222",
+                "nama_produk": "Gulaku 1kg",
+                "kategori": {
+                    "id_kategori": "KT007",
+                    "nama_kategori": "Bumbu Masakan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK017",
+                    "nama_subkategori": "Gula",
+                    "kategori": {
+                        "id_kategori": "KT007",
+                        "nama_kategori": "Bumbu Masakan"
+                    }
+                },
+                "kode_produk": "8995555123475",
+                "harga_produk": 15000,
+                "tanggal_kedaluwarsa": "2025-11-20T00:00:00Z",
+                "stok_barang": 100,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "223",
+                "nama_produk": "Champ Bakso",
+                "kategori": {
+                    "id_kategori": "KT003",
+                    "nama_kategori": "Makanan Beku"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK014",
+                    "nama_subkategori": "Bakso",
+                    "kategori": {
+                        "id_kategori": "KT003",
+                        "nama_kategori": "Makanan Beku"
+                    }
+                },
+                "kode_produk": "8995179002220",
+                "harga_produk": 28000,
+                "tanggal_kedaluwarsa": "2025-08-15T00:00:00Z",
+                "stok_barang": 35,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "224",
+                "nama_produk": "Fiesta Bakso",
+                "kategori": {
+                    "id_kategori": "KT003",
+                    "nama_kategori": "Makanan Beku"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK014",
+                    "nama_subkategori": "Bakso",
+                    "kategori": {
+                        "id_kategori": "KT003",
+                        "nama_kategori": "Makanan Beku"
+                    }
+                },
+                "kode_produk": "8995179002221",
+                "harga_produk": 26000,
+                "tanggal_kedaluwarsa": "2025-08-20T00:00:00Z",
+                "stok_barang": 40,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "225",
+                "nama_produk": "Kimbo Sosis",
+                "kategori": {
+                    "id_kategori": "KT003",
+                    "nama_kategori": "Makanan Beku"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK015",
+                    "nama_subkategori": "Sosis",
+                    "kategori": {
+                        "id_kategori": "KT003",
+                        "nama_kategori": "Makanan Beku"
+                    }
+                },
+                "kode_produk": "8995179002222",
+                "harga_produk": 18000,
+                "tanggal_kedaluwarsa": "2025-09-15T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-03-31T11:21:38.518Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "226",
+                "nama_produk": "Champ Sosis",
+                "kategori": {
+                    "id_kategori": "KT003",
+                    "nama_kategori": "Makanan Beku"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK015",
+                    "nama_subkategori": "Sosis",
+                    "kategori": {
+                        "id_kategori": "KT003",
+                        "nama_kategori": "Makanan Beku"
+                    }
+                },
+                "kode_produk": "8995179002223",
+                "harga_produk": 20000,
+                "tanggal_kedaluwarsa": "2025-09-20T00:00:00Z",
+                "stok_barang": 41,
+                "updated_at": "2025-03-31T11:29:23.2Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "227",
+                "nama_produk": "Teh Gelas Kecil",
+                "kategori": {
+                    "id_kategori": "KT002",
+                    "nama_kategori": "Minuman"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK012",
+                    "nama_subkategori": "Teh",
+                    "kategori": {
+                        "id_kategori": "KT002",
+                        "nama_kategori": "Minuman"
+                    }
+                },
+                "kode_produk": "899918829198",
+                "harga_produk": 2000,
+                "tanggal_kedaluwarsa": "2025-05-30T00:00:00Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T11:25:07.769Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "228",
+                "nama_produk": "Kacang Pilus Garuda",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK027",
+                    "nama_subkategori": "Kacang",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "9110282800112",
+                "harga_produk": 8000,
+                "tanggal_kedaluwarsa": "2025-07-30T00:00:00Z",
+                "stok_barang": 30,
+                "updated_at": "2025-03-31T11:27:37.974Z",
                 "is_deleted": null
             }
         }

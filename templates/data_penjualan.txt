@@ -1,378 +1,1326 @@
 {
     "data": [
         {
-            "id_details": "DP001",
-            "penjualan": {
-                "id_penjualan": "PJ001",
-                "user": {
-                    "id_user": "US001",
-                    "username": "AdminSRC",
-                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
-                    "role": "admin",
-                    "status": "Aktif"
-                },
-                "tanggal_penjualan": "2025-01-25T00:00:00Z",
-                "jumlah_produk": 3,
-                "subtotal": 13400,
-                "total": 13400,
-                "updated_at": "2025-03-20T14:15:18.717Z"
+            "id_penjualan": "PJ001",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
             },
-            "produk": [
-                {
-                    "id_produk": "001",
-                    "nama_produk": "Indomie Goreng Special",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Mie Instan",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563414",
-                    "harga_produk": 2700,
-                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
-                    "stok_barang": 39,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "028",
-                    "nama_produk": "Teh Sari Wangi",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Minuman"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Kopi & Teh",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563427",
-                    "harga_produk": 8000,
-                    "tanggal_kadaluarsa": "2025-10-25T00:00:00Z",
-                    "stok_barang": 70,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                }
-            ],
-            "total_pendapatan": 13400
+            "tanggal_penjualan": "2025-01-25T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 13400,
+            "total": 13400,
+            "updated_at": "2025-03-20T14:15:18.599Z"
         },
         {
-            "id_details": "DP002",
-            "penjualan": {
-                "id_penjualan": "PJ002",
-                "user": {
-                    "id_user": "US001",
-                    "username": "AdminSRC",
-                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
-                    "role": "admin",
-                    "status": "Aktif"
-                },
-                "tanggal_penjualan": "2025-03-20T00:00:00Z",
-                "jumlah_produk": 3,
-                "subtotal": 8700,
-                "total": 8700,
-                "updated_at": "2025-03-20T14:15:43.751Z"
+            "id_penjualan": "PJ002",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
             },
-            "produk": [
-                {
-                    "id_produk": "001",
-                    "nama_produk": "Indomie Goreng Special",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Mie Instan",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563414",
-                    "harga_produk": 2700,
-                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
-                    "stok_barang": 37,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "020",
-                    "nama_produk": "Aqua 600ml",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Minuman"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Air Mineral",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563419",
-                    "harga_produk": 3000,
-                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
-                    "stok_barang": 100,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                }
-            ],
-            "total_pendapatan": 8700
+            "tanggal_penjualan": "2025-03-20T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 8700,
+            "total": 8700,
+            "updated_at": "2025-03-20T14:15:43.583Z"
         },
         {
-            "id_details": "DP003",
-            "penjualan": {
-                "id_penjualan": "PJ003",
-                "user": {
-                    "id_user": "US001",
-                    "username": "AdminSRC",
-                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
-                    "role": "admin",
-                    "status": "Aktif"
-                },
-                "tanggal_penjualan": "2025-02-14T00:00:00Z",
-                "jumlah_produk": 3,
-                "subtotal": 8400,
-                "total": 8400,
-                "updated_at": "2025-03-20T14:21:21.983Z"
+            "id_penjualan": "PJ003",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
             },
-            "produk": [
-                {
-                    "id_produk": "001",
-                    "nama_produk": "Indomie Goreng Special",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Mie Instan",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563414",
-                    "harga_produk": 2700,
-                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
-                    "stok_barang": 36,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "020",
-                    "nama_produk": "Aqua 600ml",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Minuman"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Air Mineral",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563419",
-                    "harga_produk": 3000,
-                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
-                    "stok_barang": 98,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                }
-            ],
-            "total_pendapatan": 8400
+            "tanggal_penjualan": "2025-02-14T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 8400,
+            "total": 8400,
+            "updated_at": "2025-03-20T14:21:21.895Z"
         },
         {
-            "id_details": "DP004",
-            "penjualan": {
-                "id_penjualan": "PJ004",
-                "user": {
-                    "id_user": "US001",
-                    "username": "AdminSRC",
-                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
-                    "role": "admin",
-                    "status": "Aktif"
-                },
-                "tanggal_penjualan": "2024-12-08T00:00:00Z",
-                "jumlah_produk": 6,
-                "subtotal": 23600,
-                "total": 23600,
-                "updated_at": "2025-03-20T14:28:07.313Z"
+            "id_penjualan": "PJ004",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
             },
-            "produk": [
-                {
-                    "id_produk": "001",
-                    "nama_produk": "Indomie Goreng Special",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Mie Instan",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563414",
-                    "harga_produk": 2700,
-                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
-                    "stok_barang": 34,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "020",
-                    "nama_produk": "Aqua 600ml",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Minuman"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Air Mineral",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563419",
-                    "harga_produk": 3000,
-                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
-                    "stok_barang": 97,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "006",
-                    "nama_produk": "Lays Classic",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "SK025",
-                        "nama_subkategori": "Snack",
-                        "kategori": null
-                    },
-                    "kode_produk": "8996001600147",
-                    "harga_produk": 9500,
-                    "tanggal_kadaluarsa": "2025-06-15T00:00:00Z",
-                    "stok_barang": 40,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                }
-            ],
-            "total_pendapatan": 23600
+            "tanggal_penjualan": "2024-12-08T00:00:00Z",
+            "jumlah_produk": 6,
+            "subtotal": 23600,
+            "total": 23600,
+            "updated_at": "2025-03-20T14:28:07.213Z"
         },
         {
-            "id_details": "DP005",
-            "penjualan": {
-                "id_penjualan": "PJ005",
-                "user": {
-                    "id_user": "US001",
-                    "username": "AdminSRC",
-                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
-                    "role": "admin",
-                    "status": "Aktif"
-                },
-                "tanggal_penjualan": "2025-01-17T00:00:00Z",
-                "jumlah_produk": 3,
-                "subtotal": 8700,
-                "total": 8700,
-                "updated_at": "2025-03-20T14:29:46.755Z"
+            "id_penjualan": "PJ005",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
             },
-            "produk": [
-                {
-                    "id_produk": "001",
-                    "nama_produk": "Indomie Goreng Special",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Mie Instan",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563414",
-                    "harga_produk": 2700,
-                    "tanggal_kadaluarsa": "2025-04-25T00:00:00Z",
-                    "stok_barang": 31,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "020",
-                    "nama_produk": "Aqua 600ml",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Minuman"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Air Mineral",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563419",
-                    "harga_produk": 3000,
-                    "tanggal_kadaluarsa": "2025-12-31T00:00:00Z",
-                    "stok_barang": 95,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                }
-            ],
-            "total_pendapatan": 8700
+            "tanggal_penjualan": "2025-01-17T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 8700,
+            "total": 8700,
+            "updated_at": "2025-03-20T14:29:46.674Z"
         },
         {
-            "id_details": "DP006",
-            "penjualan": {
-                "id_penjualan": "PJ006",
-                "user": {
-                    "id_user": "US001",
-                    "username": "AdminSRC",
-                    "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
-                    "role": "admin",
-                    "status": "Aktif"
-                },
-                "tanggal_penjualan": "2025-03-20T00:00:00Z",
-                "jumlah_produk": 2,
-                "subtotal": 12500,
-                "total": 12500,
-                "updated_at": "2025-03-20T14:41:10.299Z"
+            "id_penjualan": "PJ006",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
             },
-            "produk": [
-                {
-                    "id_produk": "005",
-                    "nama_produk": "Chitato Sapi Panggang",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "SK025",
-                        "nama_subkategori": "Snack",
-                        "kategori": null
-                    },
-                    "kode_produk": "8996001600146",
-                    "harga_produk": 10000,
-                    "tanggal_kadaluarsa": "2025-06-10T00:00:00Z",
-                    "stok_barang": 50,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                },
-                {
-                    "id_produk": "023",
-                    "nama_produk": "Pop Ice Coklat",
-                    "kategori": {
-                        "id_kategori": "",
-                        "nama_kategori": "Minuman"
-                    },
-                    "subkategori": {
-                        "id_subkategori": "",
-                        "nama_subkategori": "Minuman Serbuk",
-                        "kategori": null
-                    },
-                    "kode_produk": "8997035563422",
-                    "harga_produk": 2500,
-                    "tanggal_kadaluarsa": "2025-09-10T00:00:00Z",
-                    "stok_barang": 80,
-                    "updated_at": "0001-01-01T00:00:00Z",
-                    "is_deleted": null
-                }
-            ],
-            "total_pendapatan": 12500
+            "tanggal_penjualan": "2025-03-20T00:00:00Z",
+            "jumlah_produk": 2,
+            "subtotal": 12500,
+            "total": 12500,
+            "updated_at": "2025-03-20T14:41:10.206Z"
+        },
+        {
+            "id_penjualan": "PJ007",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-22T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 7900,
+            "total": 7900,
+            "updated_at": "2025-03-22T09:46:45.26Z"
+        },
+        {
+            "id_penjualan": "PJ008",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-17T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 17500,
+            "total": 17500,
+            "updated_at": "2025-03-25T09:12:23.701Z"
+        },
+        {
+            "id_penjualan": "PJ009",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-01-15T00:00:00Z",
+            "jumlah_produk": 15,
+            "subtotal": 52500,
+            "total": 52500,
+            "updated_at": "2025-03-25T16:16:47.23Z"
+        },
+        {
+            "id_penjualan": "PJ010",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-01-20T00:00:00Z",
+            "jumlah_produk": 10,
+            "subtotal": 70000,
+            "total": 70000,
+            "updated_at": "2025-03-25T16:18:07.79Z"
+        },
+        {
+            "id_penjualan": "PJ011",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-05T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 80000,
+            "total": 80000,
+            "updated_at": "2025-03-25T16:19:02.875Z"
+        },
+        {
+            "id_penjualan": "PJ012",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-15T00:00:00Z",
+            "jumlah_produk": 20,
+            "subtotal": 140000,
+            "total": 140000,
+            "updated_at": "2025-03-25T16:20:31.158Z"
+        },
+        {
+            "id_penjualan": "PJ013",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-03-01T00:00:00Z",
+            "jumlah_produk": 12,
+            "subtotal": 30000,
+            "total": 30000,
+            "updated_at": "2025-03-25T16:20:45.914Z"
+        },
+        {
+            "id_penjualan": "PJ014",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-03-20T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 125000,
+            "total": 125000,
+            "updated_at": "2025-03-25T16:22:15.88Z"
+        },
+        {
+            "id_penjualan": "PJ015",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-04-05T00:00:00Z",
+            "jumlah_produk": 25,
+            "subtotal": 75000,
+            "total": 75000,
+            "updated_at": "2025-03-25T16:22:30.605Z"
+        },
+        {
+            "id_penjualan": "PJ016",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-04-15T00:00:00Z",
+            "jumlah_produk": 15,
+            "subtotal": 150000,
+            "total": 150000,
+            "updated_at": "2025-03-25T16:22:53.725Z"
+        },
+        {
+            "id_penjualan": "PJ017",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-05-01T00:00:00Z",
+            "jumlah_produk": 18,
+            "subtotal": 288000,
+            "total": 288000,
+            "updated_at": "2025-03-25T16:23:05.066Z"
+        },
+        {
+            "id_penjualan": "PJ018",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-05-15T00:00:00Z",
+            "jumlah_produk": 30,
+            "subtotal": 150000,
+            "total": 150000,
+            "updated_at": "2025-03-25T16:23:16.648Z"
+        },
+        {
+            "id_penjualan": "PJ019",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-06-01T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 144000,
+            "total": 144000,
+            "updated_at": "2025-03-25T16:23:25.946Z"
+        },
+        {
+            "id_penjualan": "PJ020",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-06-15T00:00:00Z",
+            "jumlah_produk": 22,
+            "subtotal": 154000,
+            "total": 154000,
+            "updated_at": "2025-03-25T16:23:38.021Z"
+        },
+        {
+            "id_penjualan": "PJ021",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-01-25T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 32000,
+            "total": 32000,
+            "updated_at": "2025-03-25T16:28:16.007Z"
+        },
+        {
+            "id_penjualan": "PJ022",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-05T00:00:00Z",
+            "jumlah_produk": 12,
+            "subtotal": 180000,
+            "total": 180000,
+            "updated_at": "2025-03-25T16:28:27.293Z"
+        },
+        {
+            "id_penjualan": "PJ023",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-10T00:00:00Z",
+            "jumlah_produk": 20,
+            "subtotal": 400000,
+            "total": 400000,
+            "updated_at": "2025-03-25T16:28:38.544Z"
+        },
+        {
+            "id_penjualan": "PJ024",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-15T00:00:00Z",
+            "jumlah_produk": 15,
+            "subtotal": 270000,
+            "total": 270000,
+            "updated_at": "2025-03-25T16:29:04.496Z"
+        },
+        {
+            "id_penjualan": "PJ025",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-20T00:00:00Z",
+            "jumlah_produk": 25,
+            "subtotal": 425000,
+            "total": 425000,
+            "updated_at": "2025-03-25T16:29:12.772Z"
+        },
+        {
+            "id_penjualan": "PJ026",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-25T00:00:00Z",
+            "jumlah_produk": 18,
+            "subtotal": 180000,
+            "total": 180000,
+            "updated_at": "2025-03-25T16:29:21.813Z"
+        },
+        {
+            "id_penjualan": "PJ027",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-03-01T00:00:00Z",
+            "jumlah_produk": 30,
+            "subtotal": 450000,
+            "total": 450000,
+            "updated_at": "2025-03-25T16:29:30.104Z"
+        },
+        {
+            "id_penjualan": "PJ028",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-03-05T00:00:00Z",
+            "jumlah_produk": 22,
+            "subtotal": 99000,
+            "total": 99000,
+            "updated_at": "2025-03-25T16:29:56.434Z"
+        },
+        {
+            "id_penjualan": "PJ029",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-05T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 80000,
+            "total": 80000,
+            "updated_at": "2025-03-25T16:30:06.971Z"
+        },
+        {
+            "id_penjualan": "PJ030",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-02-15T00:00:00Z",
+            "jumlah_produk": 20,
+            "subtotal": 140000,
+            "total": 140000,
+            "updated_at": "2025-03-25T16:30:20.4Z"
+        },
+        {
+            "id_penjualan": "PJ031",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-03-01T00:00:00Z",
+            "jumlah_produk": 12,
+            "subtotal": 30000,
+            "total": 30000,
+            "updated_at": "2025-03-25T16:30:48.72Z"
+        },
+        {
+            "id_penjualan": "PJ032",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-08-20T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T03:44:30.53Z"
+        },
+        {
+            "id_penjualan": "PJ033",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-11-23T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 18500,
+            "total": 18500,
+            "updated_at": "2025-03-26T03:44:54.616Z"
+        },
+        {
+            "id_penjualan": "PJ034",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-10-31T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 25500,
+            "total": 25500,
+            "updated_at": "2025-03-26T03:45:34.222Z"
+        },
+        {
+            "id_penjualan": "PJ035",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-02-12T00:00:00Z",
+            "jumlah_produk": 4,
+            "subtotal": 22000,
+            "total": 22000,
+            "updated_at": "2025-03-26T03:57:08.067Z"
+        },
+        {
+            "id_penjualan": "PJ036",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-06-01T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 144000,
+            "total": 144000,
+            "updated_at": "2025-03-26T04:14:57.132Z"
+        },
+        {
+            "id_penjualan": "PJ037",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-16T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:26:31.06Z"
+        },
+        {
+            "id_penjualan": "PJ038",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-01T00:00:00Z",
+            "jumlah_produk": 6,
+            "subtotal": 33000,
+            "total": 33000,
+            "updated_at": "2025-03-26T04:27:25.083Z"
+        },
+        {
+            "id_penjualan": "PJ039",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2020-06-01T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 144000,
+            "total": 144000,
+            "updated_at": "2025-03-26T04:50:54.348Z"
+        },
+        {
+            "id_penjualan": "PJ040",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-26T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:31.269Z"
+        },
+        {
+            "id_penjualan": "PJ041",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-02-26T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:40.838Z"
+        },
+        {
+            "id_penjualan": "PJ042",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-02-26T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:42.338Z"
+        },
+        {
+            "id_penjualan": "PJ043",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-02-26T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:43.911Z"
+        },
+        {
+            "id_penjualan": "PJ044",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-26T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:47.655Z"
+        },
+        {
+            "id_penjualan": "PJ045",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-02T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:55.095Z"
+        },
+        {
+            "id_penjualan": "PJ046",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-06T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:52:59.925Z"
+        },
+        {
+            "id_penjualan": "PJ047",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-01-06T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:32.352Z"
+        },
+        {
+            "id_penjualan": "PJ048",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-01-06T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:33.684Z"
+        },
+        {
+            "id_penjualan": "PJ049",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-01-06T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:34.856Z"
+        },
+        {
+            "id_penjualan": "PJ050",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:38.995Z"
+        },
+        {
+            "id_penjualan": "PJ051",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:40.213Z"
+        },
+        {
+            "id_penjualan": "PJ052",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:41.335Z"
+        },
+        {
+            "id_penjualan": "PJ053",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:46.258Z"
+        },
+        {
+            "id_penjualan": "PJ054",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:47.489Z"
+        },
+        {
+            "id_penjualan": "PJ055",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:48.67Z"
+        },
+        {
+            "id_penjualan": "PJ056",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T04:54:49.927Z"
+        },
+        {
+            "id_penjualan": "PJ057",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2023-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T05:12:40.244Z"
+        },
+        {
+            "id_penjualan": "PJ058",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2023-01-12T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 14500,
+            "total": 14500,
+            "updated_at": "2025-03-26T05:12:41.894Z"
+        },
+        {
+            "id_penjualan": "PJ059",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-25T00:00:00Z",
+            "jumlah_produk": 2,
+            "subtotal": 7000,
+            "total": 7000,
+            "updated_at": "2025-03-26T13:26:09.749Z"
+        },
+        {
+            "id_penjualan": "PJ060",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-06T00:00:00Z",
+            "jumlah_produk": 1,
+            "subtotal": 3500,
+            "total": 3500,
+            "updated_at": "2025-03-26T13:26:28.055Z"
+        },
+        {
+            "id_penjualan": "PJ061",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-01T00:00:00Z",
+            "jumlah_produk": 2,
+            "subtotal": 24000,
+            "total": 24000,
+            "updated_at": "2025-03-26T13:28:58.608Z"
+        },
+        {
+            "id_penjualan": "PJ062",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-26T00:00:00Z",
+            "jumlah_produk": 2,
+            "subtotal": 26000,
+            "total": 26000,
+            "updated_at": "2025-03-26T13:37:25.154Z"
+        },
+        {
+            "id_penjualan": "PJ063",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-26T00:00:00Z",
+            "jumlah_produk": 2,
+            "subtotal": 19000,
+            "total": 19000,
+            "updated_at": "2025-03-26T13:40:21.007Z"
+        },
+        {
+            "id_penjualan": "PJ064",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-03-26T00:00:00Z",
+            "jumlah_produk": 1,
+            "subtotal": 8000,
+            "total": 8000,
+            "updated_at": "2025-03-26T13:40:56.967Z"
+        },
+        {
+            "id_penjualan": "PJ065",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2025-02-08T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 65500,
+            "total": 65500,
+            "updated_at": "2025-03-27T04:15:06.384Z"
+        },
+        {
+            "id_penjualan": "PJ066",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-07-13T00:00:00Z",
+            "jumlah_produk": 12,
+            "subtotal": 272000,
+            "total": 272000,
+            "updated_at": "2025-03-31T09:01:40.161Z"
+        },
+        {
+            "id_penjualan": "PJ067",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-06-02T00:00:00Z",
+            "jumlah_produk": 15,
+            "subtotal": 127500,
+            "total": 127500,
+            "updated_at": "2025-03-31T09:02:21.317Z"
+        },
+        {
+            "id_penjualan": "PJ068",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-09-15T00:00:00Z",
+            "jumlah_produk": 10,
+            "subtotal": 62500,
+            "total": 62500,
+            "updated_at": "2025-03-31T09:03:18.902Z"
+        },
+        {
+            "id_penjualan": "PJ069",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2024-09-27T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 39000,
+            "total": 39000,
+            "updated_at": "2025-03-31T09:04:00.061Z"
+        },
+        {
+            "id_penjualan": "PJ070",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-01-01T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 102000,
+            "total": 102000,
+            "updated_at": "2025-03-31T09:09:01.015Z"
+        },
+        {
+            "id_penjualan": "PJ072",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-01-17T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 62500,
+            "total": 62500,
+            "updated_at": "2025-03-31T09:10:06.335Z"
+        },
+        {
+            "id_penjualan": "PJ073",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-02-10T00:00:00Z",
+            "jumlah_produk": 4,
+            "subtotal": 50000,
+            "total": 50000,
+            "updated_at": "2025-03-31T09:11:04.645Z"
+        },
+        {
+            "id_penjualan": "PJ074",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-02-14T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 32500,
+            "total": 32500,
+            "updated_at": "2025-03-31T09:11:42.633Z"
+        },
+        {
+            "id_penjualan": "PJ075",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-02-19T00:00:00Z",
+            "jumlah_produk": 8,
+            "subtotal": 180000,
+            "total": 180000,
+            "updated_at": "2025-03-31T09:12:29.934Z"
+        },
+        {
+            "id_penjualan": "PJ076",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-03-02T00:00:00Z",
+            "jumlah_produk": 6,
+            "subtotal": 60000,
+            "total": 60000,
+            "updated_at": "2025-03-31T09:13:57.222Z"
+        },
+        {
+            "id_penjualan": "PJ077",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-03-05T00:00:00Z",
+            "jumlah_produk": 6,
+            "subtotal": 93000,
+            "total": 93000,
+            "updated_at": "2025-03-31T09:17:54.24Z"
+        },
+        {
+            "id_penjualan": "PJ078",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-03-20T00:00:00Z",
+            "jumlah_produk": 17,
+            "subtotal": 180000,
+            "total": 180000,
+            "updated_at": "2025-03-31T10:01:06.36Z"
+        },
+        {
+            "id_penjualan": "PJ079",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-03-18T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 42500,
+            "total": 42500,
+            "updated_at": "2025-03-31T10:01:21.289Z"
+        },
+        {
+            "id_penjualan": "PJ080",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-04-03T00:00:00Z",
+            "jumlah_produk": 7,
+            "subtotal": 45500,
+            "total": 45500,
+            "updated_at": "2025-03-31T10:01:48.95Z"
+        },
+        {
+            "id_penjualan": "PJ081",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-04-07T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 58000,
+            "total": 58000,
+            "updated_at": "2025-03-31T10:03:43.09Z"
+        },
+        {
+            "id_penjualan": "PJ082",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-04-12T00:00:00Z",
+            "jumlah_produk": 2,
+            "subtotal": 16000,
+            "total": 16000,
+            "updated_at": "2025-03-31T10:03:56.512Z"
+        },
+        {
+            "id_penjualan": "PJ083",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-04-19T00:00:00Z",
+            "jumlah_produk": 6,
+            "subtotal": 88000,
+            "total": 88000,
+            "updated_at": "2025-03-31T10:04:33.149Z"
+        },
+        {
+            "id_penjualan": "PJ084",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-05-07T00:00:00Z",
+            "jumlah_produk": 4,
+            "subtotal": 33000,
+            "total": 33000,
+            "updated_at": "2025-03-31T10:05:18.733Z"
+        },
+        {
+            "id_penjualan": "PJ085",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-05-15T00:00:00Z",
+            "jumlah_produk": 3,
+            "subtotal": 27500,
+            "total": 27500,
+            "updated_at": "2025-03-31T10:05:46.659Z"
+        },
+        {
+            "id_penjualan": "PJ086",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-05-19T00:00:00Z",
+            "jumlah_produk": 5,
+            "subtotal": 27000,
+            "total": 27000,
+            "updated_at": "2025-03-31T10:07:22.296Z"
+        },
+        {
+            "id_penjualan": "PJ087",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-05-20T00:00:00Z",
+            "jumlah_produk": 12,
+            "subtotal": 61500,
+            "total": 61500,
+            "updated_at": "2025-03-31T11:02:20.93Z"
+        },
+        {
+            "id_penjualan": "PJ088",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-05-24T00:00:00Z",
+            "jumlah_produk": 13,
+            "subtotal": 280000,
+            "total": 280000,
+            "updated_at": "2025-03-31T11:29:23.043Z"
+        },
+        {
+            "id_penjualan": "PJ090",
+            "user": {
+                "id_user": "US001",
+                "username": "AdminSRC",
+                "password": "$2a$10$CiiFxxsz0eZdjRKwg83BD.JKwyciFNVlJXwuH/ZoSoFcREergmD1K",
+                "role": "admin",
+                "status": "Aktif"
+            },
+            "tanggal_penjualan": "2021-06-05T00:00:00Z",
+            "jumlah_produk": 9,
+            "subtotal": 104000,
+            "total": 104000,
+            "updated_at": "2025-03-31T11:30:27.776Z"
         }
     ],
-    "message": "Data detail penjualan berhasil diambil"
+    "message": "Data penjualan berhasil diambil",
+    "status": 200
 }
