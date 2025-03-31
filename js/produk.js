@@ -1321,7 +1321,7 @@ async function handleAddProduct(event) {
         
         // Reset form dan tampilkan notifikasi sukses
         event.target.reset();
-        showAlert('Produk berhasil ditambahkan', 'success');
+        showSuccessModal('Produk berhasil ditambahkan');
         
         // Perbarui tabel produk
         await loadProducts();
@@ -1331,7 +1331,6 @@ async function handleAddProduct(event) {
         if (modal) {
             modal.classList.remove('show');
             modal.style.display = 'none';
-            document.body.classList.remove('modal-open');
             const backdrop = document.querySelector('.modal-backdrop');
             if (backdrop) {
                 backdrop.remove();
@@ -1409,7 +1408,7 @@ async function handleUpdateProduct(e) {
         const result = await products.update(idProduk, productData);
         
         if (result.success) {
-            showAlert('Produk berhasil diperbarui', 'success');
+            showSuccessModal('Produk berhasil diperbarui');
             loadSubKategoriTable();
             $('#updateProductModal').modal('hide');
             loadProducts(); // Refresh tabel
@@ -1621,7 +1620,7 @@ async function handleDeleteClick(event) {
                 console.log('Delete result:', result);
                 
                 if (result.success) {
-                    showAlert('Produk berhasil dihapus', 'success');
+                    showSuccessModal('Produk berhasil dihapus');
                     await loadProducts();
                 } else {
                     throw new Error(result.error || 'Gagal menghapus produk');
@@ -1677,7 +1676,7 @@ async function handleImportData(e) {
             if (result.skipped && result.skipped.length > 0) {
                 message += `, ${result.skipped.length} produk dilewati`;
             }
-            showAlert(message, 'success');
+            showSuccessModal(message);
             await loadProducts();
             // Tutup modal tanpa menggunakan jQuery
             const modal = document.getElementById('importDataModal');
@@ -2131,7 +2130,7 @@ function initializeKategoriManagement() {
             try {
                 await kategori.create(namaKategori);
                 document.getElementById('newKategoriName').value = '';
-                showAlert('Kategori berhasil ditambahkan', 'success');
+                showSuccessModal('Kategori berhasil ditambahkan');
                 loadKategoriTable();
             } catch (error) {
                 console.error('Error creating kategori:', error);
@@ -2170,7 +2169,7 @@ function initializeKategoriManagement() {
             
             try {
                 await kategori.update(id, nama);
-                showAlert('Kategori berhasil diperbarui', 'success');
+                showSuccessModal('Kategori berhasil diperbarui');
                 loadKategoriTable();
                 
                 // Tutup modal
@@ -2202,7 +2201,7 @@ function initializeKategoriManagement() {
                 async function() {
                     kategori.delete(id).then(result => {
                         if (result.success) {
-                            showAlert('Kategori berhasil dihapus', 'success');
+                            showSuccessModal('Kategori berhasil dihapus');
                             loadKategoriTable();
                         } else {
                             showAlert(result.error || 'Gagal menghapus kategori', 'danger');
@@ -2247,7 +2246,7 @@ function initializeSubKategoriManagement() {
             try {
                 await subkategori.create(namaSubKategori, idKategori);
                 document.getElementById('newSubKategoriName').value = '';
-                showAlert('Subkategori berhasil ditambahkan', 'success');
+                showSuccessModal('Subkategori berhasil ditambahkan');
                 loadSubKategoriTable();
             } catch (error) {
                 console.error('Error creating subkategori:', error);
@@ -2305,7 +2304,7 @@ function initializeSubKategoriManagement() {
             
             try {
                 await subkategori.update(id, idKategori, nama);
-                showAlert('Subkategori berhasil diperbarui', 'success');
+                showSuccessModal('Subkategori berhasil diperbarui');
                 
                 // Tutup modal
                 const modal = document.getElementById('editSubKategoriModal');
@@ -2338,7 +2337,7 @@ function initializeSubKategoriManagement() {
                     
                     // Jika penghapusan berhasil, perbarui UI
                     if (result !== false) {
-                        showAlert('Subkategori berhasil dihapus', 'success');
+                        showSuccessModal('Subkategori berhasil dihapus');
                         loadSubKategoriTable();
                     }
                     // Jika false, berarti sudah ditangani oleh fungsi delete dengan menampilkan alert
@@ -2522,10 +2521,10 @@ function initializeKategoriPage() {
         try {
             await kategori.create(namaKategori);
             document.getElementById('newKategoriName').value = '';
-            showAlert('Kategori berhasil ditambahkan', 'success');
+            showSuccessModal('Kategori berhasil ditambahkan');
             loadKategoriTable();
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#addKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error creating kategori:', error);
@@ -2547,10 +2546,10 @@ function initializeKategoriPage() {
         
         try {
             await kategori.update(id, namaKategori);
-            showAlert('Kategori berhasil diperbarui', 'success');
+            showSuccessModal('Kategori berhasil diperbarui');
             loadKategoriTable();
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#editKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error updating kategori:', error);
@@ -2582,7 +2581,7 @@ function initializeKategoriPage() {
             if (confirm(`Apakah Anda yakin ingin menghapus kategori "${nama}"?`)) {
                 kategori.delete(id).then(result => {
                     if (result !== false) {
-                        showAlert('Kategori berhasil dihapus', 'success');
+                        showSuccessModal('Kategori berhasil dihapus');
                         loadKategoriTable();
                     }
                 }).catch(error => {
@@ -2656,10 +2655,10 @@ function initializeSubKategoriPage() {
             await subkategori.create(kategoriId, namaSubKategori);
             document.getElementById('newSubKategoriName').value = '';
             if (kategoriDropdown) kategoriDropdown.value = '';
-            showAlert('Subkategori berhasil ditambahkan', 'success');
+            showSuccessModal('Subkategori berhasil ditambahkan');
             loadSubKategoriTable();
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#addSubKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error creating subkategori:', error);
@@ -2687,9 +2686,9 @@ function initializeSubKategoriPage() {
         
         try {
             await subkategori.update(id, idKategori, namaSubKategori);
-            showAlert('Subkategori berhasil diperbarui', 'success');
+            showSuccessModal('Subkategori berhasil diperbarui');
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#editSubKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error updating subkategori:', error);
@@ -2748,7 +2747,7 @@ function initializeSubKategoriPage() {
             if (confirm(`Apakah Anda yakin ingin menghapus subkategori "${nama}"?`)) {
                 subkategori.delete(id).then(result => {
                     if (result !== false) {
-                        showAlert('Subkategori berhasil dihapus', 'success');
+                        showSuccessModal('Subkategori berhasil dihapus');
                         loadSubKategoriTable();
                     }
                 }).catch(error => {
@@ -2778,11 +2777,11 @@ $(document).on('click', '.btn-delete', function() {
                 });
 
                 const result = await handleResponse(response);
-                showNotification('success', 'Produk berhasil dihapus');
+                showSuccessModal('Produk berhasil dihapus');
                 await loadProdukData(); // Refresh table
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('error', error.message || 'Gagal menghapus produk');
+                showAlert(`Error: ${error.message}`, 'danger');
             }
         }
     );
@@ -2796,4 +2795,163 @@ function formatDate(dateString) {
         day: 'numeric'
     };
     return new Date(dateString).toLocaleDateString('id-ID', options);
+}
+
+// Function to show success modal
+function showSuccessModal(message) {
+    // Create success modal if not exists
+    if (!$('#successModal').length) {
+        const successModalHtml = `
+            <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title" id="successModalLabel">Berhasil!</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="fas fa-check-circle text-success mb-3" style="font-size: 64px;"></i>
+                            <p class="mb-0" id="successMessage"></p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-success px-4" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(successModalHtml);
+
+        // Handle success modal hidden event
+        $('#successModal').on('hidden.bs.modal', async () => {
+            // Reset forms
+            $('#formTambahProduk')[0]?.reset();
+            $('#formEditProduk')[0]?.reset();
+            
+            // Reset any product images
+            $('#previewImage').attr('src', '');
+            $('#editPreviewImage').attr('src', '');
+            
+            // Refresh data table
+            await loadProducts();
+            
+            // Refresh category and subcategory options
+            await populateKategoriDropdowns();
+        });
+    }
+
+    // Set message and show modal
+    $('#successMessage').text(message);
+    $('#successModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+}
+
+// Function to show success modal
+function showSuccessModal(message) {
+    // Create success modal if not exists
+    if (!$('#successModal').length) {
+        const successModalHtml = `
+            <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title" id="successModalLabel">Berhasil!</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="fas fa-check-circle text-success mb-3" style="font-size: 64px;"></i>
+                            <p class="mb-0" id="successMessage"></p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-success px-4" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(successModalHtml);
+
+        // Handle success modal hidden event
+        $('#successModal').on('hidden.bs.modal', async () => {
+            // Reset forms
+            $('#formTambahProduk')[0]?.reset();
+            $('#formEditProduk')[0]?.reset();
+            
+            // Reset any product images
+            $('#previewImage').attr('src', '');
+            $('#editPreviewImage').attr('src', '');
+            
+            // Refresh data table
+            await loadProducts();
+            
+            // Refresh category and subcategory options
+            await populateKategoriDropdowns();
+        });
+    }
+
+    // Set message and show modal
+    $('#successMessage').text(message);
+    $('#successModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+}
+
+// Function to show notification
+function showNotification(type, message) {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const title = type === 'success' ? 'Berhasil!' : 'Error!';
+    const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+    // Create notification modal if not exists
+    if (!$('#notificationModal').length) {
+        const modalHtml = `
+            <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header ${bgClass} text-white">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="fas ${icon} ${type === 'success' ? 'text-success' : 'text-danger'} mb-3" style="font-size: 64px;"></i>
+                            <p class="mb-0" id="notificationMessage"></p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn ${type === 'success' ? 'btn-success' : 'btn-danger'} px-4" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+
+        // Handle modal hidden event
+        $('#notificationModal').on('hidden.bs.modal', async () => {
+            if (type === 'success') {
+                // Reset forms if success
+                $('#formTambahProduk')[0]?.reset();
+                $('#formEditProduk')[0]?.reset();
+                $('#previewImage').attr('src', '');
+                $('#editPreviewImage').attr('src', '');
+                await loadProducts();
+                await populateKategoriDropdowns();
+            }
+        });
+    }
+
+    // Set message and show modal
+    $('#notificationMessage').text(message);
+    $('#notificationModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
 }

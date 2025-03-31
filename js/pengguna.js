@@ -261,11 +261,11 @@ async function loadUsers() {
         if (result.success) {
             populateUserTable(result.data.data || []);
         } else {
-            showAlert(result.error || 'Gagal memuat data pengguna', 'danger');
+            showNotification('error', result.error || 'Gagal memuat data pengguna');
         }
     } catch (error) {
         console.error('Error loading users:', error);
-        showAlert('Error memuat data pengguna', 'danger');
+        showNotification('error', 'Error memuat data pengguna');
     }
 }
 
@@ -319,26 +319,26 @@ function attachEventListeners() {
 if (addUserForm) {
     addUserForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = new FormData(addUserForm);
         
+        const formData = new FormData(e.target);
+        const userData = {
+            username: formData.get('username'),
+            password: formData.get('password'),
+            role: formData.get('role')
+        };
+
         try {
-            const result = await users.create({
-                username: formData.get('username'),
-                password: formData.get('password'),
-                role: formData.get('role')
-            });
+            const result = await users.create(userData);
 
             if (result.success) {
-                showAlert('Pengguna berhasil ditambahkan', 'success');
-                addUserForm.reset();
+                showNotification('success', 'Pengguna berhasil ditambahkan');
                 $('#addUserModal').modal('hide');
                 loadUsers();
             } else {
-                showAlert(result.error || 'Gagal menambahkan pengguna', 'danger');
+                showNotification('error', `Error menambahkan pengguna: ${result.error}`);
             }
         } catch (error) {
-            console.error('Error menambahkan pengguna:', error);
-            showAlert(error.message || 'Error menambahkan pengguna', 'danger');
+            showNotification('error', `Error menambahkan pengguna: ${error.message}`);
         }
     });
 }
@@ -364,37 +364,26 @@ function handleEditClick(e) {
 if (editUserForm) {
     editUserForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = new FormData(editUserForm);
-        const username = formData.get('username');
-        const password = formData.get('password');
-        const role = formData.get('role');
-        const status = formData.get('status');
         
-        try {
-            const userData = {
-                username,
-                role,
-                status
-            };
-            
-            // Hanya sertakan password jika diisi
-            if (password) {
-                userData.password = password;
-            }
+        const formData = new FormData(e.target);
+        const username = formData.get('username');
+        const userData = {
+            password: formData.get('password'),
+            role: formData.get('role')
+        };
 
+        try {
             const result = await users.updateUser(username, userData);
 
             if (result.success) {
-                showAlert('Pengguna berhasil diperbarui', 'success');
-                editUserForm.reset();
+                showNotification('success', 'Pengguna berhasil diperbarui');
                 $('#editUserModal').modal('hide');
                 loadUsers();
             } else {
-                showAlert(result.error || 'Gagal memperbarui pengguna', 'danger');
+                showNotification('error', `Error memperbarui pengguna: ${result.error}`);
             }
         } catch (error) {
-            console.error('Error memperbarui pengguna:', error);
-            showAlert(error.message || 'Error memperbarui pengguna', 'danger');
+            showNotification('error', `Error memperbarui pengguna: ${error.message}`);
         }
     });
 }
@@ -406,7 +395,7 @@ function handleDeleteClick(e) {
     const id = button.dataset.id_user;
     
     if (!id) {
-        showAlert('ID pengguna tidak valid', 'danger');
+        showNotification('error', 'ID pengguna tidak valid');
         return;
     }
     
@@ -422,22 +411,21 @@ function handleDeleteClick(e) {
 if (deleteUserModal) {
     document.getElementById('confirmDelete').addEventListener('click', async () => {
         if (!userToDelete) {
-            showAlert('ID pengguna tidak valid', 'danger');
+            showNotification('error', 'ID pengguna tidak valid');
             return;
         }
 
         try {
             const result = await users.delete(userToDelete);
             if (result.success) {
-                showAlert('Pengguna berhasil dihapus', 'success');
+                showNotification('success', 'Pengguna berhasil dihapus');
                 $('#deleteUserModal').modal('hide');
                 loadUsers();
             } else {
-                showAlert(result.error || 'Gagal menghapus pengguna', 'danger');
+                showNotification('error', `Error menghapus pengguna: ${result.error}`);
             }
         } catch (error) {
-            console.error('Error menghapus pengguna:', error);
-            showAlert(error.message || 'Error menghapus pengguna', 'danger');
+            showNotification('error', `Error menghapus pengguna: ${error.message}`);
         }
         
         userToDelete = null;
@@ -457,22 +445,54 @@ if (searchInput) {
     });
 }
 
-// Helper function to show alerts
-function showAlert(message, type = 'info') {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    `;
-    
-    const alertPlaceholder = document.getElementById('alertPlaceholder');
-    if (alertPlaceholder) {
-        alertPlaceholder.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
+// Function to show notification
+function showNotification(type, message) {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const title = type === 'success' ? 'Berhasil!' : 'Error!';
+    const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+    // Create notification modal if not exists
+    if (!$('#notificationModal').length) {
+        const modalHtml = `
+            <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header ${bgClass} text-white">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="fas ${icon} ${type === 'success' ? 'text-success' : 'text-danger'} mb-3" style="font-size: 64px;"></i>
+                            <p class="mb-0" id="notificationMessage"></p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn ${type === 'success' ? 'btn-success' : 'btn-danger'} px-4" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+
+        // Handle modal hidden event
+        $('#notificationModal').on('hidden.bs.modal', function () {
+            // Reset forms if success
+            if (type === 'success') {
+                $('#addUserForm')[0]?.reset();
+                $('#editUserForm')[0]?.reset();
+                loadUsers();
+            }
+        });
     }
+
+    // Set message and show modal
+    $('#notificationMessage').text(message);
+    $('#notificationModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
 }
 
 // Initialize
