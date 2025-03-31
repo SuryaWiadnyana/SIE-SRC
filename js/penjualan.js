@@ -160,6 +160,9 @@ async function loadProdukOptions() {
             };
         }).filter(product => product !== null);
 
+        // Sort produkList alphabetically by nama_produk
+        produkList.sort((a, b) => a.nama_produk.localeCompare(b.nama_produk));
+
         console.log('Processed product list:', produkList);
 
         if (produkList.length === 0) {

@@ -815,6 +815,55 @@ async function loadProducts() {
             filteredProducts = [...allProducts]; // Pastikan filteredProducts diinisialisasi
             currentPage = 1; // Reset ke halaman pertama
             
+            // Add sort dropdown to the UI if it doesn't exist
+            let sortSelect = document.getElementById('sortSelect');
+            if (!sortSelect) {
+                const sortContainer = document.createElement('div');
+                sortContainer.className = 'd-flex justify-content-end mb-3';
+                sortContainer.innerHTML = `
+                    <div class="form-group" style="width: 200px;">
+                        <select class="form-control" id="sortSelect">
+                            <option value="name-asc">Nama (A-Z)</option>
+                            <option value="name-desc">Nama (Z-A)</option>
+                            <option value="stock-desc">Stok (Tinggi-Rendah)</option>
+                            <option value="stock-asc">Stok (Rendah-Tinggi)</option>
+                        </select>
+                    </div>
+                `;
+                
+                // Find the table's parent container
+                const tableContainer = productTable.parentElement;
+                
+                // If there's a search input, insert after it, otherwise insert before the table
+                const searchContainer = document.querySelector('.search-container');
+                if (searchContainer) {
+                    searchContainer.appendChild(sortContainer);
+                } else {
+                    tableContainer.insertBefore(sortContainer, productTable);
+                }
+                
+                // Add change handler for sort select
+                sortSelect = document.getElementById('sortSelect');
+                sortSelect.addEventListener('change', function() {
+                    const sortType = this.value;
+                    switch(sortType) {
+                        case 'name-asc':
+                            filteredProducts.sort((a, b) => a.produk.nama_produk.localeCompare(b.produk.nama_produk));
+                            break;
+                        case 'name-desc':
+                            filteredProducts.sort((a, b) => b.produk.nama_produk.localeCompare(a.produk.nama_produk));
+                            break;
+                        case 'stock-desc':
+                            filteredProducts.sort((a, b) => b.produk.stok_barang - a.produk.stok_barang);
+                            break;
+                        case 'stock-asc':
+                            filteredProducts.sort((a, b) => a.produk.stok_barang - b.produk.stok_barang);
+                            break;
+                    }
+                    displayProducts(filteredProducts);
+                });
+            }
+            
             // Update UI
             updateFilterButtons();
             displayProducts(filteredProducts);
