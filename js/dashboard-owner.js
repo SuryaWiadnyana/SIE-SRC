@@ -133,11 +133,8 @@ function checkAuth() {
 
 // Format number to Indonesian Rupiah
 function formatRupiah(number) {
-  // Pastikan angka dibulatkan
   const roundedNumber = Math.round(Number(number) || 0);
   return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(roundedNumber);
@@ -304,11 +301,13 @@ Chart.defaults.set('plugins.datalabels', {
     if (typeof value === 'object' && value !== null) {
       value = value.y;
     }
-    return formatRupiah(value);
+    return new Intl.NumberFormat('id-ID', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(Math.round(Number(value) || 0));
   }
 });
 
-// Konfigurasi Chart.js
 let mainChart = null;
 
 // Fungsi untuk menginisialisasi grafik
@@ -375,9 +374,9 @@ async function initializeCharts() {
             anchor: 'end',
             formatter: function(value, context) {
               if (context.datasetIndex === 1) { // Total Penjualan
-                return formatRupiah(value);
+                return formatRupiah(value.y);
               } else { // Jumlah Produk
-                return value;
+                return value.y;
               }
             },
             color: function(context) {
@@ -563,7 +562,7 @@ async function updateChart() {
               const monthData = responseData.data.find(item => item.bulan === index + 1);
               return {
                 x: index + 1,
-                y: monthData ? Math.round(Number(monthData.jumlah_produk) || 0) : 0
+                y: monthData ? monthData.jumlah_produk || 0 : 0
               };
             })
           },
@@ -574,7 +573,7 @@ async function updateChart() {
               const monthData = responseData.data.find(item => item.bulan === index + 1);
               return {
                 x: index + 1,
-                y: monthData ? Math.round(Number(monthData.total) || 0) : 0
+                y: monthData ? monthData.total || 0 : 0
               };
             })
           }
@@ -663,7 +662,7 @@ async function updateChart() {
       align: 'top',
       formatter: function(value, context) {
         if (chartType === 'sales' && this.datasetIndex === 1) {
-          return formatRupiah(value);
+          return formatRupiah(value.y);
         }
         return value.y.toLocaleString('id-ID');
       },
@@ -1802,16 +1801,6 @@ function getChartTitle(chartType) {
     default:
       return 'Grafik Penjualan';
   }
-}
-
-// Format number to rupiah
-function formatRupiah(number) {
-  // Pastikan angka dibulatkan
-  const roundedNumber = Math.round(Number(number) || 0);
-  return new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(roundedNumber);
 }
 
 // Function to load year options

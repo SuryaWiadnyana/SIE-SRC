@@ -1,0 +1,77 @@
+[
+  {
+    "penjualan": {
+      "produk_terjual": 3,
+      "tanggal_penjualan": "01-01-2022"
+    },
+    "produk": {
+      "id_produk": "001",
+      "nama_produk": "Kellogg's Corn Flakes",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK001",
+        "nama_subkategori": "Sereal",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8996001600156",
+      "harga_produk": 25000,
+      "tanggal_kedaluwarsa": "2025-09-10T00:00:00Z"
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 5,
+      "tanggal_penjualan": "01-02-2022"
+    },
+    "produk": {
+      "id_produk": "013",
+      "nama_produk": "Indomie Goreng",
+      "kategori": {
+        "id_kategori": "KT001",
+        "nama_kategori": "Makanan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK006",
+        "nama_subkategori": "Mie Instan",
+        "kategori": {
+          "id_kategori": "KT001",
+          "nama_kategori": "Makanan"
+        }
+      },
+      "kode_produk": "8996001600162",
+      "harga_produk": 3500,
+      "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z"
+    }
+  },
+  {
+    "penjualan": {
+      "produk_terjual": 2,
+      "tanggal_penjualan": "01-03-2022"
+    },
+    "produk": {
+      "id_produk": "039",
+      "nama_produk": "Tropical Gula 1kg",
+      "kategori": {
+        "id_kategori": "KT007",
+        "nama_kategori": "Bumbu Masakan"
+      },
+      "subkategori": {
+        "id_subkategori": "SK017",
+        "nama_subkategori": "Gula",
+        "kategori": {
+          "id_kategori": "KT007",
+          "nama_kategori": "Bumbu Masakan"
+        }
+      },
+      "kode_produk": "8996001600188",
+      "harga_produk": 13000,
+      "tanggal_kedaluwarsa": "2025-11-20T00:00:00Z"
+    }
+  }
+]
