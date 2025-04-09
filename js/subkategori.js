@@ -399,7 +399,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     
                     const kategoriData = {
-                        id: kategoriId
+                        id_kategori: kategoriId,
+                        nama_kategori: document.getElementById('kategoriDropdown').options[document.getElementById('kategoriDropdown').selectedIndex].text
                     };
                     
                     await subkategori.create(namaSubKategori, kategoriData);
@@ -433,7 +434,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     
                     const kategoriData = {
-                        id: kategoriId
+                        id_kategori: kategoriId,
+                        nama_kategori: document.getElementById('editKategoriDropdown').options[document.getElementById('editKategoriDropdown').selectedIndex].text
                     };
                     
                     await subkategori.update(id, namaSubKategori, kategoriData);
