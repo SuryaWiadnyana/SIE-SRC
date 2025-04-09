@@ -312,6 +312,29 @@ const products = {
 
         console.log('Mengirim request update ke API:', productData);
 
+        // Validasi input dasar
+        if (!productData.nama_produk || !productData.kategori || !productData.subkategori || !productData.kode_produk || !productData.harga_produk || !productData.stok_barang) {
+            showAlert('Semua field harus diisi kecuali tanggal kedaluwarsa', 'danger');
+            return;
+        }
+
+        // Validasi kode produk tidak boleh kosong atau hanya spasi
+        if (!productData.kode_produk.trim()) {
+            showAlert('Kode produk tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        // Validasi harga dan stok
+        if (parseFloat(productData.harga_produk) <= 0) {
+            showAlert('Harga produk harus lebih dari 0', 'danger');
+            return;
+        }
+        
+        if (parseInt(productData.stok_barang) <= 0) {
+            showAlert('Stok barang harus lebih dari 0', 'danger');
+            return;
+        }
+
         const response = await fetch(`${BASE_URL}/produk/update/${id}`, {
           method: "PUT",
           headers: {
@@ -1298,6 +1321,23 @@ async function handleAddProduct(event) {
         showAlert('Nama produk, kode produk, harga, stok, kategori, dan sub kategori harus diisi', 'danger');
         return;
     }
+    
+    // Validasi kode produk tidak boleh kosong atau hanya spasi
+    if (!productData.kode_produk.trim()) {
+        showAlert('Kode produk tidak boleh kosong', 'danger');
+        return;
+    }
+
+    // Validasi nilai tidak boleh 0
+    if (parseFloat(productData.harga_produk) <= 0) {
+        showAlert('Harga produk harus lebih dari 0', 'danger');
+        return;
+    }
+
+    if (parseInt(productData.stok_barang) <= 0) {
+        showAlert('Stok barang harus lebih dari 0', 'danger');
+        return;
+    }
 
     // Validasi kategori dan subkategori
     const kategoriSelect = document.getElementById('kategori');
@@ -1328,17 +1368,6 @@ async function handleAddProduct(event) {
         }
     };
 
-    // Validasi harga dan stok (tidak boleh negatif)
-    if (formattedData.harga_produk < 0) {
-        showAlert('Harga produk tidak boleh negatif', 'danger');
-        return;
-    }
-    
-    if (formattedData.stok_barang < 0) {
-        showAlert('Stok barang tidak boleh negatif', 'danger');
-        return;
-    }
-    
     // Format tanggal kedaluwarsa ke ISO string jika ada
     if (productData.tanggal_kedaluwarsa) {
         const expDate = new Date(productData.tanggal_kedaluwarsa);
@@ -1411,13 +1440,19 @@ async function handleUpdateProduct(e) {
             return;
         }
         
+        // Validasi kode produk tidak boleh kosong atau hanya spasi
+        if (!kodeProduk.trim()) {
+            showAlert('Kode produk tidak boleh kosong', 'danger');
+            return;
+        }
+        
         // Validasi harga dan stok
-        if (parseFloat(hargaProduk) < 0) {
+        if (parseFloat(hargaProduk) <= 0) {
             showAlert('Harga produk tidak boleh negatif', 'danger');
             return;
         }
         
-        if (parseInt(stokBarang) < 0) {
+        if (parseInt(stokBarang) <= 0) {
             showAlert('Stok barang tidak boleh negatif', 'danger');
             return;
         }
@@ -1426,7 +1461,9 @@ async function handleUpdateProduct(e) {
         let formattedTanggalkedaluwarsa = null;
         if (tanggalkedaluwarsaInput) {
             const expDate = new Date(tanggalkedaluwarsaInput);
-            formattedTanggalkedaluwarsa = expDate.toISOString();
+            if (!isNaN(expDate.getTime())) {
+                formattedTanggalkedaluwarsa = expDate.toISOString();
+            }
         }
         
         // Siapkan data produk dengan format yang benar
@@ -1735,7 +1772,6 @@ async function handleImportData(e) {
             if (backdrop) {
                 backdrop.remove();
             }
-            document.getElementById('importDataForm').reset();
         } else {
             showAlert(result.error || 'Gagal mengimpor data', 'danger');
         }
@@ -1770,26 +1806,25 @@ function initializeImportForm() {
 // Helper functions
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('alertPlaceholder');
-    if (alertPlaceholder) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        `;
-        alertPlaceholder.appendChild(wrapper);
+    if (!alertPlaceholder) return;
 
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            const alert = wrapper.querySelector('.alert');
-            if (alert) {
-                $(alert).alert('close');
-            }
-        }, 5000);
-    }
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = wrapper.querySelector('.alert');
+        if (alert) {
+            $(alert).alert('close');
+        }
+    }, 5000);
+    
+    alertPlaceholder.appendChild(wrapper);
 }
 
 function formatCurrency(amount) {

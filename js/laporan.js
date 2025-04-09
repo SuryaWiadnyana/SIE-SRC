@@ -248,7 +248,7 @@ function updateSortOptions() {
     
     if (reportType === 'penjualan') {
         const salesOptions = [
-            { value: '', label: 'Urutan Default' },
+            { value: '', label: 'Urutkan Default' },
             { value: 'date_asc', label: 'Tanggal (A-Z)' },
             { value: 'date_desc', label: 'Tanggal (Z-A)' },
             { value: 'quantity_asc', label: 'Jumlah (Terendah)' },
@@ -268,7 +268,7 @@ function updateSortOptions() {
         }
     } else {
         const productOptions = [
-            { value: '', label: 'Urutan Default' },
+            { value: '', label: 'Urutkan Default' },
             { value: 'name_asc', label: 'Nama (A-Z)' },
             { value: 'name_desc', label: 'Nama (Z-A)' },
             { value: 'stock_asc', label: 'Stok (Terendah)' },
@@ -298,7 +298,7 @@ function updateSortingOptions() {
     const sortSelect = document.getElementById("sortOption");
     
     // Clear existing options
-    sortSelect.innerHTML = '<option value="">Pilih Urutan</option>';
+    sortSelect.innerHTML = '<option value="">Pilih Urutkan</option>';
     
     // Add options based on report type
     if (reportType === 'penjualan') {
