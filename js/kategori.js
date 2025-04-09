@@ -352,9 +352,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (addForm) {
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const namaKategori = document.getElementById('newKategoriName').value.trim();
+                
                 try {
-                    const namaKategori = document.getElementById('newKategoriName').value.trim();
-                    
                     if (!namaKategori) {
                         showAlert('Nama kategori harus diisi', 'danger');
                         return;
@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     addForm.reset();
                     await loadKategoriTable();
                 } catch (error) {
-                    showAlert('Gagal menambahkan kategori: ' + error.message, 'danger');
+                    showAlert('Gagal menambahkan kategori: Kategori dengan nama "' + namaKategori + '" sudah ada', 'danger');
                 }
             });
         }

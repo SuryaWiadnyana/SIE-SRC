@@ -335,23 +335,16 @@ async function populateKategoriDropdowns() {
 // Show alert message
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('alertPlaceholder');
-    if (!alertPlaceholder) {
-        console.error('Alert placeholder not found');
-        return;
-    }
+    if (!alertPlaceholder) return;
 
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;">
             ${message}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
     
-    alertPlaceholder.appendChild(wrapper);
-
     // Auto-dismiss after 5 seconds
     setTimeout(() => {
         const alert = wrapper.querySelector('.alert');
@@ -359,6 +352,8 @@ function showAlert(message, type) {
             $(alert).alert('close');
         }
     }, 5000);
+    
+    alertPlaceholder.appendChild(wrapper);
 }
 
 // Initialize page
@@ -389,10 +384,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (addForm) {
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const kategoriId = document.getElementById('kategoriDropdown').value;
+                const namaSubKategori = document.getElementById('namaSubKategori').value.trim();
+                
                 try {
-                    const kategoriId = document.getElementById('kategoriDropdown').value;
-                    const namaSubKategori = document.getElementById('namaSubKategori').value.trim();
-                    
                     if (!kategoriId) {
                         showAlert('Pilih kategori terlebih dahulu', 'danger');
                         return;
@@ -403,31 +398,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return;
                     }
                     
-                    // Get kategori data first
-                    const kategoriResponse = await fetch(`${BASE_URL}/kategori/getbyid/${kategoriId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${getToken()}`
-                        }
-                    });
+                    const kategoriData = {
+                        id: kategoriId
+                    };
                     
-                    if (!kategoriResponse.ok) {
-                        throw new Error('Gagal mendapatkan data kategori');
-                    }
-                    
-                    const kategoriData = await kategoriResponse.json();
-                    if (!kategoriData || !kategoriData.data || !kategoriData.data.id_kategori) {
-                        throw new Error('Data kategori tidak valid');
-                    }
-                    
-                    // Create subkategori with complete kategori data
-                    await subkategori.create(namaSubKategori, kategoriData.data);
+                    await subkategori.create(namaSubKategori, kategoriData);
                     showAlert('Subkategori berhasil ditambahkan', 'success');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addSubKategoriModal'));
-                    modal.hide();
+                    $('#addSubKategoriModal').modal('hide');
                     addForm.reset();
                     await loadSubKategoriTable();
                 } catch (error) {
-                    showAlert('Gagal menambahkan subkategori: ' + error.message, 'danger');
+                    showAlert('Gagal menambahkan subkategori: Subkategori dengan nama "' + namaSubKategori + '" sudah ada di kategori ini', 'danger');
                 }
             });
         }
@@ -436,16 +417,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (editForm) {
             editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const id = document.getElementById('editSubKategoriId').value;
+                const kategoriId = document.getElementById('editKategoriDropdown').value;
+                const namaSubKategori = document.getElementById('editNamaSubKategori').value.trim();
+                
                 try {
-                    const id = document.getElementById('editSubKategoriId').value;
-                    const kategoriId = document.getElementById('editKategoriDropdown').value;
-                    const namaSubKategori = document.getElementById('editNamaSubKategori').value;
-                    
-                    if (!id) {
-                        showAlert('ID subkategori tidak valid', 'danger');
-                        return;
-                    }
-                    
                     if (!kategoriId) {
                         showAlert('Pilih kategori terlebih dahulu', 'danger');
                         return;
@@ -456,30 +432,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return;
                     }
                     
-                    // Get kategori data first
-                    const kategoriResponse = await fetch(`${BASE_URL}/kategori/getbyid/${kategoriId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${getToken()}`
-                        }
-                    });
+                    const kategoriData = {
+                        id: kategoriId
+                    };
                     
-                    if (!kategoriResponse.ok) {
-                        throw new Error('Gagal mendapatkan data kategori');
-                    }
-                    
-                    const kategoriData = await kategoriResponse.json();
-                    if (!kategoriData || !kategoriData.data || !kategoriData.data.id_kategori) {
-                        throw new Error('Data kategori tidak valid');
-                    }
-                    
-                    // Update subkategori with complete kategori data
-                    await subkategori.update(id, namaSubKategori, kategoriData.data);
+                    await subkategori.update(id, namaSubKategori, kategoriData);
                     showAlert('Subkategori berhasil diperbarui', 'success');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editSubKategoriModal'));
-                    modal.hide();
+                    $('#editSubKategoriModal').modal('hide');
+                    editForm.reset();
                     await loadSubKategoriTable();
                 } catch (error) {
-                    showAlert('Gagal memperbarui subkategori: ' + error.message, 'danger');
+                    if (error.message.includes('Subkategori dengan nama')) {
+                        showAlert('Gagal memperbarui subkategori: Subkategori dengan nama "' + namaSubKategori + '" sudah ada di kategori ini', 'danger');
+                    } else {
+                        showAlert('Gagal memperbarui subkategori: ' + error.message, 'danger');
+                    }
                 }
             });
         }
