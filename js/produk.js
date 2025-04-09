@@ -1448,12 +1448,12 @@ async function handleUpdateProduct(e) {
         
         // Validasi harga dan stok
         if (parseFloat(hargaProduk) <= 0) {
-            showAlert('Harga produk tidak boleh negatif', 'danger');
+            showAlert('Harga produk tidak boleh 0 atau negatif', 'danger');
             return;
         }
         
         if (parseInt(stokBarang) <= 0) {
-            showAlert('Stok barang tidak boleh negatif', 'danger');
+            showAlert('Stok barang tidak boleh 0 atau negatif', 'danger');
             return;
         }
         
