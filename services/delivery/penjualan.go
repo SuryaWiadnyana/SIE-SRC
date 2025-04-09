@@ -41,6 +41,7 @@ func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, us
 	protected.Get("/getall", handler.GetAll)
 	protected.Get("/by-id/:id_penjualan", handler.GetByID)
 	protected.Delete("/delete/:id_penjualan", handler.Delete)
+	protected.Get("/fix-old-sales-data", handler.FixOldSalesData)
 }
 
 func (d *HttpDeliveryPenjualan) GetAll(c *fiber.Ctx) error {
@@ -268,4 +269,49 @@ func (d *HttpDeliveryPenjualan) GetByID(c *fiber.Ctx) error {
 		"message": "Data penjualan berhasil diambil",
 		"data":    penjualan,
 	})
+}
+
+func (d *HttpDeliveryPenjualan) FixOldSalesData(c *fiber.Ctx) error {
+    // Ambil detail penjualan dari DP001-DP031
+    details, err := d.DetailPenjualan.GetAll(c.Context())
+    if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+            "status":  fiber.StatusInternalServerError,
+            "message": fmt.Sprintf("Gagal mengambil data detail penjualan: %v", err),
+            "data":    nil,
+        })
+    }
+
+    var fixedCount int
+    // Iterasi setiap detail penjualan
+    for _, detail := range details {
+        // Hanya proses DP001-DP031
+        if detail.ID_DetailPenjualan < "DP032" {
+            // Hitung total pendapatan yang benar
+            var totalPendapatan int
+            for _, produk := range detail.Produk {
+                // Total = harga produk × jumlah terjual untuk produk ini
+                totalPendapatan += produk.HargaProduk * detail.Penjualan.JumlahProduk / len(detail.Produk)
+            }
+
+            // Update total pendapatan jika berbeda
+            if detail.TotalPendapatan != totalPendapatan {
+                oldTotal := detail.TotalPendapatan
+                detail.TotalPendapatan = totalPendapatan
+                if err := d.DetailPenjualan.UpdateDetails(c.Context(), &detail); err != nil {
+                    log.Printf("Error updating detail penjualan %s: %v", detail.ID_DetailPenjualan, err)
+                    continue
+                }
+                fixedCount++
+                log.Printf("Fixed detail penjualan %s: old total=%d, new total=%d", 
+                    detail.ID_DetailPenjualan, oldTotal, totalPendapatan)
+            }
+        }
+    }
+
+    return c.JSON(fiber.Map{
+        "status":  fiber.StatusOK,
+        "message": fmt.Sprintf("Berhasil memperbaiki %d data penjualan", fixedCount),
+        "data":    nil,
+    })
 }

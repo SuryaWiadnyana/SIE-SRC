@@ -62,3 +62,10 @@ func (uc *detailPenjualanUsecase) GetByID(ctx context.Context, id string) (*doma
 	}
 	return uc.detailPenjualanRepo.GetByID(ctx, id)
 }
+
+func (uc *detailPenjualanUsecase) UpdateDetails(ctx context.Context, bd *domain.DetailPenjualan) error {
+	if bd.ID_DetailPenjualan == "" {
+		return fmt.Errorf("id detail penjualan tidak boleh kosong")
+	}
+	return uc.detailPenjualanRepo.UpdateDetails(ctx, bd)
+}

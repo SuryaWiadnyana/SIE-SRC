@@ -36,6 +36,7 @@ type DetailPenjualanRepository interface {
 	GetByPenjualanID(ctx context.Context, idPenjualan string) ([]DetailPenjualan, error)
 	Delete(ctx context.Context, id string) error
 	GenerateNextID(ctx context.Context) (string, error)
+	UpdateDetails(ctx context.Context, bd *DetailPenjualan) error
 }
 
 type DetailPenjualanUseCase interface {
@@ -44,4 +45,5 @@ type DetailPenjualanUseCase interface {
 	GetByID(ctx context.Context, id string) (*DetailPenjualan, error)
 	GetByPenjualanID(ctx context.Context, idPenjualan string) ([]DetailPenjualan, error)
 	Delete(ctx context.Context, id string) error
+	UpdateDetails(ctx context.Context, bd *DetailPenjualan) error
 }

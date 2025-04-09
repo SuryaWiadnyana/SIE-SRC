@@ -296,7 +296,8 @@ func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 		for _, detail := range details {
 			// Hitung total pendapatan per kategori
 			for _, product := range detail.Produk {
-				categorySales[product.Kategori.NamaKategori] += float64(detail.TotalPendapatan) / float64(len(detail.Produk))
+				// Gunakan TotalPendapatan yang sudah dihitung
+				categorySales[product.Kategori.NamaKategori] += float64(detail.TotalPendapatan)
 			}
 		}
 	}

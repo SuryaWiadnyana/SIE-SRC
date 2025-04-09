@@ -22,7 +22,7 @@ func NewMongoRepoDetailPenjualan(client *mongo.Database) domain.DetailPenjualanR
 
 func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain.DetailPenjualan) (*domain.DetailPenjualan, error) {
 	collection := r.DB.Collection("detail_penjualan")
-	
+
 	id, err := r.GenerateNextID(ctx)
 	if err != nil {
 		log.Printf("Error generating ID: %v", err)
@@ -88,7 +88,6 @@ func (r *mongoRepoDetailPenjualan) GetAll(ctx context.Context) ([]domain.DetailP
 
 func (r *mongoRepoDetailPenjualan) GetByID(ctx context.Context, id string) (*domain.DetailPenjualan, error) {
 	collection := r.DB.Collection("detail_penjualan")
-	produkCollection := r.DB.Collection("produk")
 
 	var detail domain.DetailPenjualan
 	err := collection.FindOne(ctx, bson.M{"id_details": id}).Decode(&detail)
@@ -99,21 +98,11 @@ func (r *mongoRepoDetailPenjualan) GetByID(ctx context.Context, id string) (*dom
 		return nil, fmt.Errorf("gagal mengambil detail penjualan: %v", err)
 	}
 
-	// Update produk dengan data lengkap
-	for i, produk := range detail.Produk {
-		var produkLengkap domain.Produk
-		err := produkCollection.FindOne(ctx, bson.M{"id_produk": produk.IDProduk}).Decode(&produkLengkap)
-		if err == nil {
-			detail.Produk[i] = produkLengkap
-		}
-	}
-
 	return &detail, nil
 }
 
 func (r *mongoRepoDetailPenjualan) GetByPenjualanID(ctx context.Context, idPenjualan string) ([]domain.DetailPenjualan, error) {
 	collection := r.DB.Collection("detail_penjualan")
-	produkCollection := r.DB.Collection("produk")
 
 	cursor, err := collection.Find(ctx, bson.M{"penjualan.id_penjualan": idPenjualan})
 	if err != nil {
@@ -124,17 +113,6 @@ func (r *mongoRepoDetailPenjualan) GetByPenjualanID(ctx context.Context, idPenju
 	var details []domain.DetailPenjualan
 	if err := cursor.All(ctx, &details); err != nil {
 		return nil, fmt.Errorf("gagal decode detail penjualan: %v", err)
-	}
-
-	// Update setiap produk dengan data lengkap
-	for i := range details {
-		for j, produk := range details[i].Produk {
-			var produkLengkap domain.Produk
-			err := produkCollection.FindOne(ctx, bson.M{"id_produk": produk.IDProduk}).Decode(&produkLengkap)
-			if err == nil {
-				details[i].Produk[j] = produkLengkap
-			}
-		}
 	}
 
 	return details, nil
