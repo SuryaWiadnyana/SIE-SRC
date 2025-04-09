@@ -587,7 +587,7 @@ async function updateChart() {
             label: 'Total Penjualan per Kategori',
             data: responseData.data.map(item => ({
               x: item.category || 'Tidak Ada Kategori',
-              y: Math.round(Number(item.value) || 0)
+              y: Math.round(Number(item.value) / 1) // Dibagi 1000000 untuk menampilkan dalam juta
             }))
           }
         ]
