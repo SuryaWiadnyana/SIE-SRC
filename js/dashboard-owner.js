@@ -133,11 +133,12 @@ function checkAuth() {
 
 // Format number to Indonesian Rupiah
 function formatRupiah(number) {
-  const roundedNumber = Math.round(Number(number) || 0);
   return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(roundedNumber);
+  }).format(number).replace(/^Rp\s?/, '');
 }
 
 // Fungsi untuk mengambil data dashboard
@@ -297,14 +298,11 @@ Chart.defaults.set('plugins.datalabels', {
   font: {
     weight: 'bold'
   },
-  formatter: function(value) {
-    if (typeof value === 'object' && value !== null) {
-      value = value.y;
+  formatter: function(value, context) {
+    if (context.chart.config._config.type === 'bar') {
+      return formatRupiah(value);
     }
-    return new Intl.NumberFormat('id-ID', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(Math.round(Number(value) || 0));
+    return value;
   }
 });
 
@@ -587,7 +585,7 @@ async function updateChart() {
             label: 'Total Penjualan per Kategori',
             data: responseData.data.map(item => ({
               x: item.category || 'Tidak Ada Kategori',
-              y: Math.round(Number(item.value) / 1) // Dibagi 1000000 untuk menampilkan dalam juta
+              y: parseInt(item.value) // Pastikan nilai adalah integer
             }))
           }
         ]
