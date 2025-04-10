@@ -67,8 +67,8 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ambil frequent itemsets dengan minimum support 0.05 (5%)
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.01)
+	// Ambil frequent itemsets dengan minimum support 50%
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.5)
 	if err != nil {
 		// Jika gagal mendapatkan itemsets, tetap kembalikan produk
 		return c.Status(http.StatusOK).JSON(fiber.Map{
@@ -77,11 +77,11 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 	}
 
 	// Buat map untuk menyimpan produk terkait untuk setiap produk
-	productRelatedMap := make(map[string][]domain.Produk)
+	productRelatedMap := make(map[string][]map[string]interface{})
 
 	// Untuk setiap produk, cari produk terkait dari itemsets
 	for _, product := range products {
-		var relatedProducts []domain.Produk
+		var relatedItems []map[string]interface{}
 		// Map untuk melacak produk terkait yang sudah ditambahkan (mencegah duplikasi)
 		relatedProductsMap := make(map[string]bool)
 
@@ -114,64 +114,31 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 						continue
 					}
 
-					// Ambil detail produk terkait
-					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), produkId)
-					if err == nil {
-						relatedProducts = append(relatedProducts, *relatedProduk)
-						// Tandai produk ini sebagai sudah ditambahkan
-						relatedProductsMap[produkId] = true
-					}
+					// Tambahkan informasi produk terkait
+					relatedItems = append(relatedItems, map[string]interface{}{
+						"id_produk":   produkId,
+						"nama_produk": itemset.ProdukList[i],
+						"support":     itemset.Support,
+						"confidence":  itemset.Confidence,
+					})
+					relatedProductsMap[produkId] = true
 				}
 			}
 		}
-		if len(relatedProducts) > 0 {
-			productRelatedMap[product.IDProduk] = relatedProducts
+		if len(relatedItems) > 0 {
+			productRelatedMap[product.IDProduk] = relatedItems
 		}
 	}
 
 	// Format response dengan produk dan produk terkaitnya
 	type ProductWithRelated struct {
-		Produk        domain.Produk   `json:"produk"`
-		ProdukTerkait []domain.Produk `json:"produk_terkait,omitempty"`
+		Produk        domain.Produk            `json:"produk"`
+		ProdukTerkait []map[string]interface{} `json:"produk_terkait,omitempty"`
 	}
 
 	// Buat slice untuk menyimpan semua produk dengan produk terkaitnya
 	productsWithRelated := make([]ProductWithRelated, len(products))
 	for i, product := range products {
-		var relatedProducts []domain.Produk
-		for _, itemset := range itemsets {
-			// Pastikan itemset memiliki setidaknya 2 produk
-			if len(itemset.Produk) < 2 {
-				continue
-			}
-
-			// Cari indeks produk saat ini dalam itemset
-			currentProductIndex := -1
-			for i, produkId := range itemset.Produk {
-				if produkId == product.IDProduk {
-					currentProductIndex = i
-					break
-				}
-			}
-
-			// Jika produk ditemukan dalam itemset
-			if currentProductIndex != -1 {
-				// Ambil semua produk lain dari itemset
-				for i, produkId := range itemset.Produk {
-					// Lewati produk saat ini
-					if i == currentProductIndex {
-						continue
-					}
-
-					// Ambil detail produk terkait
-					relatedProduk, err := d.HTTP.GetProdukById(c.Context(), produkId)
-					if err == nil {
-						relatedProducts = append(relatedProducts, *relatedProduk)
-					}
-				}
-			}
-		}
-
 		productsWithRelated[i] = ProductWithRelated{
 			Produk:        product,
 			ProdukTerkait: productRelatedMap[product.IDProduk],
@@ -231,17 +198,17 @@ func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
 	for _, prod := range allProducts {
 		// Debug log
 		log.Printf("Comparing with existing product: '%s'", prod.NamaProduk)
-		
+
 		if prod.KodeProduk == body.KodeProduk {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 				"error": "Kode produk sudah ada",
 			})
 		}
-		
+
 		// Trim whitespace dan bandingkan nama produk (case insensitive)
 		existingName := strings.TrimSpace(prod.NamaProduk)
 		newName := strings.TrimSpace(body.NamaProduk)
-		
+
 		if strings.EqualFold(existingName, newName) {
 			log.Printf("Duplicate product name found: '%s' matches '%s'", existingName, newName)
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -290,7 +257,7 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 	}
 
 	// Ambil frequent itemsets untuk mendapatkan produk terkait
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.05)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.5)
 	if err != nil {
 		return c.Status(http.StatusOK).JSON(fiber.Map{
 			"message": "Data produk berhasil diambil",
@@ -353,7 +320,7 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 		})
 	}
 
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.05)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.5)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": fmt.Sprintf("Gagal mendapatkan itemset yang sering muncul: %v", err),
@@ -833,21 +800,8 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		})
 	}
 
+	// Set nilai minimum support tetap 50%
 	minSupport := 0.5
-	if supportStr := c.Query("min_support"); supportStr != "" {
-		support, err := strconv.ParseFloat(supportStr, 64)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "Format min_support tidak valid",
-			})
-		}
-		if support <= 0 || support > 1 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": "min_support harus antara 0 dan 1",
-			})
-		}
-		minSupport = support
-	}
 
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), minSupport)
 	if err != nil {
@@ -859,15 +813,19 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 	response := make([]map[string]interface{}, len(itemsets))
 	for i, itemset := range itemsets {
 		response[i] = map[string]interface{}{
-			"produk": itemset.Produk,
+			"produk":      itemset.Produk,
+			"nama_produk": itemset.ProdukList,
+			"support":     itemset.Support,
+			"confidence":  itemset.Confidence,
 		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Berhasil mendapatkan itemset yang sering muncul",
 		"data": map[string]interface{}{
-			"min_support": minSupport,
-			"list_produk": response,
+			"min_support":    minSupport,
+			"min_confidence": 0.6, // 10%
+			"itemsets":       response,
 		},
 	})
 }

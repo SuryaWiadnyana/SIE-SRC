@@ -97,7 +97,7 @@ func (rp *mongoRepoProduk) CreateProduk(ctx context.Context, bd *domain.Produk) 
 	return *bd, nil
 }
 
-// Memunculkan Semua Data Produk
+// Memunculkan Semua Data Produk dengan produk terkait berdasarkan Apriori
 func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, error) {
 	ListProduk := rp.DB.Collection(_Produk)
 	var produkList []domain.Produk
@@ -116,12 +116,54 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 
 	if produkList == nil {
 		produkList = []domain.Produk{} // Return empty slice instead of nil
+		return produkList, nil
+	}
+
+	// Dapatkan frequent itemsets dengan minimum support 40%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.4)
+	if err != nil {
+		log.Printf("Error getting frequent itemsets: %v", err)
+		return produkList, nil // Return products without related items
+	}
+
+	// Buat map untuk menyimpan produk terkait
+	relatedProducts := make(map[string][]map[string]interface{})
+
+	// Proses setiap frequent itemset untuk membuat daftar produk terkait
+	for _, itemset := range frequentItemsets {
+		for i, produkID := range itemset.Produk {
+			related := make([]map[string]interface{}, 0)
+			// Tambahkan produk lain dalam itemset sebagai produk terkait
+			for j, relatedID := range itemset.Produk {
+				if i != j {
+					related = append(related, map[string]interface{}{
+						"id_produk":   relatedID,
+						"nama_produk": itemset.ProdukList[j],
+						"support":     itemset.Support,
+						"confidence":  itemset.Confidence,
+					})
+				}
+			}
+			// Gabungkan dengan produk terkait yang sudah ada
+			if existing, ok := relatedProducts[produkID]; ok {
+				relatedProducts[produkID] = append(existing, related...)
+			} else {
+				relatedProducts[produkID] = related
+			}
+		}
+	}
+
+	// Terapkan produk terkait ke setiap produk
+	for i := range produkList {
+		if related, ok := relatedProducts[produkList[i].IDProduk]; ok {
+			produkList[i].ProdukTerkait = related
+		}
 	}
 
 	return produkList, nil
 }
 
-// Mencari Data Produk Berdasarkan ID Produk
+// Mencari Data Produk Berdasarkan ID Produk dengan produk terkait berdasarkan Apriori
 func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domain.Produk, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
@@ -133,6 +175,37 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 		}
 		return nil, fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
+
+	// Dapatkan frequent itemsets dengan minimum support 40%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.4)
+	if err != nil {
+		log.Printf("Error getting frequent itemsets: %v", err)
+		return &product, nil // Return product without related items
+	}
+
+	// Cari produk terkait dari frequent itemsets
+	related := make([]map[string]interface{}, 0)
+	for _, itemset := range frequentItemsets {
+		// Cek apakah produk ini ada dalam itemset
+		for i, produkID := range itemset.Produk {
+			if produkID == id {
+				// Tambahkan produk lain dalam itemset sebagai produk terkait
+				for j, relatedID := range itemset.Produk {
+					if i != j {
+						related = append(related, map[string]interface{}{
+							"id_produk":   relatedID,
+							"nama_produk": itemset.ProdukList[j],
+							"support":     itemset.Support,
+							"confidence":  itemset.Confidence,
+						})
+					}
+				}
+			}
+		}
+	}
+
+	// Terapkan produk terkait ke produk
+	product.ProdukTerkait = related
 
 	return &product, nil
 }
@@ -199,14 +272,14 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 	filter := bson.M{"id_produk": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
-			"nama_produk":        bd.NamaProduk,
-			"kategori":           bd.Kategori,
-			"subkategori":        bd.SubKategori,
-			"kode_produk":        bd.KodeProduk,
-			"harga_produk":       bd.HargaProduk,
-			"stok_barang":        bd.Stok,
+			"nama_produk":         bd.NamaProduk,
+			"kategori":            bd.Kategori,
+			"subkategori":         bd.SubKategori,
+			"kode_produk":         bd.KodeProduk,
+			"harga_produk":        bd.HargaProduk,
+			"stok_barang":         bd.Stok,
 			"tanggal_kedaluwarsa": bd.TanggalKedaluwarsa,
-			"updated_at":         bd.UpdatedAt,
+			"updated_at":          bd.UpdatedAt,
 		},
 	}
 
@@ -449,6 +522,9 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 
 // Mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
 func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemsetResponse, error) {
+	// Set minimum support dan confidence
+	minSupport = 0.5     // 50%
+	minConfidence := 0.6 // 60%
 	// Ambil semua data detail penjualan
 	DetailPenjualan := rp.DB.Collection("detail_penjualan")
 
@@ -554,10 +630,22 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 			}
 
 			pairSupport := pairCount / totalTransactions
-			if pairSupport >= minSupport {
+			// Hitung confidence untuk kedua arah (A->B dan B->A)
+			confidence1 := pairCount / itemCounts[item1]
+			confidence2 := pairCount / itemCounts[item2]
+
+			// Tambahkan ke hasil jika memenuhi minimum support dan confidence
+			if pairSupport >= minSupport && (confidence1 >= minConfidence || confidence2 >= minConfidence) {
+				// Pilih confidence tertinggi antara kedua arah
+				maxConfidence := confidence1
+				if confidence2 > confidence1 {
+					maxConfidence = confidence2
+				}
+
 				itemset := domain.FrequentItemsetResponse{
 					Produk:     []string{item1, item2},
 					Support:    pairSupport,
+					Confidence: maxConfidence,
 					ProdukList: []string{itemNames[item1], itemNames[item2]},
 				}
 				result = append(result, itemset)
@@ -585,10 +673,28 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 				}
 
 				tripletSupport := tripletCount / totalTransactions
-				if tripletSupport >= minSupport {
+
+				// Hitung confidence untuk setiap kombinasi dalam triplet
+				confidences := []float64{
+					tripletCount / itemCounts[item1], // item1 -> (item2,item3)
+					tripletCount / itemCounts[item2], // item2 -> (item1,item3)
+					tripletCount / itemCounts[item3], // item3 -> (item1,item2)
+				}
+
+				// Cari confidence maksimum
+				maxConfidence := 0.0
+				for _, conf := range confidences {
+					if conf > maxConfidence {
+						maxConfidence = conf
+					}
+				}
+
+				// Tambahkan ke hasil jika memenuhi minimum support dan confidence
+				if tripletSupport >= minSupport && maxConfidence >= minConfidence {
 					itemset := domain.FrequentItemsetResponse{
 						Produk:     []string{item1, item2, item3},
 						Support:    tripletSupport,
+						Confidence: maxConfidence,
 						ProdukList: []string{itemNames[item1], itemNames[item2], itemNames[item3]},
 					}
 					result = append(result, itemset)
@@ -714,55 +820,55 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 
 // GetLaporanProduk retrieves product report data with filters
 func (rp *mongoRepoProduk) GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]domain.Produk, error) {
-    collection := rp.DB.Collection(_Produk)
+	collection := rp.DB.Collection(_Produk)
 
-    // Build filter
-    filter := bson.M{}
+	// Build filter
+	filter := bson.M{}
 
-    // Add kategori filter if provided
-    if kategoriID != 0 {
-        filter["kategori.id_kategori"] = kategoriID
-    }
+	// Add kategori filter if provided
+	if kategoriID != 0 {
+		filter["kategori.id_kategori"] = kategoriID
+	}
 
-    // Add subkategori filter if provided
-    if subkategoriID != 0 {
-        filter["subkategori.id_subkategori"] = subkategoriID
-    }
+	// Add subkategori filter if provided
+	if subkategoriID != 0 {
+		filter["subkategori.id_subkategori"] = subkategoriID
+	}
 
-    // Build sort options
-    sortOptions := bson.D{}
-    if sort != "" {
-        switch sort {
-        case "nama_asc":
-            sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: 1})
-        case "nama_desc":
-            sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: -1})
-        case "stok_asc":
-            sortOptions = append(sortOptions, bson.E{Key: "stok", Value: 1})
-        case "stok_desc":
-            sortOptions = append(sortOptions, bson.E{Key: "stok", Value: -1})
-        case "harga_asc":
-            sortOptions = append(sortOptions, bson.E{Key: "harga_produk", Value: 1})
-        case "harga_desc":
-            sortOptions = append(sortOptions, bson.E{Key: "harga_produk", Value: -1})
-        }
-    } else {
-        // Default sort by nama_produk ascending
-        sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: 1})
-    }
+	// Build sort options
+	sortOptions := bson.D{}
+	if sort != "" {
+		switch sort {
+		case "nama_asc":
+			sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: 1})
+		case "nama_desc":
+			sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: -1})
+		case "stok_asc":
+			sortOptions = append(sortOptions, bson.E{Key: "stok", Value: 1})
+		case "stok_desc":
+			sortOptions = append(sortOptions, bson.E{Key: "stok", Value: -1})
+		case "harga_asc":
+			sortOptions = append(sortOptions, bson.E{Key: "harga_produk", Value: 1})
+		case "harga_desc":
+			sortOptions = append(sortOptions, bson.E{Key: "harga_produk", Value: -1})
+		}
+	} else {
+		// Default sort by nama_produk ascending
+		sortOptions = append(sortOptions, bson.E{Key: "nama_produk", Value: 1})
+	}
 
-    // Execute query
-    opts := options.Find().SetSort(sortOptions)
-    cursor, err := collection.Find(ctx, filter, opts)
-    if err != nil {
-        return nil, err
-    }
-    defer cursor.Close(ctx)
+	// Execute query
+	opts := options.Find().SetSort(sortOptions)
+	cursor, err := collection.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
 
-    var produkList []domain.Produk
-    if err = cursor.All(ctx, &produkList); err != nil {
-        return nil, err
-    }
+	var produkList []domain.Produk
+	if err = cursor.All(ctx, &produkList); err != nil {
+		return nil, err
+	}
 
-    return produkList, nil
+	return produkList, nil
 }

@@ -6,21 +6,23 @@ import (
 )
 
 type Produk struct {
-	IDProduk          string      `json:"id_produk" bson:"id_produk"`
-	NamaProduk        string      `json:"nama_produk" bson:"nama_produk"`
-	Kategori          Kategori    `json:"kategori" bson:"kategori"`
-	SubKategori       SubKategori `json:"subkategori" bson:"subkategori"`
-	KodeProduk        string      `json:"kode_produk" bson:"kode_produk"`
-	HargaProduk       int         `json:"harga_produk" bson:"harga_produk"`
-	TanggalKedaluwarsa time.Time   `json:"tanggal_kedaluwarsa" bson:"tanggal_kedaluwarsa"`
-	Stok              int         `json:"stok_barang" bson:"stok_barang"`
-	UpdatedAt         time.Time   `json:"updated_at" bson:"updated_at"`
-	IsDeleted         *time.Time  `json:"is_deleted" bson:"is_deleted"`
+	IDProduk          string                   `json:"id_produk" bson:"id_produk"`
+	NamaProduk        string                   `json:"nama_produk" bson:"nama_produk"`
+	Kategori          Kategori                 `json:"kategori" bson:"kategori"`
+	SubKategori       SubKategori              `json:"subkategori" bson:"subkategori"`
+	KodeProduk        string                   `json:"kode_produk" bson:"kode_produk"`
+	HargaProduk       int                      `json:"harga_produk" bson:"harga_produk"`
+	TanggalKedaluwarsa time.Time               `json:"tanggal_kedaluwarsa" bson:"tanggal_kedaluwarsa"`
+	Stok              int                      `json:"stok_barang" bson:"stok_barang"`
+	UpdatedAt         time.Time                `json:"updated_at" bson:"updated_at"`
+	IsDeleted         *time.Time               `json:"is_deleted" bson:"is_deleted"`
+	ProdukTerkait     []map[string]interface{} `json:"produk_terkait,omitempty" bson:"-"`
 }
 
 type FrequentItemsetResponse struct {
 	Produk     []string `json:"produk"`
 	Support    float64  `json:"support"`
+	Confidence float64  `json:"confidence"`
 	ProdukList []string `json:"list_produk"`
 }
 
