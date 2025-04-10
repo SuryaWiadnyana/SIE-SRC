@@ -230,6 +230,43 @@ const users = {
         return { success: false, error: error.message };
       }
     },
+    
+    updateUserStatus: async (id_user, status) => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Tidak terautentikasi");
+        }
+        
+        // Konversi status ke format yang diharapkan backend
+        const statusValue = status === 'aktif' ? 'Aktif' : 'Tidak Aktif';
+        
+        const response = await fetch(
+          `${BASE_URL}/user/admin/status/${id_user}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ status: statusValue }),
+          }
+        );
+      
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || `HTTP error! status: ${response.status}`
+          );
+        }
+      
+        const data = await response.json();
+        return { success: true, data: data.data };
+      } catch (error) {
+        console.error("Update user status error:", error);
+        return { success: false, error: error.message };
+      }
+    },
   
     delete: async (id_user) => {
       try {
@@ -286,12 +323,16 @@ function populateUserTable(users) {
         const userId = user.id_user || '';
         
         const row = document.createElement('tr');
+        // Tambahkan data-userid dan data-username ke baris tabel
+        row.setAttribute('data-userid', userId);
+        row.setAttribute('data-username', user.username);
         row.innerHTML = `
             <td>${user.username}</td>
             <td>${user.role}</td>
             <td>${statusBadge}</td>
             <td class="text-center">
                 <button class="btn btn-warning btn-sm edit-user" 
+                    data-userid="${userId}"
                     data-username="${user.username}" 
                     data-role="${user.role}"
                     data-status="${status}">
@@ -349,12 +390,19 @@ function handleEditClick(e) {
     const username = button.dataset.username;
     const role = button.dataset.role;
     const status = button.dataset.status || 'Aktif';
+    const userId = button.dataset.userid || '';
     
     // Populate edit form
     if (editUserForm) {
         editUserForm.querySelector('#editUsername').value = username;
         editUserForm.querySelector('#editRole').value = role;
-        editUserForm.querySelector('#editStatus').value = status;
+        
+        // Simpan ID pengguna sebagai data atribut pada form
+        editUserForm.setAttribute('data-userid', userId);
+        
+        // Convert status to the correct format for the dropdown
+        const statusValue = status.toLowerCase() === 'aktif' ? 'aktif' : 'tidak aktif';
+        editUserForm.querySelector('#editStatus').value = statusValue;
         
         $('#editUserModal').modal('show');
     }
@@ -367,20 +415,40 @@ if (editUserForm) {
         
         const formData = new FormData(e.target);
         const username = formData.get('username');
+        const statusValue = formData.get('status');
+        
+        // Buat objek userData dengan format yang benar
         const userData = {
             password: formData.get('password'),
-            role: formData.get('role')
+            role: formData.get('role'),
+            // Konversi nilai status sesuai format yang diharapkan backend
+            status: statusValue === 'aktif' ? 'Aktif' : 'Tidak Aktif'
         };
 
         try {
-            const result = await users.updateUser(username, userData);
-
-            if (result.success) {
+            // Dapatkan ID pengguna dari form
+            const id_user = e.target.getAttribute('data-userid');
+            
+            // Update password dan role menggunakan updateUser
+            const updateResult = await users.updateUser(username, {
+                password: userData.password,
+                role: userData.role
+            });
+            
+            // Update status menggunakan updateUserStatus jika ID pengguna tersedia
+            let statusResult = { success: true };
+            if (id_user) {
+                statusResult = await users.updateUserStatus(id_user, statusValue);
+            } else {
+                console.warn('ID pengguna tidak tersedia, status tidak diperbarui');
+            }
+            
+            if (updateResult.success && statusResult.success) {
                 showNotification('success', 'Pengguna berhasil diperbarui');
                 $('#editUserModal').modal('hide');
                 loadUsers();
             } else {
-                showNotification('error', `Error memperbarui pengguna: ${result.error}`);
+                showNotification('error', `Error memperbarui pengguna: ${updateResult.error || statusResult.error}`);
             }
         } catch (error) {
             showNotification('error', `Error memperbarui pengguna: ${error.message}`);

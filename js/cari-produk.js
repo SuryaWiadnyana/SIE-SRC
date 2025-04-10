@@ -88,6 +88,8 @@ async function auth() {
 // Get DOM elements
 const productTable = document.getElementById('productTable');
 const searchInput = document.getElementById('searchProduct');
+const addProductForm = document.getElementById('addProductForm');
+const updateProductForm = document.getElementById('updateProductForm');
 
 let productTableElement;
 let allProducts = []; // Menyimpan semua produk untuk filtering
@@ -309,6 +311,29 @@ const products = {
         }
 
         console.log('Mengirim request update ke API:', productData);
+
+        // Validasi input dasar
+        if (!productData.nama_produk || !productData.kategori || !productData.subkategori || !productData.kode_produk || !productData.harga_produk || !productData.stok_barang) {
+            showAlert('Semua field harus diisi kecuali tanggal kedaluwarsa', 'danger');
+            return;
+        }
+
+        // Validasi kode produk tidak boleh kosong atau hanya spasi
+        if (!productData.kode_produk.trim()) {
+            showAlert('Kode produk tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        // Validasi harga dan stok
+        if (parseFloat(productData.harga_produk) <= 0) {
+            showAlert('Harga produk harus lebih dari 0', 'danger');
+            return;
+        }
+        
+        if (parseInt(productData.stok_barang) <= 0) {
+            showAlert('Stok barang harus lebih dari 0', 'danger');
+            return;
+        }
 
         const response = await fetch(`${BASE_URL}/produk/update/${id}`, {
           method: "PUT",
@@ -668,6 +693,7 @@ async function updateSubCategories(selectedKategoriId, isUpdateForm = false) {
       });
     }
     
+    
     // Jika tidak ada subkategori sama sekali, pastikan dropdown tetap aktif
     if (subCategorySelect.options.length <= 1 && !isUpdateForm) {
       subCategorySelect.disabled = false;
@@ -676,6 +702,39 @@ async function updateSubCategories(selectedKategoriId, isUpdateForm = false) {
     console.error('Error updating subcategories:', error);
     return;
   }
+}
+
+// Tambahkan event listener untuk dropdown kategori
+function setupKategoriChangeListeners() {
+    // Untuk form tambah produk
+    const kategoriDropdown = document.getElementById('kategori');
+    if (kategoriDropdown) {
+        // Hapus event listener lama untuk menghindari duplikasi
+        const newKategoriDropdown = kategoriDropdown.cloneNode(true);
+        kategoriDropdown.parentNode.replaceChild(newKategoriDropdown, kategoriDropdown);
+        
+        // Pasang event listener baru
+        newKategoriDropdown.addEventListener('change', function() {
+            const selectedKategoriId = this.value;
+            console.log(`Kategori dipilih (form tambah): ${selectedKategoriId}`);
+            updateSubCategories(selectedKategoriId, false);
+        });
+    }
+    
+    // Untuk form edit produk
+    const editKategoriDropdown = document.getElementById('update_kategori');
+    if (editKategoriDropdown) {
+        // Hapus event listener lama untuk menghindari duplikasi
+        const newEditKategoriDropdown = editKategoriDropdown.cloneNode(true);
+        editKategoriDropdown.parentNode.replaceChild(newEditKategoriDropdown, editKategoriDropdown);
+        
+        // Pasang event listener baru
+        newEditKategoriDropdown.addEventListener('change', function() {
+            const selectedKategoriId = this.value;
+            console.log(`Kategori dipilih (form edit): ${selectedKategoriId}`);
+            updateSubCategories(selectedKategoriId, true);
+        });
+    }
 }
 
 // Initialize event listeners when DOM is loaded
@@ -692,17 +751,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     const elements = {
         productTable: document.getElementById('productTable'),
         searchInput: document.getElementById('searchProduct'),
+        addProductForm: document.getElementById('addProductForm'),
+        updateProductForm: document.getElementById('updateProductForm')
     };
     
     console.log('Elements initialized:', {
         hasProductTable: !!elements.productTable,
         hasSearchInput: !!elements.searchInput,
+        hasAddForm: !!elements.addProductForm,
+        hasUpdateForm: !!elements.updateProductForm
     });
 
     productTableElement = elements.productTable;
 
     // Load initial data
     loadProducts();
+
+    // Add form submit handlers
+    if (elements.addProductForm) {
+        elements.addProductForm.addEventListener('submit', handleAddProduct);
+    }
+
+    if (elements.updateProductForm) {
+        elements.updateProductForm.addEventListener('submit', handleUpdateProduct);
+    }
 
     // Add search handler
     if (elements.searchInput) {
@@ -789,6 +861,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Initialize update form
+    // initializeUpdateForm();
+
+    // Initialize import form
+    initializeImportForm();
+
     // Initialize kategori management
     initializeKategoriManagement();
 
@@ -811,7 +889,7 @@ async function loadProducts() {
         
         if (result.success && result.data) {  
             // Set both allProducts and filteredProducts
-            allProducts = result.data;
+            allProducts = result.data.sort((a, b) => a.produk.nama_produk.localeCompare(b.produk.nama_produk));
             filteredProducts = [...allProducts]; // Pastikan filteredProducts diinisialisasi
             currentPage = 1; // Reset ke halaman pertama
             
@@ -1068,12 +1146,12 @@ function displayProducts(products = []) {
         }
         
         // Format tanggal kedaluwarsa
-        let tanggalKedaluwarsa = '-';
+        let tanggalkedaluwarsa = '-';
         let infoButton = '';
         if (product.tanggal_kedaluwarsa) {
             const date = new Date(product.tanggal_kedaluwarsa);
             if (!isNaN(date.getTime())) {
-                tanggalKedaluwarsa = date.toLocaleDateString('id-ID', {
+                tanggalkedaluwarsa = date.toLocaleDateString('id-ID', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric'
@@ -1103,24 +1181,13 @@ function displayProducts(products = []) {
         
         row.innerHTML = `
             <td>${infoButton}${product.id_produk || '-'}</td>
-            <td>
-                <div class="font-weight-bold">${product.nama_produk || '-'}</div>
-                ${item.produk_terkait && item.produk_terkait.length > 0 ? 
-                    `<div class="text-danger mt-2 font-weight-bold" style="font-size: 14px;">
-                        Sering dibeli dengan:
-                    </div>
-                    <div class="mt-1">
-                        ${item.produk_terkait.map(related => 
-                            `<span class="badge badge-info" style="font-size: 13px; padding: 5px 8px; margin: 2px;">${related.nama_produk}</span>`
-                        ).join(' ')}
-                    </div>` : ''}
-            </td>
+            <td>${product.nama_produk || '-'}</td>
             <td>${kategoriDisplay}</td>
             <td>${subKategoriDisplay}</td>
             <td>${product.kode_produk || '-'}</td>
             <td>${formatCurrency(parseFloat(product.harga_produk)) || 'Rp0'}</td>
             <td>${product.stok_barang || '0'}</td>
-            <td>${tanggalKedaluwarsa}</td>
+            <td>${tanggalkedaluwarsa}</td>
         `;
         tbody.appendChild(row);
         
@@ -1226,6 +1293,206 @@ function handleSearch() {
     displayProducts(filteredProducts);
 }
 
+// Handle form submissions
+async function handleAddProduct(event) {
+    event.preventDefault();
+    
+    // Validasi form
+    const formData = new FormData(event.target);
+    const productData = Object.fromEntries(formData.entries());
+    
+    // Debug: Log semua field dari form
+    console.log("Form data:", productData);
+    
+    // Validasi data produk
+    if (!productData.nama_produk || !productData.kode_produk || 
+        !productData.harga_produk || !productData.stok_barang ||
+        !productData.kategori || !productData.sub_kategori) {
+        showAlert('Nama produk, kode produk, harga, stok, kategori, dan sub kategori harus diisi', 'danger');
+        return;
+    }
+    
+    // Validasi kode produk tidak boleh kosong atau hanya spasi
+    if (!productData.kode_produk.trim()) {
+        showAlert('Kode produk tidak boleh kosong', 'danger');
+        return;
+    }
+
+    // Validasi nilai tidak boleh 0
+    if (parseFloat(productData.harga_produk) <= 0) {
+        showAlert('Harga produk harus lebih dari 0', 'danger');
+        return;
+    }
+
+    if (parseInt(productData.stok_barang) <= 0) {
+        showAlert('Stok barang harus lebih dari 0', 'danger');
+        return;
+    }
+
+    // Validasi kategori dan subkategori
+    const kategoriSelect = document.getElementById('kategori');
+    const subKategoriSelect = document.getElementById('sub_kategori');
+    
+    if (!kategoriSelect.value || !subKategoriSelect.value) {
+        showAlert('Kategori dan sub kategori harus dipilih', 'danger');
+        return;
+    }
+
+    // Format data produk dengan kategori dan subkategori
+    const formattedData = {
+        nama_produk: productData.nama_produk,
+        kode_produk: productData.kode_produk,
+        harga_produk: parseFloat(productData.harga_produk),
+        stok_barang: parseInt(productData.stok_barang),
+        kategori: {
+            id_kategori: kategoriSelect.value,
+            nama_kategori: kategoriSelect.options[kategoriSelect.selectedIndex].text
+        },
+        subkategori: {
+            id_subkategori: subKategoriSelect.value,
+            nama_subkategori: subKategoriSelect.options[subKategoriSelect.selectedIndex].text,
+            kategori: {
+                id_kategori: kategoriSelect.value,
+                nama_kategori: kategoriSelect.options[kategoriSelect.selectedIndex].text
+            }
+        }
+    };
+
+    // Format tanggal kedaluwarsa ke ISO string jika ada
+    if (productData.tanggal_kedaluwarsa) {
+        const expDate = new Date(productData.tanggal_kedaluwarsa);
+        if (!isNaN(expDate.getTime())) {
+            formattedData.tanggal_kedaluwarsa = expDate.toISOString();
+        }
+    }
+    
+    try {
+        console.log('Mengirim data produk:', formattedData);
+        
+        // Kirim data ke backend
+        const response = await fetch(`${BASE_URL}/produk/createproduk`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${getToken()}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formattedData),
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Gagal membuat produk");
+        }
+        
+        const data = await response.json();
+        console.log('Produk berhasil ditambahkan:', data);
+        
+        // Perbarui tabel produk
+        await loadProducts();
+        
+        // Tutup modal
+        const modal = document.getElementById('addProductModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+    } catch (error) {
+        console.error('Error adding product:', error);
+        showAlert(`Gagal menambahkan produk: ${error.message}`, 'danger');
+    }
+}
+
+async function handleUpdateProduct(e) {
+    e.preventDefault();
+    
+    try {
+        // Ambil nilai dari form
+        const idProduk = document.getElementById('update_id_produk').value;
+        const namaProduk = document.getElementById('update_nama_produk').value;
+        const kategoriSelect = document.getElementById('update_kategori');
+        const subKategoriSelect = document.getElementById('update_sub_kategori');
+        const kodeProduk = document.getElementById('update_kode_produk').value;
+        const hargaProduk = document.getElementById('update_harga_produk').value;
+        const stokBarang = document.getElementById('update_stok_barang').value;
+        const tanggalkedaluwarsaInput = document.getElementById('update_tanggal_kedaluwarsa').value;
+
+        // Validasi input dasar
+        if (!namaProduk || !kategoriSelect.value || !subKategoriSelect.value || !kodeProduk || !hargaProduk || !stokBarang) {
+            showAlert('Semua field harus diisi kecuali tanggal kedaluwarsa', 'danger');
+            return;
+        }
+        
+        // Validasi kode produk tidak boleh kosong atau hanya spasi
+        if (!kodeProduk.trim()) {
+            showAlert('Kode produk tidak boleh kosong', 'danger');
+            return;
+        }
+        
+        // Validasi harga dan stok
+        if (parseFloat(hargaProduk) <= 0) {
+            showAlert('Harga produk tidak boleh 0 atau negatif', 'danger');
+            return;
+        }
+        
+        if (parseInt(stokBarang) <= 0) {
+            showAlert('Stok barang tidak boleh 0 atau negatif', 'danger');
+            return;
+        }
+        
+        // Format tanggal kedaluwarsa ke ISO string
+        let formattedTanggalkedaluwarsa = null;
+        if (tanggalkedaluwarsaInput) {
+            const expDate = new Date(tanggalkedaluwarsaInput);
+            if (!isNaN(expDate.getTime())) {
+                formattedTanggalkedaluwarsa = expDate.toISOString();
+            }
+        }
+        
+        // Siapkan data produk dengan format yang benar
+        const productData = {
+            id_produk: idProduk,
+            nama_produk: namaProduk,
+            kategori: {
+                id_kategori: kategoriSelect.value,
+                nama_kategori: kategoriSelect.options[kategoriSelect.selectedIndex].text
+            },
+            subkategori: {
+                id_subkategori: subKategoriSelect.value,
+                nama_subkategori: subKategoriSelect.options[subKategoriSelect.selectedIndex].text
+            },
+            kode_produk: kodeProduk,
+            harga_produk: parseFloat(hargaProduk),
+            stok_barang: parseInt(stokBarang)
+        };
+
+        // Tambahkan tanggal kedaluwarsa jika ada
+        if (formattedTanggalkedaluwarsa) {
+            productData.tanggal_kedaluwarsa = formattedTanggalkedaluwarsa;
+        }
+
+        console.log('Data produk yang akan diupdate:', productData);
+
+        // Kirim request update
+        const result = await products.update(idProduk, productData);
+        
+        if (result.success) {
+            showSuccessModal('Produk berhasil diperbarui');
+            loadSubKategoriTable();
+            $('#updateProductModal').modal('hide');
+            loadProducts(); // Refresh tabel
+        } else {
+            throw new Error(result.error || 'Gagal memperbarui produk');
+        }
+    } catch (error) {
+        console.error('Error updating product:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+    }
+}
+
 // Fungsi untuk mendapatkan nilai field dari objek
 function getFieldValue(obj, field) {
     const fieldParts = field.split('.');
@@ -1258,6 +1525,11 @@ async function handleEditClick(id) {
             const product = result.data;
             console.log('Retrieved product for editing:', product);
             
+            // Populate form
+            await populateUpdateForm(product);
+            
+            // Show modal
+            $('#updateProductModal').modal('show');
         } else {
             const errorMsg = result.error || 'Gagal mengambil data produk';
             console.error('Error fetching product:', errorMsg);
@@ -1274,6 +1546,9 @@ async function populateUpdateForm(product) {
     console.log('Data produk yang akan ditampilkan:', product);
     
     try {
+        // Reset form
+        document.getElementById('updateProductForm').reset();
+        
         // Set nilai-nilai dasar
         document.getElementById('update_id_produk').value = product.id_produk;
         document.getElementById('update_nama_produk').value = product.nama_produk;
@@ -1367,29 +1642,175 @@ async function populateUpdateForm(product) {
     }
 }
 
+// Edit product button click
+async function editProduct(id) {
+    try {
+        console.log(`Editing product with ID: ${id}`);
+        
+        // Ambil data produk
+        const result = await products.getById(id);
+        
+        if (result.success) {
+            const product = result.data;
+            console.log('Retrieved product for editing:', product);
+            
+            // Populate form
+            await populateUpdateForm(product);
+            
+            // Show modal
+            $('#updateProductModal').modal('show');
+        } else {
+            showAlert(`Error: ${result.error}`, 'danger');
+        }
+    } catch (error) {
+        console.error('Error when trying to edit product:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+    }
+}
+
+// Initialize update form
+function initializeUpdateForm() {
+    // Fungsi ini sudah tidak diperlukan karena event listener untuk update_kategori
+    // sudah ditambahkan pada saat DOM loaded dan populateUpdateForm
+    console.log('Update form initialized');
+}
+
+// Handle delete product
+async function handleDeleteClick(event) {
+    const button = event.target.closest('.delete-product');
+    if (!button) return;
+
+    const id = button.dataset.id;
+    const namaProduk = button.closest('tr').querySelector('td:nth-child(2)').textContent;
+
+    showDeleteConfirmation(
+        "Konfirmasi Hapus",
+        `Apakah Anda yakin ingin menghapus produk "${namaProduk}"?`,
+        async function() {
+            try {
+                const result = await products.delete(id);
+                console.log('Delete result:', result);
+                
+                if (result.success) {
+                    showSuccessModal('Produk berhasil dihapus');
+                    await loadProducts();
+                } else {
+                    throw new Error(result.error || 'Gagal menghapus produk');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showAlert(`Error: ${error.message}`, 'danger');
+            }
+        }
+    );
+}
+
+// Handle import data
+async function handleImportData(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('fileInput');
+    
+    if (!fileInput.files.length) {
+        showAlert('Pilih file terlebih dahulu', 'warning');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    
+    // Validasi format file
+    const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.csv')) {
+        showAlert('Format file tidak didukung. Gunakan file Excel (.xlsx) atau CSV', 'warning');
+        return;
+    }
+
+    // Validasi ukuran file (maksimal 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showAlert('Ukuran file terlalu besar. Maksimal 5MB', 'warning');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Tampilkan loading state
+    const importButton = document.getElementById('importDataBtn');
+    const originalText = importButton.textContent;
+    importButton.disabled = true;
+    importButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengimpor...';
+
+    try {
+        const result = await products.importData(formData);
+        if (result.success) {
+            let message = `Berhasil mengimpor ${result.count || 0} produk`;
+            if (result.skipped && result.skipped.length > 0) {
+                message += `, ${result.skipped.length} produk dilewati`;
+            }
+            showSuccessModal(message);
+            await loadProducts();
+            // Tutup modal tanpa menggunakan jQuery
+            const modal = document.getElementById('importDataModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        } else {
+            showAlert(result.error || 'Gagal mengimpor data', 'danger');
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        let errorMessage = 'Terjadi kesalahan saat mengimpor data';
+        
+        if (error.message.includes('duplicate')) {
+            const match = error.message.match(/\{ id_produk: "(.+?)" \}/);
+            const id = match ? match[1] : "unknown";
+            errorMessage += `ID ${id} sudah digunakan`;
+        } else if (error.message.includes('validation')) {
+            errorMessage = 'Data dalam file tidak valid. Pastikan semua kolom terisi dengan benar';
+        }
+        
+        showAlert(errorMessage, 'danger');
+    } finally {
+        // Kembalikan tombol ke kondisi awal
+        importButton.disabled = false;
+        importButton.innerHTML = originalText;
+    }
+}
+
+// Initialize import form
+function initializeImportForm() {
+    const importBtn = document.getElementById('importDataBtn');
+    if (importBtn) {
+        importBtn.addEventListener('click', handleImportData);
+    }
+}
+
 // Helper functions
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('alertPlaceholder');
-    if (alertPlaceholder) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        `;
-        alertPlaceholder.appendChild(wrapper);
+    if (!alertPlaceholder) return;
 
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            const alert = wrapper.querySelector('.alert');
-            if (alert) {
-                $(alert).alert('close');
-            }
-        }, 5000);
-    }
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = wrapper.querySelector('.alert');
+        if (alert) {
+            $(alert).alert('close');
+        }
+    }, 5000);
+    
+    alertPlaceholder.appendChild(wrapper);
 }
 
 function formatCurrency(amount) {
@@ -1434,6 +1855,34 @@ const kategori = {
             console.error('Error fetching kategori:', error);
             showAlert(`Error: ${error.message}`, 'danger');
             return [];
+        }
+    },
+    
+    // Membuat kategori baru
+    create: async function(namaKategori) {
+        try {
+            // Validasi nama kategori
+            if (!namaKategori || namaKategori.trim() === '') {
+                throw new Error('Nama kategori tidak boleh kosong');
+            }
+            
+            console.log(`Mencoba membuat kategori baru: "${namaKategori}"`);
+            
+            const response = await fetch(`${BASE_URL}/kategori/admin/create-kategori`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify({ nama_kategori: namaKategori })
+            });
+            
+            const result = await handleResponse(response);
+            console.log('Kategori berhasil dibuat:', result);
+            return result;
+        } catch (error) {
+            console.error('Error creating kategori:', error);
+            throw error;
         }
     },
     
@@ -1751,7 +2200,7 @@ function initializeKategoriManagement() {
             try {
                 await kategori.create(namaKategori);
                 document.getElementById('newKategoriName').value = '';
-                showAlert('Kategori berhasil ditambahkan', 'success');
+                showSuccessModal('Kategori berhasil ditambahkan');
                 loadKategoriTable();
             } catch (error) {
                 console.error('Error creating kategori:', error);
@@ -1790,7 +2239,7 @@ function initializeKategoriManagement() {
             
             try {
                 await kategori.update(id, nama);
-                showAlert('Kategori berhasil diperbarui', 'success');
+                showSuccessModal('Kategori berhasil diperbarui');
                 loadKategoriTable();
                 
                 // Tutup modal
@@ -1822,7 +2271,7 @@ function initializeKategoriManagement() {
                 async function() {
                     kategori.delete(id).then(result => {
                         if (result.success) {
-                            showAlert('Kategori berhasil dihapus', 'success');
+                            showSuccessModal('Kategori berhasil dihapus');
                             loadKategoriTable();
                         } else {
                             showAlert(result.error || 'Gagal menghapus kategori', 'danger');
@@ -1867,7 +2316,7 @@ function initializeSubKategoriManagement() {
             try {
                 await subkategori.create(namaSubKategori, idKategori);
                 document.getElementById('newSubKategoriName').value = '';
-                showAlert('Subkategori berhasil ditambahkan', 'success');
+                showSuccessModal('Subkategori berhasil ditambahkan');
                 loadSubKategoriTable();
             } catch (error) {
                 console.error('Error creating subkategori:', error);
@@ -1925,7 +2374,7 @@ function initializeSubKategoriManagement() {
             
             try {
                 await subkategori.update(id, idKategori, nama);
-                showAlert('Subkategori berhasil diperbarui', 'success');
+                showSuccessModal('Subkategori berhasil diperbarui');
                 
                 // Tutup modal
                 const modal = document.getElementById('editSubKategoriModal');
@@ -1958,7 +2407,7 @@ function initializeSubKategoriManagement() {
                     
                     // Jika penghapusan berhasil, perbarui UI
                     if (result !== false) {
-                        showAlert('Subkategori berhasil dihapus', 'success');
+                        showSuccessModal('Subkategori berhasil dihapus');
                         loadSubKategoriTable();
                     }
                     // Jika false, berarti sudah ditangani oleh fungsi delete dengan menampilkan alert
@@ -2142,10 +2591,10 @@ function initializeKategoriPage() {
         try {
             await kategori.create(namaKategori);
             document.getElementById('newKategoriName').value = '';
-            showAlert('Kategori berhasil ditambahkan', 'success');
+            showSuccessModal('Kategori berhasil ditambahkan');
             loadKategoriTable();
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#addKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error creating kategori:', error);
@@ -2167,10 +2616,10 @@ function initializeKategoriPage() {
         
         try {
             await kategori.update(id, namaKategori);
-            showAlert('Kategori berhasil diperbarui', 'success');
+            showSuccessModal('Kategori berhasil diperbarui');
             loadKategoriTable();
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#editKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error updating kategori:', error);
@@ -2202,7 +2651,7 @@ function initializeKategoriPage() {
             if (confirm(`Apakah Anda yakin ingin menghapus kategori "${nama}"?`)) {
                 kategori.delete(id).then(result => {
                     if (result !== false) {
-                        showAlert('Kategori berhasil dihapus', 'success');
+                        showSuccessModal('Kategori berhasil dihapus');
                         loadKategoriTable();
                     }
                 }).catch(error => {
@@ -2276,10 +2725,10 @@ function initializeSubKategoriPage() {
             await subkategori.create(kategoriId, namaSubKategori);
             document.getElementById('newSubKategoriName').value = '';
             if (kategoriDropdown) kategoriDropdown.value = '';
-            showAlert('Subkategori berhasil ditambahkan', 'success');
+            showSuccessModal('Subkategori berhasil ditambahkan');
             loadSubKategoriTable();
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#addSubKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error creating subkategori:', error);
@@ -2307,9 +2756,9 @@ function initializeSubKategoriPage() {
         
         try {
             await subkategori.update(id, idKategori, namaSubKategori);
-            showAlert('Subkategori berhasil diperbarui', 'success');
+            showSuccessModal('Subkategori berhasil diperbarui');
             
-            // Tutup modal setelah berhasil
+            // Tutup modal
             $('#editSubKategoriModal').modal('hide');
         } catch (error) {
             console.error('Error updating subkategori:', error);
@@ -2368,7 +2817,7 @@ function initializeSubKategoriPage() {
             if (confirm(`Apakah Anda yakin ingin menghapus subkategori "${nama}"?`)) {
                 subkategori.delete(id).then(result => {
                     if (result !== false) {
-                        showAlert('Subkategori berhasil dihapus', 'success');
+                        showSuccessModal('Subkategori berhasil dihapus');
                         loadSubKategoriTable();
                     }
                 }).catch(error => {
@@ -2398,11 +2847,11 @@ $(document).on('click', '.btn-delete', function() {
                 });
 
                 const result = await handleResponse(response);
-                showNotification('success', 'Produk berhasil dihapus');
+                showSuccessModal('Produk berhasil dihapus');
                 await loadProdukData(); // Refresh table
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('error', error.message || 'Gagal menghapus produk');
+                showAlert(`Error: ${error.message}`, 'danger');
             }
         }
     );
@@ -2416,4 +2865,57 @@ function formatDate(dateString) {
         day: 'numeric'
     };
     return new Date(dateString).toLocaleDateString('id-ID', options);
+}
+
+// Function to show notification
+function showNotification(type, message) {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const title = type === 'success' ? 'Berhasil!' : 'Error!';
+    const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+    // Create notification modal if not exists
+    if (!$('#notificationModal').length) {
+        const modalHtml = `
+            <div class="modal fade" id="notificationModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header ${bgClass} text-white">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="fas ${icon} ${type === 'success' ? 'text-success' : 'text-danger'} mb-3" style="font-size: 64px;"></i>
+                            <p class="mb-0" id="notificationMessage"></p>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn ${type === 'success' ? 'btn-success' : 'btn-danger'} px-4" data-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+
+        // Handle modal hidden event
+        $('#notificationModal').on('hidden.bs.modal', async () => {
+            if (type === 'success') {
+                // Reset forms if success
+                $('#formTambahProduk')[0]?.reset();
+                $('#formEditProduk')[0]?.reset();
+                $('#previewImage').attr('src', '');
+                $('#editPreviewImage').attr('src', '');
+                await loadProducts();
+                await populateKategoriDropdowns();
+            }
+        });
+    }
+
+    // Set message and show modal
+    $('#notificationMessage').text(message);
+    $('#notificationModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
 }

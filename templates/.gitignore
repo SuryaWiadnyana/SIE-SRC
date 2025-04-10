@@ -1,6 +1,6 @@
 data_penjualan.txt
-data_produk.txt
-detail_penjualan.txt
+# data_produk.txt
+# detail_penjualan.txt
 produk_data.csv
 produk_test.csv
 template_import_produk_basic.csv
