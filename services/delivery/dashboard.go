@@ -71,7 +71,7 @@ func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 	}
 
 	// Menghitung total penjualan
-	var totalSales float64
+	var totalSales int
 	var totalProducts int
 	var totalStock int
 	var totalSold int
@@ -88,12 +88,12 @@ func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 		saleMonth := int(sale.Tanggal_Penjualan.Month())
 
 		// Log untuk debugging
-		log.Printf("Checking sale: year=%d (target=%d), month=%d (target=%d)", 
+		log.Printf("Checking sale: year=%d (target=%d), month=%d (target=%d)",
 			saleYear, yearInt, saleMonth, monthInt)
 
 		if saleYear == yearInt {
 			if month == "" || saleMonth == monthInt {
-				totalSales += float64(sale.Total)
+				totalSales += sale.Total
 				totalSold += sale.JumlahProduk
 			}
 		}
@@ -107,11 +107,10 @@ func (d *HttpDeliveryDashboard) GetDashboardData(c *fiber.Ctx) error {
 		}
 	}
 
-	// Log hasil perhitungan
-	log.Printf("Calculated totals: sales=%.2f, products=%d, stock=%d, sold=%d",
+	// Log untuk debugging
+	log.Printf("Dashboard totals: sales=%d, products=%d, stock=%d, sold=%d",
 		totalSales, totalProducts, totalStock, totalSold)
 
-	// Menyiapkan response
 	return c.JSON(fiber.Map{
 		"success": true,
 		"data": fiber.Map{
@@ -153,7 +152,7 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 	for i := 1; i <= 12; i++ {
 		monthlySales[i] = fiber.Map{
 			"month":         i,
-			"total":         0.0,
+			"total":         0,
 			"jumlah_produk": 0,
 		}
 	}
@@ -178,10 +177,11 @@ func (d *HttpDeliveryDashboard) GetSalesData(c *fiber.Ctx) error {
 		}
 
 		monthData := monthlySales[saleMonth]
-		monthData["total"] = monthData["total"].(float64) + float64(sale.Total)
+		monthData["total"] = monthData["total"].(int) + sale.Total
 		monthData["jumlah_produk"] = monthData["jumlah_produk"].(int) + sale.JumlahProduk
 		monthlySales[saleMonth] = monthData
 
+		// Hitung jumlah produk terjual per produk
 		for _, detail := range details {
 			for _, product := range detail.Produk {
 				// Cek kategori jika filter kategori aktif
@@ -265,7 +265,7 @@ func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 	}
 
 	// Inisialisasi map penjualan per kategori
-	categorySales := make(map[string]float64)
+	categorySales := make(map[string]int)
 	for _, kategori := range kategoriList {
 		categorySales[kategori.NamaKategori] = 0
 	}
@@ -293,11 +293,20 @@ func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 			continue
 		}
 
+		// Hitung total per kategori
 		for _, detail := range details {
-			// Hitung total pendapatan per kategori
-			for _, product := range detail.Produk {
-				// Gunakan TotalPendapatan yang sudah dihitung
-				categorySales[product.Kategori.NamaKategori] += float64(detail.TotalPendapatan)
+			// Kelompokkan produk per kategori dan hitung total
+			if len(detail.Produk) > 0 {
+				// Hitung proporsi pendapatan untuk setiap produk
+				totalPendapatan := detail.TotalPendapatan
+				jumlahProduk := len(detail.Produk)
+				pendapatanPerProduk := totalPendapatan / jumlahProduk
+
+				// Distribusikan pendapatan ke setiap kategori
+				for _, product := range detail.Produk {
+					kategori := product.Kategori.NamaKategori
+					categorySales[kategori] += pendapatanPerProduk
+				}
 			}
 		}
 	}
@@ -312,6 +321,20 @@ func (d *HttpDeliveryDashboard) GetCategorySales(c *fiber.Ctx) error {
 			})
 		}
 	}
+
+	// Verifikasi total
+	total := 0
+	for _, value := range categorySales {
+		total += value
+	}
+
+	// Log untuk debugging
+	log.Printf("Total dari semua kategori: %d", total)
+
+	// Sort result berdasarkan value (descending)
+	sort.Slice(result, func(i, j int) bool {
+		return result[i]["value"].(int) > result[j]["value"].(int)
+	})
 
 	return c.JSON(fiber.Map{
 		"success": true,
@@ -343,7 +366,7 @@ func (d *HttpDeliveryDashboard) GetStockByCategory(c *fiber.Ctx) error {
 			if _, exists := subCategoryStock[product.Kategori.NamaKategori]; !exists {
 				subCategoryStock[product.Kategori.NamaKategori] = make(map[string]int)
 			}
-			
+
 			// Tambahkan stok ke subkategori
 			subCategoryStock[product.Kategori.NamaKategori][product.SubKategori.NamaSubKategori] += product.Stok
 		}
@@ -401,7 +424,7 @@ func (d *HttpDeliveryDashboard) GetLowestStock(c *fiber.Ctx) error {
 		result = append(result, fiber.Map{
 			"product_name": product.NamaProduk,
 			"category":     product.Kategori.NamaKategori,
-			"subcategory": product.SubKategori.NamaSubKategori,
+			"subcategory":  product.SubKategori.NamaSubKategori,
 			"stock":        product.Stok,
 		})
 	}
@@ -501,7 +524,7 @@ func (d *HttpDeliveryDashboard) GetBestSellingProducts(c *fiber.Ctx) error {
 
 	// Create a map to store product sales data
 	type ProductSales struct {
-		IDProduk        string  `json:"id_produk"`
+		IDProduk       string  `json:"id_produk"`
 		NamaProduk     string  `json:"nama_produk"`
 		JumlahTerjual  int     `json:"jumlah_terjual"`
 		TotalPenjualan float64 `json:"total_penjualan"`
@@ -521,11 +544,11 @@ func (d *HttpDeliveryDashboard) GetBestSellingProducts(c *fiber.Ctx) error {
 				for _, produk := range detail.Produk {
 					if _, exists := productSalesMap[produk.IDProduk]; !exists {
 						productSalesMap[produk.IDProduk] = &ProductSales{
-							IDProduk:    produk.IDProduk,
-							NamaProduk:  produk.NamaProduk,
+							IDProduk:   produk.IDProduk,
+							NamaProduk: produk.NamaProduk,
 						}
 					}
-					
+
 					productSalesMap[produk.IDProduk].JumlahTerjual++
 					productSalesMap[produk.IDProduk].TotalPenjualan += float64(produk.HargaProduk)
 				}

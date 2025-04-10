@@ -68,7 +68,7 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 	}
 
 	// Ambil frequent itemsets dengan minimum support 0.05 (5%)
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.03)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.01)
 	if err != nil {
 		// Jika gagal mendapatkan itemsets, tetap kembalikan produk
 		return c.Status(http.StatusOK).JSON(fiber.Map{

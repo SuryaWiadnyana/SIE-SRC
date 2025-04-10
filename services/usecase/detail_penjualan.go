@@ -50,10 +50,10 @@ func (uc *detailPenjualanUsecase) Delete(ctx context.Context, id string) error {
 }
 
 func (uc *detailPenjualanUsecase) GetByPenjualanID(ctx context.Context, idPenjualan string) ([]domain.DetailPenjualan, error) {
-    if idPenjualan == "" {
-        return nil, fmt.Errorf("id penjualan tidak boleh kosong")
-    }
-    return uc.detailPenjualanRepo.GetByPenjualanID(ctx, idPenjualan)
+	if idPenjualan == "" {
+		return nil, fmt.Errorf("id penjualan tidak boleh kosong")
+	}
+	return uc.detailPenjualanRepo.GetByPenjualanID(ctx, idPenjualan)
 }
 
 func (uc *detailPenjualanUsecase) GetByID(ctx context.Context, id string) (*domain.DetailPenjualan, error) {
