@@ -746,6 +746,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     console.log('Auth check passed');
+    
+    // Hide related products section initially
+    const relatedProductsSection = document.getElementById('recommendationCard');
+    if (relatedProductsSection) {
+        relatedProductsSection.style.display = 'none';
+    }
+    
+    // Add CSS for related products
+    const style = document.createElement('style');
+    style.textContent = `
+        .related-products {
+            padding: 5px 10px;
+            background-color: #f8f9fc;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        .related-products-label {
+            font-weight: bold;
+            color: #e74a3b;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .related-products-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .related-products-row {
+            background-color: transparent !important;
+        }
+        .badge-primary {
+            background-color: #4e73df;
+        }
+    `;
+    document.head.appendChild(style);
 
     // Initialize elements
     const elements = {
@@ -1034,6 +1069,7 @@ function applyFilters() {
 let currentPage = 1;
 const itemsPerPage = 15;
 let filteredProducts = [];
+let selectedProductId = null;
 
 // Display products with pagination
 function displayProducts(products = []) {
@@ -1181,7 +1217,11 @@ function displayProducts(products = []) {
         
         row.innerHTML = `
             <td>${infoButton}${product.id_produk || '-'}</td>
-            <td>${product.nama_produk || '-'}</td>
+            <td>
+                <a href="#" class="product-detail-link" data-product-id="${product.id_produk}" style="color: inherit; text-decoration: none;">
+                    ${product.nama_produk || '-'}
+                </a>
+            </td>
             <td>${kategoriDisplay}</td>
             <td>${subKategoriDisplay}</td>
             <td>${product.kode_produk || '-'}</td>
@@ -1196,6 +1236,16 @@ function displayProducts(products = []) {
         tooltips.forEach(tooltip => {
             new bootstrap.Tooltip(tooltip);
         });
+        
+        // Add click event for product detail
+        const productLink = row.querySelector('.product-detail-link');
+        if (productLink) {
+            productLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const productId = e.target.dataset.productId;
+                showProductRelated(productId, products);
+            });
+        }
     });
 
     // Update pagination
@@ -1820,6 +1870,103 @@ function formatCurrency(amount) {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(amount);
+}
+
+// Fungsi untuk menampilkan produk terkait (frequent itemset)
+function showProductRelated(productId, allProducts) {
+    console.log('Showing related products for:', productId);
+    selectedProductId = productId;
+    
+    // Find the product in the products array
+    const productItem = allProducts.find(item => item.produk && item.produk.id_produk === productId);
+    if (!productItem || !productItem.produk) {
+        console.warn('Product not found:', productId);
+        return;
+    }
+    
+    const product = productItem.produk;
+    console.log('Found product:', product);
+    
+    // Check if product has related products
+    if (!product.produk_terkait || product.produk_terkait.length === 0) {
+        console.log('No related products found');
+        return;
+    }
+    
+    // Find the row element for this product
+    const productRows = document.querySelectorAll('#productTable tbody tr');
+    let productRow = null;
+    
+    for (const row of productRows) {
+        const idCell = row.querySelector('td:first-child');
+        if (idCell && idCell.textContent.includes(productId)) {
+            productRow = row;
+            break;
+        }
+    }
+    
+    if (!productRow) {
+        console.warn('Product row not found in table');
+        return;
+    }
+    
+    // Check if related products section already exists
+    let relatedSection = productRow.querySelector('.related-products');
+    
+    // If it doesn't exist, create it
+    if (!relatedSection) {
+        // Create a new row for related products
+        const newRow = document.createElement('tr');
+        newRow.className = 'related-products-row';
+        
+        // Create a cell that spans all columns
+        const cell = document.createElement('td');
+        cell.colSpan = 8; // Adjust based on your table structure
+        
+        // Create the related products container
+        relatedSection = document.createElement('div');
+        relatedSection.className = 'related-products';
+        
+        // Add the label
+        const label = document.createElement('div');
+        label.className = 'related-products-label';
+        label.textContent = 'Sering dibeli dengan:';
+        relatedSection.appendChild(label);
+        
+        // Add the badges container
+        const badgesContainer = document.createElement('div');
+        badgesContainer.className = 'related-products-badges';
+        relatedSection.appendChild(badgesContainer);
+        
+        // Add the related section to the cell
+        cell.appendChild(relatedSection);
+        
+        // Add the cell to the row
+        newRow.appendChild(cell);
+        
+        // Insert the new row after the product row
+        productRow.parentNode.insertBefore(newRow, productRow.nextSibling);
+    }
+    
+    // Get the badges container
+    const badgesContainer = relatedSection.querySelector('.related-products-badges');
+    if (!badgesContainer) {
+        console.warn('Badges container not found');
+        return;
+    }
+    
+    // Clear previous badges
+    badgesContainer.innerHTML = '';
+    
+    // Add related products as badges
+    product.produk_terkait.forEach(relatedProduct => {
+        const badge = document.createElement('span');
+        badge.className = 'badge badge-primary mr-2 mb-2';
+        badge.textContent = relatedProduct.nama_produk;
+        badge.style.fontSize = '0.85rem';
+        badge.style.padding = '5px 10px';
+        badgesContainer.appendChild(badge);
+    });
 }
 
 // Check authentication and redirect if not logged in
