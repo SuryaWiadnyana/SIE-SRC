@@ -141,15 +141,16 @@ function processSalesData(data) {
     };
 }
 
-function createSalesChart(data) {
+async function createSalesChart(data) {
     const ctx = document.getElementById('salesChart');
+    if (!ctx) return null;
     
     // Clear existing chart if any
     if (window.salesChart instanceof Chart) {
         window.salesChart.destroy();
     }
 
-    // Create chart
+    // Create chart with optimized settings for PDF
     window.salesChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -159,27 +160,28 @@ function createSalesChart(data) {
                     label: 'Jumlah Terjual',
                     type: 'bar',
                     data: data.units,
-                    backgroundColor: 'rgba(53, 162, 235, 0.7)',
-                    borderColor: 'rgba(53, 162, 235, 1)',
-                    borderWidth: 1,
+                    backgroundColor: 'rgb(53, 162, 235)', // Solid colors for PDF
+                    borderColor: 'rgb(53, 162, 235)',
+                    borderWidth: 2,
                     yAxisID: 'y',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.7
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.9
                 },
                 {
                     label: 'Total Penjualan (Rp)',
                     type: 'line',
                     data: data.totals,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                    borderWidth: 2,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.3)',
+                    borderWidth: 3,
                     fill: true,
                     yAxisID: 'y1',
-                    tension: 0.3
+                    tension: 0.4
                 }
             ]
         },
         options: {
+            animation: false, // Disable animation for PDF
             responsive: true,
             maintainAspectRatio: false,
             interaction: {
@@ -191,11 +193,19 @@ function createSalesChart(data) {
                     display: true,
                     text: 'Grafik Penjualan per Bulan',
                     font: {
-                        size: 16
-                    }
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    padding: 20
                 },
                 legend: {
                     position: 'top',
+                    labels: {
+                        font: {
+                            size: 14
+                        },
+                        padding: 15
+                    }
                 }
             },
             scales: {
@@ -205,7 +215,17 @@ function createSalesChart(data) {
                     position: 'left',
                     title: {
                         display: true,
-                        text: 'Jumlah Terjual'
+                        text: 'Jumlah Terjual',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        padding: 8
                     }
                 },
                 y1: {
@@ -217,23 +237,44 @@ function createSalesChart(data) {
                     },
                     title: {
                         display: true,
-                        text: 'Total Penjualan (Rp)'
+                        text: 'Total Penjualan (Rp)',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
                     },
                     ticks: {
                         callback: function(value) {
                             return 'Rp ' + value.toLocaleString('id-ID');
-                        }
+                        },
+                        font: {
+                            size: 12
+                        },
+                        padding: 8
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Bulan'
+                        text: 'Bulan',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        padding: 8
                     }
                 }
             }
         }
     });
+
+    // Return the chart instance
+    return window.salesChart;
 }
 
 // Update sort options based on report type
@@ -654,29 +695,68 @@ async function generateReport() {
         if (reportType === 'penjualan' && result.data.length > 0) {
             try {
                 const chartData = processSalesData(result.data);
-                createSalesChart(chartData);
                 
-                // Wait for chart animation
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                const chartCanvas = document.getElementById('salesChart');
-                if (chartCanvas) {
-                    const chartImage = chartCanvas.toDataURL('image/png', 1.0);
+                // Get chart container and prepare for PDF
+                const chartContainer = document.getElementById('salesChart');
+                if (chartContainer) {
+                    // Set fixed dimensions for high-quality rendering
+                    chartContainer.style.width = '1200px';
+                    chartContainer.style.height = '600px';
                     
-                    // Add new page for chart
-                    doc.addPage();
+                    // Force a layout recalculation
+                    chartContainer.offsetHeight;
                     
-                    // Add chart title
-                    doc.setFontSize(14);
-                    doc.text('Grafik Penjualan', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                    // Create chart and ensure it's rendered
+                    const chart = await createSalesChart(chartData);
                     
-                    // Add chart
-                    const chartWidth = doc.internal.pageSize.getWidth() - 30;
-                    const chartHeight = 120;
-                    doc.addImage(chartImage, 'PNG', 15, 30, chartWidth, chartHeight);
+                    if (chart) {
+                        // Wait a bit for the chart to be fully rendered
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        try {
+                            // Get chart image with maximum quality
+                            const chartImage = chartContainer.toDataURL('image/png', 1.0);
+                            
+                            // Add new page in landscape for better chart display
+                            doc.addPage('a4', 'landscape');
+                            
+                            // Add chart title with better styling
+                            doc.setFontSize(16);
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Grafik Penjualan Bulanan', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+                            
+                            // Calculate optimal dimensions for landscape mode
+                            const pageWidth = doc.internal.pageSize.getWidth();
+                            const pageHeight = doc.internal.pageSize.getHeight();
+                            const margin = 20;
+                            
+                            const chartWidth = pageWidth - (margin * 2);
+                            const chartHeight = pageHeight - (margin * 3) - 20; // Account for title
+                            
+                            // Add chart with optimized dimensions
+                            doc.addImage(chartImage, 'PNG', margin, margin + 20, chartWidth, chartHeight);
+                            
+                            // Add timestamp
+                            doc.setFontSize(8);
+                            doc.setFont(undefined, 'normal');
+                            doc.text(
+                                `Generated: ${new Date().toLocaleString('id-ID')}`,
+                                margin,
+                                pageHeight - 10
+                            );
+                        } catch (imgError) {
+                            console.error('Error creating chart image:', imgError);
+                            showAlert('warning', 'Gagal membuat gambar grafik');
+                        }
+                    }
+                    
+                    // Reset chart container size
+                    chartContainer.style.width = '';
+                    chartContainer.style.height = '';
                 }
             } catch (error) {
                 console.error('Error adding chart:', error);
+                showAlert('warning', 'Grafik tidak dapat ditampilkan dalam laporan');
             }
         }
 
