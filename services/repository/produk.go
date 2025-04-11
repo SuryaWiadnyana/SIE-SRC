@@ -120,7 +120,7 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 		return produkList, nil
 	}
 
-	// Dapatkan frequent itemsets dengan minimum support 60%
+	// Dapatkan frequent itemsets dengan minimum support 20%
 	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.6)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
