@@ -68,7 +68,7 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 	}
 
 	// Ambil frequent itemsets dengan minimum support 20%
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.6)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.2)
 	if err != nil {
 		// Jika gagal mendapatkan itemsets, tetap kembalikan produk
 		return c.Status(http.StatusOK).JSON(fiber.Map{
@@ -257,7 +257,7 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 	}
 
 	// Ambil frequent itemsets untuk mendapatkan produk terkait
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.6)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.2)
 	if err != nil {
 		return c.Status(http.StatusOK).JSON(fiber.Map{
 			"message": "Data produk berhasil diambil",
@@ -321,7 +321,7 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 	}
 
 	// Ambil frequent itemsets dengan minimum support 20%
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.4)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.2)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": fmt.Sprintf("Gagal mendapatkan itemset yang sering muncul: %v", err),
@@ -802,7 +802,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 	}
 
 	// Set nilai minimum support sesuai kebutuhan aplikasi
-	minSupport := 0.6
+	minSupport := 0.2
 
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), minSupport)
 	if err != nil {
@@ -825,7 +825,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		"message": "Berhasil mendapatkan itemset yang sering muncul",
 		"data": map[string]interface{}{
 			"min_support":    minSupport,
-			"min_confidence": 0.8, // 30%
+			"min_confidence": 0.3, // 30%
 			"itemsets":       response,
 		},
 	})

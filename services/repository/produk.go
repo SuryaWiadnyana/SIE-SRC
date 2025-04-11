@@ -121,7 +121,7 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 	}
 
 	// Dapatkan frequent itemsets dengan minimum support 20%
-	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.6)
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.2)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
 		return produkList, nil // Return products without related items
@@ -178,8 +178,8 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 		return nil, fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
 
-	// Dapatkan frequent itemsets dengan minimum support 60%
-	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.6)
+	// Dapatkan frequent itemsets dengan minimum support 20%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.2)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
 		return &product, nil // Return product without related items
@@ -523,11 +523,12 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 
 // Mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
 func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemsetResponse, error) {
-	// Gunakan nilai minimum yang sangat rendah untuk memastikan ada hasil
-	minSupport = 0.6     // 60%
-	minConfidence := 0.8 // 80%
+	// Set nilai minimum support dan confidence
+	minSupport = 0.4     // 20%
+	minConfidence := 0.7 // 30%
 
 	log.Printf("Running Apriori with minSupport: %.2f, minConfidence: %.2f", minSupport, minConfidence)
+
 	// Ambil semua data detail penjualan
 	DetailPenjualan := rp.DB.Collection("detail_penjualan")
 
@@ -572,16 +573,26 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		}
 	}
 
-	// Rumus Filter produk yang memenuhi minimum support
+	// Rumus Filter produk yang memenuhi minimum support dan tambahkan ke hasil
 	var frequentItems []string
+	var result []domain.FrequentItemsetResponse
+
+	// Tambahkan L1 (1-itemset) ke dalam hasil
 	for item, count := range itemCounts {
 		support := count / totalTransactions
 		if support >= minSupport {
 			frequentItems = append(frequentItems, item)
+
+			// Tambahkan 1-itemset ke hasil
+			itemset := domain.FrequentItemsetResponse{
+				Produk:     []string{item},
+				Support:    support,
+				Confidence: 1.0, // Confidence untuk 1-itemset selalu 1
+				ProdukList: []string{itemNames[item]},
+			}
+			result = append(result, itemset)
 		}
 	}
-
-	var result []domain.FrequentItemsetResponse
 
 	// Fungsi untuk mengecek apakah itemset muncul dalam transaksi
 	checkItemsetInTransaction := func(itemset []string, products primitive.A) bool {
