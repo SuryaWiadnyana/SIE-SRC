@@ -101,6 +101,7 @@ func (rp *mongoRepoProduk) CreateProduk(ctx context.Context, bd *domain.Produk) 
 func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, error) {
 	ListProduk := rp.DB.Collection(_Produk)
 	var produkList []domain.Produk
+	var produkTerkait []map[string]interface{}
 
 	cursor, err := ListProduk.Find(ctx, bson.M{"is_deleted": nil})
 	if err != nil {
@@ -156,7 +157,7 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 	// Terapkan produk terkait ke setiap produk
 	for i := range produkList {
 		if related, ok := relatedProducts[produkList[i].IDProduk]; ok {
-			produkList[i].ProdukTerkait = related
+			produkTerkait = append(produkTerkait, related...)
 		}
 	}
 
@@ -168,6 +169,7 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var product domain.Produk
+
 	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -204,8 +206,7 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 		}
 	}
 
-	// Terapkan produk terkait ke produk
-	product.ProdukTerkait = related
+	// Produk terkait sudah ditangani di FrequentItemsetResponse
 
 	return &product, nil
 }

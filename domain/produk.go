@@ -16,7 +16,6 @@ type Produk struct {
 	Stok              int                      `json:"stok_barang" bson:"stok_barang"`
 	UpdatedAt         time.Time                `json:"updated_at" bson:"updated_at"`
 	IsDeleted         *time.Time               `json:"is_deleted" bson:"is_deleted"`
-	ProdukTerkait     []map[string]interface{} `json:"produk_terkait,omitempty" bson:"-"`
 }
 
 type FrequentItemsetResponse struct {
@@ -24,6 +23,7 @@ type FrequentItemsetResponse struct {
 	Support    float64  `json:"support"`
 	Confidence float64  `json:"confidence"`
 	ProdukList []string `json:"list_produk"`
+	ProdukTerkait     []map[string]interface{} `json:"produk_terkait,omitempty" bson:"-"`
 }
 
 type ProdukExpiryResponse struct {
