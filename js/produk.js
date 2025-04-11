@@ -431,10 +431,8 @@ const products = {
         if (data.skipped && data.skipped.length > 0) {
           return {
             success: true,
-            message: `Berhasil mengimpor ${data.count || 0} produk. ${
-              data.skipped.length
-            } produk dilewati.`,
-            count: data.count || 0,
+            message: data.message,
+            count: data.message ? parseInt(data.message.match(/Berhasil mengimpor (\d+) produk/)?.[1] || '0') : 0,
             skipped: data.skipped,
             warnings: data.warnings || [],
           };
@@ -442,8 +440,8 @@ const products = {
   
         return {
           success: true,
-          message: data.message || `Berhasil mengimpor ${data.count || 0} produk`,
-          count: data.count || 0,
+          message: data.message,
+          count: data.message ? parseInt(data.message.match(/Berhasil mengimpor (\d+) produk/)?.[1] || '0') : 0,
         };
       } catch (error) {
         console.error("Import data error:", error);
