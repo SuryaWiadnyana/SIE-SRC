@@ -1191,15 +1191,15 @@ function displayProducts(products = []) {
         
         // Create related products badges
         let relatedProductsHtml = '';
-        if (hasRelatedProducts) {
+        if (item.produk_terkait && item.produk_terkait.length > 0) {
             relatedProductsHtml = `
                 <div class="mt-2">
                     <small class="text-muted">Sering dibeli dengan:</small><br>
                     <div class="mt-1">
-                        ${product.produk_terkait.map(related => `
+                        ${item.produk_terkait.map(related => `
                             <span class="badge badge-primary mr-1" style="font-size: 0.9em;">
                                 ${related.nama_produk}
-                                <small>(${(related.confidence * 100).toFixed(1)}%)</small>
+                                <small>(Confidence: ${(related.confidence * 100).toFixed(1)}%)</small>
                             </span>
                         `).join('')}
                     </div>

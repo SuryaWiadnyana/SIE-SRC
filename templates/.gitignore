@@ -1,9 +1,47 @@
 data_penjualan.txt
-# data_produk.txt
-# detail_penjualan.txt
+data_produk.txt
+detail_penjualan.txt
 produk_data.csv
 produk_test.csv
 template_import_produk_basic.csv
 stock_produk_new.csv
 stock_produk_new_2.csv
 stock_produk.csv
+generate_sales_indomie.js
+generate_sales_rokok_korek.js
+mongo_insert_sales_2.js
+mongo_insert_sales_3.js
+mongo_insert_sales_4.js
+mongo_insert_sales_5.js
+mongo_insert_sales_indomie.js
+mongo_insert_sales_rokok_korek.js
+mongo_insert_sales_stock.js
+mongo_insert_sales.js
+delete_sales_data.js
+
+[diff_block_start]
+@@ -18,4 +18,5 @@
+data_penjualan.txt
+data_produk.txt
+detail_penjualan.txt
+produk_data.csv
+produk_test.csv
+template_import_produk_basic.csv
+stock_produk_new.csv
+stock_produk_new_2.csv
+stock_produk.csv
+generate_sales_indomie.js
+generate_sales_rokok_korek.js
+mongo_insert_sales_2.js
+mongo_insert_sales_3.js
+mongo_insert_sales_4.js
+mongo_insert_sales_5.js
+mongo_insert_sales_indomie.js
+mongo_insert_sales_rokok_korek.js
+mongo_insert_sales_stock.js
+mongo_insert_sales.js
+delete_sales_data.js
+
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
