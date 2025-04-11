@@ -119,8 +119,8 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 		return produkList, nil
 	}
 
-	// Dapatkan frequent itemsets dengan minimum support 40%
-	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.4)
+	// Dapatkan frequent itemsets dengan minimum support 60%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.6)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
 		return produkList, nil // Return products without related items
@@ -176,8 +176,8 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 		return nil, fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
 
-	// Dapatkan frequent itemsets dengan minimum support 40%
-	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.4)
+	// Dapatkan frequent itemsets dengan minimum support 60%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.6)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
 		return &product, nil // Return product without related items
@@ -522,9 +522,11 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 
 // Mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
 func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemsetResponse, error) {
-	// Set minimum support dan confidence
-	minSupport = 0.5     // 50%
-	minConfidence := 0.6 // 60%
+	// Gunakan nilai minimum yang sangat rendah untuk memastikan ada hasil
+	minSupport = 0.6     // 60%
+	minConfidence := 0.8 // 80%
+
+	log.Printf("Running Apriori with minSupport: %.2f, minConfidence: %.2f", minSupport, minConfidence)
 	// Ambil semua data detail penjualan
 	DetailPenjualan := rp.DB.Collection("detail_penjualan")
 
@@ -569,7 +571,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		}
 	}
 
-	// Filter produk yang memenuhi minimum support
+	// Rumus Filter produk yang memenuhi minimum support
 	var frequentItems []string
 	for item, count := range itemCounts {
 		support := count / totalTransactions
@@ -629,8 +631,9 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 				}
 			}
 
+			// Rumus Hitung support untuk pasangan produk
 			pairSupport := pairCount / totalTransactions
-			// Hitung confidence untuk kedua arah (A->B dan B->A)
+			// Rumus Hitung confidence untuk kedua arah (A->B dan B->A)
 			confidence1 := pairCount / itemCounts[item1]
 			confidence2 := pairCount / itemCounts[item2]
 
@@ -653,7 +656,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		}
 	}
 
-	// Cari frequent itemset dengan 3 produk
+	// Rumus Cari frequent itemset dengan 3 produk
 	for i := 0; i < len(frequentItems); i++ {
 		for j := i + 1; j < len(frequentItems); j++ {
 			for k := j + 1; k < len(frequentItems); k++ {
@@ -674,14 +677,14 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 				tripletSupport := tripletCount / totalTransactions
 
-				// Hitung confidence untuk setiap kombinasi dalam triplet
+				// Rumus Hitung confidence untuk setiap kombinasi dalam triplet
 				confidences := []float64{
 					tripletCount / itemCounts[item1], // item1 -> (item2,item3)
 					tripletCount / itemCounts[item2], // item2 -> (item1,item3)
 					tripletCount / itemCounts[item3], // item3 -> (item1,item2)
 				}
 
-				// Cari confidence maksimum
+				// Rumus Cari confidence maksimum
 				maxConfidence := 0.0
 				for _, conf := range confidences {
 					if conf > maxConfidence {
