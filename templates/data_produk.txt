@@ -18,24 +18,8 @@
                 "tanggal_kedaluwarsa": "2025-09-10T00:00:00Z",
                 "stok_barang": 42,
                 "updated_at": "2025-04-10T02:50:42.061Z",
-                "is_deleted": null,
-                "produk_terkait": [
-                    {
-                        "confidence": 0.7096774193548387,
-                        "id_produk": "013",
-                        "nama_produk": "Indomie Goreng",
-                        "support": 0.07829181494661921
-                    }
-                ]
-            },
-            "produk_terkait": [
-                {
-                    "confidence": 0.7096774193548387,
-                    "id_produk": "013",
-                    "nama_produk": "Indomie Goreng",
-                    "support": 0.07829181494661921
-                }
-            ]
+                "is_deleted": null
+            }
         },
         {
             "produk": {
@@ -300,32 +284,29 @@
                 "subkategori": {
                     "id_subkategori": "SK006",
                     "nama_subkategori": "Mie Instan",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "8996001600162",
                 "harga_produk": 3500,
                 "tanggal_kedaluwarsa": "2025-05-15T00:00:00Z",
-                "stok_barang": 56,
-                "updated_at": "2025-04-10T02:53:29.299Z",
+                "stok_barang": 32,
+                "updated_at": "2025-04-10T15:51:16.209Z",
                 "is_deleted": null,
                 "produk_terkait": [
                     {
-                        "confidence": 0.7096774193548387,
-                        "id_produk": "001",
-                        "nama_produk": "Kellogg's Corn Flakes",
-                        "support": 0.07829181494661921
+                        "confidence": 0.9444444444444444,
+                        "id_produk": "025",
+                        "nama_produk": "Aqua 600ml",
+                        "support": 0.47309833024118736
                     }
                 ]
             },
             "produk_terkait": [
                 {
-                    "confidence": 0.7096774193548387,
-                    "id_produk": "001",
-                    "nama_produk": "Kellogg's Corn Flakes",
-                    "support": 0.07829181494661921
+                    "confidence": 0.9444444444444444,
+                    "id_produk": "025",
+                    "nama_produk": "Aqua 600ml",
+                    "support": 0.47309833024118736
                 }
             ]
         },
@@ -604,18 +585,31 @@
                 "subkategori": {
                     "id_subkategori": "SK013",
                     "nama_subkategori": "Air Mineral",
-                    "kategori": {
-                        "id_kategori": "KT002",
-                        "nama_kategori": "Minuman"
-                    }
+                    "kategori": null
                 },
                 "kode_produk": "8996001600174",
                 "harga_produk": 3000,
-                "tanggal_kedaluwarsa": "2025-12-31T00:00:00Z",
-                "stok_barang": 81,
-                "updated_at": "2025-04-09T13:47:35.045Z",
-                "is_deleted": null
-            }
+                "tanggal_kedaluwarsa": "2026-02-28T00:00:00Z",
+                "stok_barang": 0,
+                "updated_at": "2025-04-10T15:21:46.275Z",
+                "is_deleted": null,
+                "produk_terkait": [
+                    {
+                        "confidence": 0.9444444444444444,
+                        "id_produk": "013",
+                        "nama_produk": "Indomie Goreng",
+                        "support": 0.47309833024118736
+                    }
+                ]
+            },
+            "produk_terkait": [
+                {
+                    "confidence": 0.9444444444444444,
+                    "id_produk": "013",
+                    "nama_produk": "Indomie Goreng",
+                    "support": 0.47309833024118736
+                }
+            ]
         },
         {
             "produk": {
@@ -3997,30 +3991,6 @@
         },
         {
             "produk": {
-                "id_produk": "168",
-                "nama_produk": "Beng Beng",
-                "kategori": {
-                    "id_kategori": "KT001",
-                    "nama_kategori": "Makanan"
-                },
-                "subkategori": {
-                    "id_subkategori": "SK005",
-                    "nama_subkategori": "Cokelat",
-                    "kategori": {
-                        "id_kategori": "KT001",
-                        "nama_kategori": "Makanan"
-                    }
-                },
-                "kode_produk": "8999999037956",
-                "harga_produk": 2500,
-                "tanggal_kedaluwarsa": "2025-08-10T00:00:00Z",
-                "stok_barang": 176,
-                "updated_at": "2025-04-09T12:45:35.394Z",
-                "is_deleted": null
-            }
-        },
-        {
-            "produk": {
                 "id_produk": "169",
                 "nama_produk": "Top",
                 "kategori": {
@@ -6216,8 +6186,8 @@
                 "kode_produk": "8999999038560",
                 "harga_produk": 3000,
                 "tanggal_kedaluwarsa": "2025-12-31T00:00:00Z",
-                "stok_barang": 90,
-                "updated_at": "2025-04-10T05:15:17.452Z",
+                "stok_barang": 88,
+                "updated_at": "2025-04-10T14:53:44.427Z",
                 "is_deleted": null
             }
         },
@@ -6770,6 +6740,54 @@
                 "tanggal_kedaluwarsa": "2025-11-20T00:00:00Z",
                 "stok_barang": 35,
                 "updated_at": "2025-04-10T05:15:17.452Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "291",
+                "nama_produk": "Beng Beng",
+                "kategori": {
+                    "id_kategori": "KT001",
+                    "nama_kategori": "Makanan"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK005",
+                    "nama_subkategori": "Cokelat",
+                    "kategori": {
+                        "id_kategori": "KT001",
+                        "nama_kategori": "Makanan"
+                    }
+                },
+                "kode_produk": "89926373732",
+                "harga_produk": 2000,
+                "tanggal_kedaluwarsa": "2025-10-10T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-04-10T13:27:06.006Z",
+                "is_deleted": null
+            }
+        },
+        {
+            "produk": {
+                "id_produk": "292",
+                "nama_produk": "Rokok Banten",
+                "kategori": {
+                    "id_kategori": "KT010",
+                    "nama_kategori": "Rokok"
+                },
+                "subkategori": {
+                    "id_subkategori": "SK031",
+                    "nama_subkategori": "Rokok Kretek",
+                    "kategori": {
+                        "id_kategori": "KT010",
+                        "nama_kategori": "Rokok"
+                    }
+                },
+                "kode_produk": "89976677655",
+                "harga_produk": 10000,
+                "tanggal_kedaluwarsa": "2026-01-10T00:00:00Z",
+                "stok_barang": 50,
+                "updated_at": "2025-04-10T14:50:38.218Z",
                 "is_deleted": null
             }
         }

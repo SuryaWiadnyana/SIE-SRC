@@ -260,11 +260,27 @@ async function initializeDataTable() {
         }
 
         // Initialize DataTable with the fetched data
+        // Add custom sorting function for ID column
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "id-numeric-pre": function(a) {
+                // Extract the numeric part from PJxxx
+                let num = a.replace('PJ', '');
+                return parseInt(num, 10);
+            },
+            "id-numeric-asc": function(a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+            "id-numeric-desc": function(a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+
         penjualanTable = $('#penjualanTable').DataTable({
             data: penjualanData,
             columns: [
                 { 
                     data: 'id_penjualan',
+                    type: 'id-numeric',
                     render: function(data) {
                         return data || '-';
                     }

@@ -1126,6 +1126,10 @@ function displayProducts(products = []) {
         }
 
         const product = item.produk;
+        
+        // Check for related products
+        const hasRelatedProducts = product.produk_terkait && product.produk_terkait.length > 0;
+        console.log('Related products for', product.nama_produk, ':', product.produk_terkait);
         const row = document.createElement('tr');
         
         // Function to calculate days until expiry
@@ -1184,6 +1188,24 @@ function displayProducts(products = []) {
         // Format tanggal kedaluwarsa
         let tanggalkedaluwarsa = '-';
         let infoButton = '';
+        
+        // Create related products badges
+        let relatedProductsHtml = '';
+        if (hasRelatedProducts) {
+            relatedProductsHtml = `
+                <div class="mt-2">
+                    <small class="text-muted">Sering dibeli dengan:</small><br>
+                    <div class="mt-1">
+                        ${product.produk_terkait.map(related => `
+                            <span class="badge badge-primary mr-1" style="font-size: 0.9em;">
+                                ${related.nama_produk}
+                                <small>(${(related.confidence * 100).toFixed(1)}%)</small>
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
         if (product.tanggal_kedaluwarsa) {
             const date = new Date(product.tanggal_kedaluwarsa);
             if (!isNaN(date.getTime())) {
@@ -1221,6 +1243,7 @@ function displayProducts(products = []) {
                 <a href="#" class="product-detail-link" data-product-id="${product.id_produk}" style="color: inherit; text-decoration: none;">
                     ${product.nama_produk || '-'}
                 </a>
+                ${relatedProductsHtml}
             </td>
             <td>${kategoriDisplay}</td>
             <td>${subKategoriDisplay}</td>
@@ -1240,10 +1263,103 @@ function displayProducts(products = []) {
         // Add click event for product detail
         const productLink = row.querySelector('.product-detail-link');
         if (productLink) {
-            productLink.addEventListener('click', (e) => {
+            productLink.addEventListener('click', async (e) => {
                 e.preventDefault();
-                const productId = e.target.dataset.productId;
-                showProductRelated(productId, products);
+                // Pastikan kita mendapatkan element dengan data-product-id
+                // Jika e.target adalah elemen dalam link, kita perlu mendapatkan parent link
+                const target = e.target.closest('.product-detail-link');
+                const productId = target.dataset.productId;
+                console.log('Clicked product ID:', productId);
+                
+                // Hapus semua baris produk terkait yang sudah ada
+                document.querySelectorAll('.related-products-row').forEach(row => row.remove());
+                
+                // Ambil data produk langsung dari API
+                try {
+                    const response = await fetch(`${BASE_URL}/produk/by-id/${productId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${getToken()}`
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    console.log('API response for product details:', result);
+                    
+                    if (!result.data || !result.data.produk) {
+                        console.warn('Invalid API response format');
+                        return;
+                    }
+                    
+                    const product = result.data.produk;
+                    const relatedProducts = result.data.produk_terkait || [];
+                    console.log('Product:', product);
+                    console.log('Related products:', relatedProducts);
+                    
+                    // Jika tidak ada produk terkait, tidak perlu menampilkan apa-apa
+                    if (!relatedProducts || relatedProducts.length === 0) {
+                        console.log('No related products found for:', product.nama_produk);
+                        return;
+                    }
+                    
+                    // Buat baris baru untuk produk terkait
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'related-products-row';
+                    
+                    // Buat sel yang mencakup semua kolom
+                    const cell = document.createElement('td');
+                    cell.colSpan = 8; // Sesuaikan dengan struktur tabel
+                    cell.style.backgroundColor = '#f8f9fc';
+                    cell.style.padding = '10px';
+                    
+                    // Buat container untuk produk terkait
+                    const relatedSection = document.createElement('div');
+                    relatedSection.className = 'related-products';
+                    
+                    // Tambahkan label
+                    const label = document.createElement('div');
+                    label.className = 'related-products-label font-weight-bold';
+                    label.textContent = 'Sering dibeli dengan:';
+                    label.style.marginBottom = '8px';
+                    relatedSection.appendChild(label);
+                    
+                    // Tambahkan container untuk badge
+                    const badgesContainer = document.createElement('div');
+                    badgesContainer.className = 'related-products-badges';
+                    relatedSection.appendChild(badgesContainer);
+                    
+                    // Tambahkan produk terkait sebagai badge
+                    relatedProducts.forEach(relatedProduct => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge badge-primary mr-2 mb-2';
+                        badge.textContent = relatedProduct.nama_produk;
+                        badge.style.fontSize = '0.85rem';
+                        badge.style.padding = '5px 10px';
+                        badge.style.marginRight = '5px';
+                        badge.style.marginBottom = '5px';
+                        badge.style.display = 'inline-block';
+                        badge.style.backgroundColor = '#4e73df';
+                        badgesContainer.appendChild(badge);
+                    });
+                    
+                    // Tambahkan section ke sel
+                    cell.appendChild(relatedSection);
+                    
+                    // Tambahkan sel ke baris
+                    newRow.appendChild(cell);
+                    
+                    // Dapatkan baris produk yang diklik
+                    const clickedRow = target.closest('tr');
+                    
+                    // Masukkan baris baru setelah baris produk yang diklik
+                    clickedRow.parentNode.insertBefore(newRow, clickedRow.nextSibling);
+                } catch (error) {
+                    console.error('Error fetching product details:', error);
+                }
             });
         }
     });
@@ -1872,102 +1988,7 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Fungsi untuk menampilkan produk terkait (frequent itemset)
-function showProductRelated(productId, allProducts) {
-    console.log('Showing related products for:', productId);
-    selectedProductId = productId;
-    
-    // Find the product in the products array
-    const productItem = allProducts.find(item => item.produk && item.produk.id_produk === productId);
-    if (!productItem || !productItem.produk) {
-        console.warn('Product not found:', productId);
-        return;
-    }
-    
-    const product = productItem.produk;
-    console.log('Found product:', product);
-    
-    // Check if product has related products
-    if (!product.produk_terkait || product.produk_terkait.length === 0) {
-        console.log('No related products found');
-        return;
-    }
-    
-    // Find the row element for this product
-    const productRows = document.querySelectorAll('#productTable tbody tr');
-    let productRow = null;
-    
-    for (const row of productRows) {
-        const idCell = row.querySelector('td:first-child');
-        if (idCell && idCell.textContent.includes(productId)) {
-            productRow = row;
-            break;
-        }
-    }
-    
-    if (!productRow) {
-        console.warn('Product row not found in table');
-        return;
-    }
-    
-    // Check if related products section already exists
-    let relatedSection = productRow.querySelector('.related-products');
-    
-    // If it doesn't exist, create it
-    if (!relatedSection) {
-        // Create a new row for related products
-        const newRow = document.createElement('tr');
-        newRow.className = 'related-products-row';
-        
-        // Create a cell that spans all columns
-        const cell = document.createElement('td');
-        cell.colSpan = 8; // Adjust based on your table structure
-        
-        // Create the related products container
-        relatedSection = document.createElement('div');
-        relatedSection.className = 'related-products';
-        
-        // Add the label
-        const label = document.createElement('div');
-        label.className = 'related-products-label';
-        label.textContent = 'Sering dibeli dengan:';
-        relatedSection.appendChild(label);
-        
-        // Add the badges container
-        const badgesContainer = document.createElement('div');
-        badgesContainer.className = 'related-products-badges';
-        relatedSection.appendChild(badgesContainer);
-        
-        // Add the related section to the cell
-        cell.appendChild(relatedSection);
-        
-        // Add the cell to the row
-        newRow.appendChild(cell);
-        
-        // Insert the new row after the product row
-        productRow.parentNode.insertBefore(newRow, productRow.nextSibling);
-    }
-    
-    // Get the badges container
-    const badgesContainer = relatedSection.querySelector('.related-products-badges');
-    if (!badgesContainer) {
-        console.warn('Badges container not found');
-        return;
-    }
-    
-    // Clear previous badges
-    badgesContainer.innerHTML = '';
-    
-    // Add related products as badges
-    product.produk_terkait.forEach(relatedProduct => {
-        const badge = document.createElement('span');
-        badge.className = 'badge badge-primary mr-2 mb-2';
-        badge.textContent = relatedProduct.nama_produk;
-        badge.style.fontSize = '0.85rem';
-        badge.style.padding = '5px 10px';
-        badgesContainer.appendChild(badge);
-    });
-}
+// Variabel selectedProductId sudah dideklarasikan sebelumnya
 
 // Check authentication and redirect if not logged in
 function checkAuth() {
