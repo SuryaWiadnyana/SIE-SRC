@@ -32,24 +32,36 @@ var Produk domain.Produk
 func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error) {
 	ListPenjualan := rp.DB.Collection(_Penjualan)
 
+	// Find the last penjualan sorted by id_penjualan in descending order
 	opts := options.FindOne().SetSort(bson.M{"id_penjualan": -1})
 	var lastPenjualan domain.Penjualan
 
 	err := ListPenjualan.FindOne(ctx, bson.M{}, opts).Decode(&lastPenjualan)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+			// If no documents exist, start with PJ001
 			return "PJ001", nil
 		}
 		return "", fmt.Errorf("error finding last penjualan: %v", err)
 	}
 
-	numStr := lastPenjualan.IDPenjualan[2:]
+	// Extract number from ID and increment
+	numStr := lastPenjualan.IDPenjualan[2:] // Skip 'PJ' prefix
 	num, err := strconv.Atoi(numStr)
 	if err != nil {
 		return "", fmt.Errorf("error parsing last ID number: %v", err)
 	}
 
-	newID := fmt.Sprintf("PJ%03d", num+1)
+	// Generate new ID with proper formatting
+	// If number is 999 or less, use 3 digits
+	// If number is 1000 or more, use 4 digits
+	var newID string
+	if num < 999 {
+		newID = fmt.Sprintf("PJ%03d", num+1)
+	} else {
+		newID = fmt.Sprintf("PJ%d", num+1)
+	}
+
 	return newID, nil
 }
 

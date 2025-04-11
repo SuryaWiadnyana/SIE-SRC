@@ -89,13 +89,38 @@ func (r *mongoRepoDetailPenjualan) GetAll(ctx context.Context) ([]domain.DetailP
 func (r *mongoRepoDetailPenjualan) GetByID(ctx context.Context, id string) (*domain.DetailPenjualan, error) {
 	collection := r.DB.Collection("detail_penjualan")
 
-	var detail domain.DetailPenjualan
-	err := collection.FindOne(ctx, bson.M{"id_details": id}).Decode(&detail)
+	// Cari detail penjualan berdasarkan id_penjualan
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{"id_penjualan": id},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         "produk",
+				"localField":   "id_produk",
+				"foreignField": "id_produk",
+				"as":           "produk",
+			},
+		},
+		{
+			"$unwind": "$produk",
+		},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("detail penjualan dengan ID %s tidak ditemukan", id)
-		}
 		return nil, fmt.Errorf("gagal mengambil detail penjualan: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	// Ambil detail pertama
+	if !cursor.Next(ctx) {
+		return nil, fmt.Errorf("detail penjualan dengan ID %s tidak ditemukan", id)
+	}
+
+	var detail domain.DetailPenjualan
+	if err := cursor.Decode(&detail); err != nil {
+		return nil, fmt.Errorf("gagal decode detail penjualan: %v", err)
 	}
 
 	return &detail, nil
