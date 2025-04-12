@@ -32,35 +32,40 @@ var Produk domain.Produk
 func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error) {
 	ListPenjualan := rp.DB.Collection(_Penjualan)
 
-	// Find the last penjualan sorted by id_penjualan in descending order
-	opts := options.FindOne().SetSort(bson.M{"id_penjualan": -1})
-	var lastPenjualan domain.Penjualan
-
-	err := ListPenjualan.FindOne(ctx, bson.M{}, opts).Decode(&lastPenjualan)
+	// Find all penjualan IDs
+	cursor, err := ListPenjualan.Find(ctx, bson.M{}, options.Find().SetProjection(bson.M{"id_penjualan": 1}))
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			// If no documents exist, start with PJ001
-			return "PJ001", nil
+		return "", fmt.Errorf("error finding penjualan: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	// Get all IDs and find the highest number
+	highestNum := 0
+	for cursor.Next(ctx) {
+		var doc struct {
+			IDPenjualan string `bson:"id_penjualan"`
 		}
-		return "", fmt.Errorf("error finding last penjualan: %v", err)
+		if err := cursor.Decode(&doc); err != nil {
+			continue
+		}
+		// Extract number from PJxxx format
+		numStr := doc.IDPenjualan[2:] // Skip 'PJ' prefix
+		num, err := strconv.Atoi(numStr)
+		if err != nil {
+			continue
+		}
+		if num > highestNum {
+			highestNum = num
+		}
 	}
 
-	// Extract number from ID and increment
-	numStr := lastPenjualan.IDPenjualan[2:] // Skip 'PJ' prefix
-	num, err := strconv.Atoi(numStr)
-	if err != nil {
-		return "", fmt.Errorf("error parsing last ID number: %v", err)
+	// If no documents found, start with PJ001
+	if highestNum == 0 {
+		return "PJ001", nil
 	}
 
-	// Generate new ID with proper formatting
-	// If number is 999 or less, use 3 digits
-	// If number is 1000 or more, use 4 digits
-	var newID string
-	if num < 999 {
-		newID = fmt.Sprintf("PJ%03d", num+1)
-	} else {
-		newID = fmt.Sprintf("PJ%d", num+1)
-	}
+	// Generate new ID by incrementing the highest number found
+	newID := fmt.Sprintf("PJ%d", highestNum+1)
 
 	return newID, nil
 }
