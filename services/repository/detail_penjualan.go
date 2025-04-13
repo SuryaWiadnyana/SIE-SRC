@@ -36,7 +36,7 @@ func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain
 
 	// Buat dokumen detail penjualan
 	detailDoc := bson.M{
-		"id_details":       id,
+		"_id":       id,
 		"penjualan":        dp.Penjualan,
 		"produk":           dp.Produk,
 		"total_pendapatan": dp.TotalPendapatan,
@@ -56,7 +56,7 @@ func (r *mongoRepoDetailPenjualan) CreateDetails(ctx context.Context, dp *domain
 func (r *mongoRepoDetailPenjualan) UpdateDetails(ctx context.Context, dp *domain.DetailPenjualan) error {
 	collection := r.DB.Collection("detail_penjualan")
 
-	_, err := collection.UpdateOne(ctx, bson.M{"id_details": dp.ID_DetailPenjualan}, bson.M{"$set": dp})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": dp.ID_DetailPenjualan}, bson.M{"$set": dp})
 	if err != nil {
 		return fmt.Errorf("gagal memperbarui detail penjualan: %v", err)
 	}
@@ -92,13 +92,13 @@ func (r *mongoRepoDetailPenjualan) GetByID(ctx context.Context, id string) (*dom
 	// Cari detail penjualan berdasarkan id_penjualan
 	pipeline := []bson.M{
 		{
-			"$match": bson.M{"id_penjualan": id},
+			"$match": bson.M{"_id": id},
 		},
 		{
 			"$lookup": bson.M{
 				"from":         "produk",
-				"localField":   "id_produk",
-				"foreignField": "id_produk",
+				"localField":   "_id",
+				"foreignField": "_id",
 				"as":           "produk",
 			},
 		},
@@ -129,7 +129,7 @@ func (r *mongoRepoDetailPenjualan) GetByID(ctx context.Context, id string) (*dom
 func (r *mongoRepoDetailPenjualan) GetByPenjualanID(ctx context.Context, idPenjualan string) ([]domain.DetailPenjualan, error) {
 	collection := r.DB.Collection("detail_penjualan")
 
-	cursor, err := collection.Find(ctx, bson.M{"penjualan.id_penjualan": idPenjualan})
+	cursor, err := collection.Find(ctx, bson.M{"penjualan._id": idPenjualan})
 	if err != nil {
 		return nil, fmt.Errorf("gagal mencari detail penjualan: %v", err)
 	}
@@ -146,7 +146,7 @@ func (r *mongoRepoDetailPenjualan) GetByPenjualanID(ctx context.Context, idPenju
 func (r *mongoRepoDetailPenjualan) Delete(ctx context.Context, id string) error {
 	collection := r.DB.Collection("detail_penjualan")
 
-	_, err := collection.DeleteOne(ctx, bson.M{"id_details": id})
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return fmt.Errorf("gagal menghapus detail penjualan: %v", err)
 	}

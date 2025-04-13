@@ -38,10 +38,10 @@ func NewHttpDeliveryProduk(app fiber.Router, HTTP domain.ProdukUseCase, kuc doma
 	group.Use(middleware.AuthMiddleware("admin", "owner"))
 	group.Post("/createproduk", handler.CreateProduk)
 	group.Get("/getallproduk", handler.GetAllProduk)
-	group.Get("/by-id/:id_produk", handler.GetProdukById)
+	group.Get("/by-id/:_id", handler.GetProdukById)
 	group.Get("/by-name/:nama_produk", handler.GetProdukByName)
-	group.Put("/update/:id_produk", handler.UpdateProduk)
-	group.Delete("/delete/:id_produk", handler.DeleteProduk)
+	group.Put("/update/:_id", handler.UpdateProduk)
+	group.Delete("/delete/:_id", handler.DeleteProduk)
 	group.Post("/importdata", handler.ImportProduk)
 	group.Post("/importJSON", handler.ImportProdukJSON)
 	group.Get("/getfrequentitemsets", handler.GetFrequentItemsets)
@@ -67,8 +67,8 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ambil frequent itemsets dengan minimum support 20%
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.2)
+	// Ambil frequent itemsets dengan minimum support 40%
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.4)
 	if err != nil {
 		// Jika gagal mendapatkan itemsets, tetap kembalikan produk
 		return c.Status(http.StatusOK).JSON(fiber.Map{
@@ -116,7 +116,7 @@ func (d *HttpDeliveryProduk) GetAllProduk(c *fiber.Ctx) error {
 
 					// Tambahkan informasi produk terkait
 					relatedItems = append(relatedItems, map[string]interface{}{
-						"id_produk":   produkId,
+						"_id":       produkId,
 						"nama_produk": itemset.ProdukList[i],
 						"support":     itemset.Support,
 						"confidence":  itemset.Confidence,
@@ -236,7 +236,7 @@ func (d *HttpDeliveryProduk) CreateProduk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
-	id := c.Params("id_produk")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID produk tidak boleh kosong",
@@ -257,7 +257,7 @@ func (d *HttpDeliveryProduk) GetProdukById(c *fiber.Ctx) error {
 	}
 
 	// Ambil frequent itemsets untuk mendapatkan produk terkait
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.2)
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.4)
 	if err != nil {
 		return c.Status(http.StatusOK).JSON(fiber.Map{
 			"message": "Data produk berhasil diambil",
@@ -320,8 +320,8 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 		})
 	}
 
-	// Ambil frequent itemsets dengan minimum support 20%
-	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.2)
+	// Ambil frequent itemsets dengan minimum support 40%
+	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), 0.4)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": fmt.Sprintf("Gagal mendapatkan itemset yang sering muncul: %v", err),
@@ -372,7 +372,7 @@ func (d *HttpDeliveryProduk) GetProdukByName(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
-	id := c.Params("id_produk")
+	id := c.Params("_id")
 
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -524,7 +524,7 @@ func (d *HttpDeliveryProduk) UpdateProduk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryProduk) DeleteProduk(c *fiber.Ctx) error {
-	id := c.Params("id_produk")
+	id := c.Params("_id")
 
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -802,7 +802,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 	}
 
 	// Set nilai minimum support sesuai kebutuhan aplikasi
-	minSupport := 0.2
+	minSupport := 0.4
 
 	itemsets, err := d.HTTP.GetFrequentItemsets(c.Context(), minSupport)
 	if err != nil {
@@ -825,7 +825,7 @@ func (d *HttpDeliveryProduk) GetFrequentItemsets(c *fiber.Ctx) error {
 		"message": "Berhasil mendapatkan itemset yang sering muncul",
 		"data": map[string]interface{}{
 			"min_support":    minSupport,
-			"min_confidence": 0.3, // 30%
+			"min_confidence": 0.7, // 70%
 			"itemsets":       response,
 		},
 	})

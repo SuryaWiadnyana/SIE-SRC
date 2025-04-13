@@ -45,9 +45,9 @@ func NewHttpDeliveryUser(app fiber.Router, HTTP domain.UserUseCase) {
 	adminOnly.Use(middleware.AuthMiddleware("admin"))
 	adminOnly.Post("/register", handler.RegisterUser)
 	adminOnly.Put("/update/:username", handler.UpdateUser)
-	adminOnly.Put("/status/:id_user", handler.StatusUser)
+	adminOnly.Put("/status/:_id", handler.StatusUser)
 	adminOnly.Get("/by-username/:username", handler.GetUserByUsername)
-	adminOnly.Get("/by-id/:id_user", handler.GetUserById)
+	adminOnly.Get("/by-id/:_id", handler.GetUserById)
 }
 
 func (d *HttpDeliveryUser) RegisterUser(c *fiber.Ctx) error {
@@ -218,7 +218,7 @@ func (d *HttpDeliveryUser) GetUserByUsername(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryUser) GetUserById(c *fiber.Ctx) error {
-	id := c.Params("id_user")
+	id := c.Params("_id")
 
 	user, err := d.HTTP.GetUserById(context.Background(), id)
 	if err != nil {
@@ -245,7 +245,7 @@ func (d *HttpDeliveryUser) GetAll(c *fiber.Ctx) error {
 
 // StatusUser handles changing a user's status (Aktif/Tidak Aktif)
 func (d *HttpDeliveryUser) StatusUser(c *fiber.Ctx) error {
-	id := c.Params("id_user")
+	id := c.Params("_id")
 	
 	// Parse request body to get status
 	var requestBody struct {

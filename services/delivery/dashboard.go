@@ -524,7 +524,7 @@ func (d *HttpDeliveryDashboard) GetBestSellingProducts(c *fiber.Ctx) error {
 
 	// Create a map to store product sales data
 	type ProductSales struct {
-		IDProduk       string  `json:"id_produk"`
+		IDProduk       string  `json:"_id"`
 		NamaProduk     string  `json:"nama_produk"`
 		JumlahTerjual  int     `json:"jumlah_terjual"`
 		TotalPenjualan float64 `json:"total_penjualan"`

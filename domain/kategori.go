@@ -3,7 +3,7 @@ package domain
 import "context"
 
 type Kategori struct {
-	IDKategori   string `json:"id_kategori" bson:"id_kategori"`
+	IDKategori   string `json:"id_kategori" bson:"_id"`
 	NamaKategori string `json:"nama_kategori" bson:"nama_kategori"`
 }
 

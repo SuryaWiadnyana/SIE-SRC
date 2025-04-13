@@ -23,9 +23,9 @@ func NewHttpDeliveryDetailPenjualan(app fiber.Router, HTTP domain.DetailPenjuala
 	protected := app.Group("/detail-penjualan")
 	protected.Use(middleware.AuthMiddleware("admin", "owner"))
 	protected.Post("/create", handler.CreateDetail)
-	protected.Get("/by-id/:id_details", handler.GetByID)
+	protected.Get("/by-id/:_id", handler.GetByID)
 	protected.Get("/getall", handler.GetAll)
-	protected.Get("/by-penjualan-id/:id_penjualan", handler.GetByPenjualanID)
+	protected.Get("/by-penjualan-id/:_id", handler.GetByPenjualanID)
 }
 
 func (d *HttpDeliveryDetailPenjualan) CreateDetail(c *fiber.Ctx) error {
@@ -87,7 +87,7 @@ func (d *HttpDeliveryDetailPenjualan) GetAll(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryDetailPenjualan) GetByID(c *fiber.Ctx) error {
-	id := c.Params("id_details")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID tidak boleh kosong",
@@ -115,7 +115,7 @@ func (d *HttpDeliveryDetailPenjualan) GetByID(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryDetailPenjualan) GetByPenjualanID(c *fiber.Ctx) error {
-	id_penjualan := c.Params("id_penjualan")
+	id_penjualan := c.Params("_id")
 	if id_penjualan == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID Penjualan tidak boleh kosong",

@@ -6,7 +6,7 @@ import (
 )
 
 type Produk struct {
-	IDProduk          string                   `json:"id_produk" bson:"id_produk"`
+	IDProduk          string                   `json:"id_produk" bson:"_id"`
 	NamaProduk        string                   `json:"nama_produk" bson:"nama_produk"`
 	Kategori          Kategori                 `json:"kategori" bson:"kategori"`
 	SubKategori       SubKategori              `json:"subkategori" bson:"subkategori"`
@@ -46,7 +46,7 @@ type ProdukRepository interface {
 	GetFrequentItemsets(ctx context.Context, minSupport float64) ([]FrequentItemsetResponse, error)
 	GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error)
 	GetProdukWithLowestStock(ctx context.Context, limit int) ([]Produk, error)
-	GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]Produk, error)
+	GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID string, sort string) ([]Produk, error)
 }
 
 type ProdukUseCase interface {
@@ -64,5 +64,5 @@ type ProdukUseCase interface {
 	GetBestSellingProducts(ctx context.Context, limitProduk int) ([]map[string]interface{}, error)
 	GetProdukWithLowestStock(ctx context.Context, limit int) ([]Produk, error)
 	GetProductsNearExpiry(ctx context.Context, daysThreshold int) ([]ProdukExpiryResponse, error)
-	GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]Produk, error)
+	GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID string, sort string) ([]Produk, error)
 }

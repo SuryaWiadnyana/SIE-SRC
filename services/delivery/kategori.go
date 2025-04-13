@@ -25,15 +25,15 @@ func NewHttpDeliveryKategori(app fiber.Router, ku domain.KategoriUseCase) {
 
 	// Mendaftarkan routes publik
 	kategoriRoutes.Get("/getall", handler.GetAll)
-	kategoriRoutes.Get("/getbyid/:id_kategori", handler.GetByID)
+	kategoriRoutes.Get("/getbyid/:_id", handler.GetByID)
 	kategoriRoutes.Get("/getbynama/:nama_kategori", handler.GetByName)
 
 	// Mendaftarkan routes khusus admin
 	adminRoutes := kategoriRoutes.Group("/admin")
 	adminRoutes.Use(middleware.AuthMiddleware("admin"))
 	adminRoutes.Post("/create-kategori", handler.CreateKategori)
-	adminRoutes.Put("/update-kategori/:id_kategori", handler.UpdateKategori)
-	adminRoutes.Delete("/delete-kategori/:id_kategori", handler.DeleteKategori)
+	adminRoutes.Put("/update-kategori/:_id", handler.UpdateKategori)
+	adminRoutes.Delete("/delete-kategori/:_id", handler.DeleteKategori)
 }
 
 // CreateKategori menangani pembuatan kategori baru
@@ -103,7 +103,7 @@ func (d *HttpDeliveryKategori) GetAll(c *fiber.Ctx) error {
 // GetByID mengambil kategori berdasarkan ID
 func (d *HttpDeliveryKategori) GetByID(c *fiber.Ctx) error {
 	// Mengambil ID dari parameter URL
-	id := c.Params("id_kategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -162,7 +162,7 @@ func (d *HttpDeliveryKategori) GetByName(c *fiber.Ctx) error {
 // UpdateKategori memperbarui data kategori berdasarkan ID
 func (d *HttpDeliveryKategori) UpdateKategori(c *fiber.Ctx) error {
 	// Mengambil ID dari parameter URL
-	id := c.Params("id_kategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -217,7 +217,7 @@ func (d *HttpDeliveryKategori) UpdateKategori(c *fiber.Ctx) error {
 // DeleteKategori menghapus kategori berdasarkan ID
 func (d *HttpDeliveryKategori) DeleteKategori(c *fiber.Ctx) error {
 	// Mengambil ID dari parameter URL
-	id := c.Params("id_kategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"success": false,

@@ -26,16 +26,16 @@ func NewHttpDeliverySubKategori(app fiber.Router, sku domain.SubKategoriUseCase,
 
 	// Routes publik
 	subKategoriRoutes.Get("/getall", handler.GetAll)
-	subKategoriRoutes.Get("/getbyid/:id_subkategori", handler.GetByID)
-	subKategoriRoutes.Get("/getbykategori/:id_kategori", handler.GetByKategoriID)
+	subKategoriRoutes.Get("/getbyid/:_id", handler.GetByID)
+	subKategoriRoutes.Get("/getbykategori/:_id", handler.GetByKategoriID)
 	subKategoriRoutes.Get("/getbynama/:nama_subkategori", handler.GetByName)
 
 	// Routes khusus admin
 	adminRoutes := subKategoriRoutes.Group("/admin")
 	adminRoutes.Use(middleware.AuthMiddleware("admin"))
 	adminRoutes.Post("/create-subkategori", handler.CreateSubKategori)
-	adminRoutes.Put("/update-subkategori/:id_subkategori", handler.UpdateSubKategori)
-	adminRoutes.Delete("/delete-subkategori/:id_subkategori", handler.DeleteSubKategori)
+	adminRoutes.Put("/update-subkategori/:_id", handler.UpdateSubKategori)
+	adminRoutes.Delete("/delete-subkategori/:_id", handler.DeleteSubKategori)
 }
 
 // CreateSubKategori menangani pembuatan subkategori baru
@@ -113,7 +113,7 @@ func (d *HttpDeliverySubKategori) GetAll(c *fiber.Ctx) error {
 
 // GetByID menangani pengambilan subkategori berdasarkan ID
 func (d *HttpDeliverySubKategori) GetByID(c *fiber.Ctx) error {
-	id := c.Params("id_subkategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID sub kategori harus diisi",
@@ -134,7 +134,7 @@ func (d *HttpDeliverySubKategori) GetByID(c *fiber.Ctx) error {
 
 // GetByKategoriID menangani pengambilan subkategori berdasarkan ID kategori
 func (d *HttpDeliverySubKategori) GetByKategoriID(c *fiber.Ctx) error {
-	id := c.Params("id_kategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID kategori harus diisi",
@@ -182,7 +182,7 @@ func (d *HttpDeliverySubKategori) GetByName(c *fiber.Ctx) error {
 
 // UpdateSubKategori menangani pembaruan subkategori berdasarkan ID
 func (d *HttpDeliverySubKategori) UpdateSubKategori(c *fiber.Ctx) error {
-	id := c.Params("id_subkategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID sub kategori harus diisi",
@@ -249,7 +249,7 @@ func (d *HttpDeliverySubKategori) UpdateSubKategori(c *fiber.Ctx) error {
 // DeleteSubKategori menangani penghapusan subkategori
 func (d *HttpDeliverySubKategori) DeleteSubKategori(c *fiber.Ctx) error {
 	// Ambil ID subkategori dari parameter URL
-	id := c.Params("id_subkategori")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"error": "ID subkategori harus diisi",

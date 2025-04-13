@@ -33,7 +33,7 @@ func (rp *mongoRepoProduk) GenerateNextID(ctx context.Context) (string, error) {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	// Pastikan menggunakan kolasi untuk pengurutan numerik yang benar
-	opts := options.FindOne().SetSort(bson.M{"id_produk": -1}).SetCollation(&options.Collation{
+	opts := options.FindOne().SetSort(bson.M{"_id": -1}).SetCollation(&options.Collation{
 		Locale:          "en",
 		NumericOrdering: true,
 	})
@@ -120,8 +120,8 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 		return produkList, nil
 	}
 
-	// Dapatkan frequent itemsets dengan minimum support 20%
-	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.2)
+	// Dapatkan frequent itemsets dengan minimum support 40%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.4)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
 		return produkList, nil // Return products without related items
@@ -138,7 +138,7 @@ func (rp *mongoRepoProduk) GetAllProduk(ctx context.Context) ([]domain.Produk, e
 			for j, relatedID := range itemset.Produk {
 				if i != j {
 					related = append(related, map[string]interface{}{
-						"id_produk":   relatedID,
+						"_id":   relatedID,
 						"nama_produk": itemset.ProdukList[j],
 						"support":     itemset.Support,
 						"confidence":  itemset.Confidence,
@@ -170,7 +170,7 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 
 	var product domain.Produk
 
-	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id, "is_deleted": nil}).Decode(&product)
+	err := DataProduk.FindOne(ctx, bson.M{"_id": id, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -178,8 +178,8 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 		return nil, fmt.Errorf("gagal untuk mendapatkan produk: %v", err)
 	}
 
-	// Dapatkan frequent itemsets dengan minimum support 20%
-	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.2)
+	// Dapatkan frequent itemsets dengan minimum support 40%
+	frequentItemsets, err := rp.GetFrequentItemsets(ctx, 0.4)
 	if err != nil {
 		log.Printf("Error getting frequent itemsets: %v", err)
 		return &product, nil // Return product without related items
@@ -195,7 +195,7 @@ func (rp *mongoRepoProduk) GetProdukById(ctx context.Context, id string) (*domai
 				for j, relatedID := range itemset.Produk {
 					if i != j {
 						related = append(related, map[string]interface{}{
-							"id_produk":   relatedID,
+							"_id":   relatedID,
 							"nama_produk": itemset.ProdukList[j],
 							"support":     itemset.Support,
 							"confidence":  itemset.Confidence,
@@ -270,7 +270,7 @@ func (rp *mongoRepoProduk) UpdateProduk(ctx context.Context, bd *domain.Produk) 
 	bd.UpdatedAt = time.Now()
 
 	// Update document
-	filter := bson.M{"id_produk": bd.IDProduk}
+	filter := bson.M{"_id": bd.IDProduk}
 	update := bson.M{
 		"$set": bson.M{
 			"nama_produk":         bd.NamaProduk,
@@ -301,7 +301,7 @@ func (rp *mongoRepoProduk) DeleteProduk(ctx context.Context, id string) error {
 	DataProduk := rp.DB.Collection(_Produk)
 
 	now := time.Now()
-	filter := bson.M{"id_produk": id}
+	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
 			"is_deleted": now,
@@ -325,7 +325,7 @@ func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, k
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var product domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id, "is_deleted": nil}).Decode(&product)
+	err := DataProduk.FindOne(ctx, bson.M{"_id": id, "is_deleted": nil}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -342,7 +342,7 @@ func (rp *mongoRepoProduk) DecreaseProdukStock(ctx context.Context, id string, k
 		"$set": bson.M{"updated_at": time.Now()},
 	}
 
-	result, err := DataProduk.UpdateOne(ctx, bson.M{"id_produk": id}, update)
+	result, err := DataProduk.UpdateOne(ctx, bson.M{"_id": id}, update)
 	if err != nil {
 		return fmt.Errorf("gagal mengupdate stok: %v", err)
 	}
@@ -359,7 +359,7 @@ func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, k
 	DataProduk := rp.DB.Collection(_Produk)
 
 	var existingProduct domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{"id_produk": id}).Decode(&existingProduct)
+	err := DataProduk.FindOne(ctx, bson.M{"_id": id}).Decode(&existingProduct)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return fmt.Errorf("produk dengan ID %s tidak ditemukan", id)
@@ -380,7 +380,7 @@ func (rp *mongoRepoProduk) IncreaseProdukStock(ctx context.Context, id string, k
 		},
 	}
 
-	_, err = DataProduk.UpdateOne(ctx, bson.M{"id_produk": id}, update)
+	_, err = DataProduk.UpdateOne(ctx, bson.M{"_id": id}, update)
 	if err != nil {
 		return fmt.Errorf("gagal menambah stok produk: %v", err)
 	}
@@ -399,7 +399,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 
 	// 1. Dapatkan ID terakhir dari database
 	var lastProduct domain.Produk
-	err := DataProduk.FindOne(ctx, bson.M{}, options.FindOne().SetSort(bson.M{"id_produk": -1})).Decode(&lastProduct)
+	err := DataProduk.FindOne(ctx, bson.M{}, options.FindOne().SetSort(bson.M{"_id": -1})).Decode(&lastProduct)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return fmt.Errorf("error finding last product: %v", err)
 	}
@@ -472,7 +472,7 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 		log.Printf("Assigning ID %s to product %s", idStr, produk.NamaProduk)
 
 		doc := bson.D{
-			{Key: "id_produk", Value: idStr},
+			{Key: "_id", Value: idStr},
 			{Key: "nama_produk", Value: produk.NamaProduk},
 			{Key: "kategori", Value: produk.Kategori},
 			{Key: "subkategori", Value: produk.SubKategori},
@@ -524,8 +524,8 @@ func (rp *mongoRepoProduk) ImportData(ctx context.Context, produkList []domain.P
 // Mengimplementasikan algoritma Apriori untuk mencari itemset yang sering muncul
 func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport float64) ([]domain.FrequentItemsetResponse, error) {
 	// Set nilai minimum support dan confidence
-	minSupport = 0.4     // 20%
-	minConfidence := 0.7 // 30%
+	minSupport = 0.4     // 40%
+	minConfidence := 0.7 // 70%
 
 	log.Printf("Running Apriori with minSupport: %.2f, minConfidence: %.2f", minSupport, minConfidence)
 
@@ -562,7 +562,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 			for _, p := range products {
 				if product, ok := p.(bson.M); ok {
-					idProduk := product["id_produk"].(string)
+					idProduk := product["_id"].(string)
 					if !seenItems[idProduk] {
 						itemCounts[idProduk]++
 						itemNames[idProduk] = product["nama_produk"].(string)
@@ -599,7 +599,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 		itemPresent := make(map[string]bool)
 		for _, p := range products {
 			if product, ok := p.(bson.M); ok {
-				idProduk := product["id_produk"].(string)
+				idProduk := product["_id"].(string)
 				itemPresent[idProduk] = true
 			}
 		}
@@ -627,7 +627,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 					for _, p := range products {
 						if product, ok := p.(bson.M); ok {
-							idProduk := product["id_produk"].(string)
+							idProduk := product["_id"].(string)
 							if idProduk == item1 {
 								hasItem1 = true
 							}
@@ -746,7 +746,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 		{
 			// Group berdasarkan id_produk dan hitung total terjual
 			"$group": bson.M{
-				"_id": "$produk.id_produk",
+				"_id": "$produk._id",
 				"total_terjual": bson.M{
 					"$sum": "$penjualan.jumlah_produk",
 				},
@@ -767,7 +767,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 			"$lookup": bson.M{
 				"from":         "produk",
 				"localField":   "_id",
-				"foreignField": "id_produk",
+				"foreignField": "_id",
 				"as":           "produk_detail",
 			},
 		},
@@ -778,8 +778,7 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 		{
 			// Project untuk format hasil akhir
 			"$project": bson.M{
-				"_id":            0,
-				"id_produk":      "$_id",
+				"_id":      "$_id",
 				"nama_produk":    "$produk_detail.nama_produk",
 				"jumlah_terjual": "$total_terjual",
 			},
@@ -834,21 +833,25 @@ func (rp *mongoRepoProduk) GetBestSellingProducts(ctx context.Context, limitProd
 }
 
 // GetLaporanProduk retrieves product report data with filters
-func (rp *mongoRepoProduk) GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID uint, sort string) ([]domain.Produk, error) {
+func (rp *mongoRepoProduk) GetLaporanProduk(ctx context.Context, kategoriID, subkategoriID string, sort string) ([]domain.Produk, error) {
 	collection := rp.DB.Collection(_Produk)
 
 	// Build filter
 	filter := bson.M{}
 
 	// Add kategori filter if provided
-	if kategoriID != 0 {
-		filter["kategori.id_kategori"] = kategoriID
+	if kategoriID != "" {
+		filter["kategori._id"] = kategoriID
+		log.Printf("Added kategori filter: %v", filter)
 	}
 
 	// Add subkategori filter if provided
-	if subkategoriID != 0 {
-		filter["subkategori.id_subkategori"] = subkategoriID
+	if subkategoriID != "" {
+		filter["subkategori._id"] = subkategoriID
+		log.Printf("Added subkategori filter: %v", filter)
 	}
+
+	log.Printf("Final filter: %v", filter)
 
 	// Build sort options
 	sortOptions := bson.D{}

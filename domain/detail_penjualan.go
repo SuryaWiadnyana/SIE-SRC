@@ -6,21 +6,23 @@ import (
 )
 
 type DetailPenjualan struct {
-	ID_DetailPenjualan string    `json:"id_details" bson:"id_details"`
+	ID_DetailPenjualan string    `json:"id_details" bson:"_id"`
 	Penjualan          Penjualan `json:"penjualan" bson:"penjualan"`
 	Produk             []Produk  `json:"produk" bson:"produk"`
 	TotalPendapatan    int       `json:"total_pendapatan" bson:"total_pendapatan"`
 }
 
 type ResponseSalesReportItem struct {
-	IDPenjualan      string      `json:"id_penjualan"`
-	TanggalPenjualan time.Time   `json:"tanggal_penjualan"`
-	KodeProduk       string      `json:"kode_produk"`
-	NamaProduk       string      `json:"nama_produk"`
-	Kategori         Kategori    `json:"kategori"`
-	SubKategori      SubKategori `json:"subkategori"`
-	JumlahProduk     int         `json:"jumlah_produk"`
-	Total            int         `json:"total"`
+	IDPenjualan      string    `json:"id_penjualan"`
+	TanggalPenjualan time.Time `json:"tanggal_penjualan"`
+	KodeProduk       string    `json:"kode_produk"`
+	NamaProduk       string    `json:"nama_produk"`
+	KategoriID       uint      `json:"kategori_id"`
+	NamaKategori     string    `json:"nama_kategori"`
+	SubKategoriID    uint      `json:"subkategori_id"`
+	NamaSubKategori  string    `json:"nama_subkategori"`
+	JumlahProduk     int       `json:"jumlah_produk"`
+	Total            int       `json:"total"`
 }
 
 type CategoryStats struct {

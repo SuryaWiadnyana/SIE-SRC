@@ -59,8 +59,8 @@ func (d *HttpDeliveryLaporan) GetLaporanPenjualan(c *fiber.Ctx) error {
 	}
 
 	// Get optional filters
-	kategoriID := c.Query("id_kategori")
-	subkategoriID := c.Query("id_subkategori")
+	kategoriID := c.Query("_id")
+	subkategoriID := c.Query("_id")
 	sortOption := c.Query("sort")
 
 	// Get all sales data
@@ -109,7 +109,7 @@ func (d *HttpDeliveryLaporan) GetLaporanPenjualan(c *fiber.Ctx) error {
 
 				// Create report item
 				reportItem := map[string]interface{}{
-					"id_penjualan":      penjualan.IDPenjualan,
+					"_id":               penjualan.IDPenjualan,
 					"tanggal_penjualan": penjualan.Tanggal_Penjualan.Format("2006-01-02"),
 					"kode_produk":       produkDetail.KodeProduk,
 					"nama_produk":       produkDetail.NamaProduk,
@@ -187,12 +187,19 @@ func (d *HttpDeliveryLaporan) GetLaporanPenjualan(c *fiber.Ctx) error {
 
 func (d *HttpDeliveryLaporan) GetLaporanProduk(c *fiber.Ctx) error {
 	// Get filters
-	kategoriID := c.Query("id_kategori")
-	subkategoriID := c.Query("id_subkategori")
+	kategoriIDStr := c.Query("kategori_id")
+	subkategoriIDStr := c.Query("subkategori_id")
 	sortOption := c.Query("sort")
 
-	// Get all products
-	products, err := d.ProdukUC.GetAllProduk(context.Background())
+	log.Printf("Received kategori_id: %s", kategoriIDStr)
+	log.Printf("Received subkategori_id: %s", subkategoriIDStr)
+
+	// Get string IDs
+	kategoriID := kategoriIDStr
+	subkategoriID := subkategoriIDStr
+
+	// Get filtered products using repository function
+	products, err := d.ProdukUC.GetLaporanProduk(context.Background(), kategoriID, subkategoriID, sortOption)
 	if err != nil {
 		log.Printf("Error getting product data: %v", err)
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -200,27 +207,20 @@ func (d *HttpDeliveryLaporan) GetLaporanProduk(c *fiber.Ctx) error {
 		})
 	}
 
-	// Filter and process product data
+	// Process product data
 	var filteredData []map[string]interface{}
 	for _, product := range products {
-		// Apply category filter
-		if kategoriID != "" && product.Kategori.IDKategori != kategoriID {
-			continue
-		}
-
-		// Apply subcategory filter
-		if subkategoriID != "" && product.SubKategori.IDSubKategori != subkategoriID {
-			continue
-		}
-
 		// Create report item
 		reportItem := map[string]interface{}{
-			"kode_produk": product.KodeProduk,
-			"nama_produk": product.NamaProduk,
-			"kategori":    product.Kategori.NamaKategori,
-			"subkategori": product.SubKategori.NamaSubKategori,
-			"stok":        product.Stok,
-			"harga":       product.HargaProduk,
+			"kode_produk":     product.KodeProduk,
+			"nama_produk":     product.NamaProduk,
+			"kategori":        product.Kategori.NamaKategori,
+			"kategori_id":     product.Kategori.IDKategori,
+			"subkategori":     product.SubKategori.NamaSubKategori,
+			"subkategori_id":  product.SubKategori.IDSubKategori,
+			"stok":            product.Stok,
+			"harga":           product.HargaProduk,
+			"tanggal_expired": product.TanggalKedaluwarsa,
 		}
 
 		filteredData = append(filteredData, reportItem)

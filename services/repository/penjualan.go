@@ -33,7 +33,7 @@ func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error
 	ListPenjualan := rp.DB.Collection(_Penjualan)
 
 	// Find all penjualan IDs
-	cursor, err := ListPenjualan.Find(ctx, bson.M{}, options.Find().SetProjection(bson.M{"id_penjualan": 1}))
+	cursor, err := ListPenjualan.Find(ctx, bson.M{}, options.Find().SetProjection(bson.M{"_id": 1}))
 	if err != nil {
 		return "", fmt.Errorf("error finding penjualan: %v", err)
 	}
@@ -43,7 +43,7 @@ func (rp *mongoRepoPenjualan) GenerateNextID(ctx context.Context) (string, error
 	highestNum := 0
 	for cursor.Next(ctx) {
 		var doc struct {
-			IDPenjualan string `bson:"id_penjualan"`
+			IDPenjualan string `bson:"_id"`
 		}
 		if err := cursor.Decode(&doc); err != nil {
 			continue
@@ -118,7 +118,7 @@ func (rp *mongoRepoPenjualan) CreateBulk(ctx context.Context, bd []domain.Penjua
 
 		// Buat satu dokumen penjualan untuk semua produk
 		penjualanDoc := bson.M{
-			"id_penjualan":      nextID,
+			"_id":      nextID,
 			"user":              bd[0].User,
 			"tanggal_penjualan": parsedTime,
 			"jumlah_produk":     totalJumlahProduk,
@@ -194,7 +194,7 @@ func (rp *mongoRepoPenjualan) GetByID(ctx context.Context, id string) (*domain.P
 	penjualanProduk := rp.DB.Collection(_Penjualan)
 
 	var penjualan domain.Penjualan
-	err := penjualanProduk.FindOne(ctx, bson.M{"id_penjualan": id}).Decode(&penjualan)
+	err := penjualanProduk.FindOne(ctx, bson.M{"_id": id}).Decode(&penjualan)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("penjualan dengan ID %s tidak ditemukan", id)
@@ -222,7 +222,7 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 
 		// Ambil data penjualan yang akan dihapus
 		var existingSales domain.Penjualan
-		err := penjualanProduk.FindOne(sc, bson.M{"id_penjualan": id}).Decode(&existingSales)
+		err := penjualanProduk.FindOne(sc, bson.M{"_id": id}).Decode(&existingSales)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				return fmt.Errorf("penjualan dengan ID %s tidak ditemukan", id)
@@ -231,7 +231,7 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 		}
 
 		// Hapus penjualan
-		_, err = penjualanProduk.DeleteOne(sc, bson.M{"id_penjualan": id})
+		_, err = penjualanProduk.DeleteOne(sc, bson.M{"_id": id})
 		if err != nil {
 			return fmt.Errorf("gagal menghapus penjualan: %v", err)
 		}
@@ -246,7 +246,19 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
 	collection := rp.DB.Collection(_Penjualan)
 
-	// Build pipeline stages
+	// Ensure index exists for tanggal_penjualan
+	_, err := collection.Indexes().CreateOne(
+		ctx,
+		mongo.IndexModel{
+			Keys:    bson.D{{Key: "tanggal_penjualan", Value: 1}},
+			Options: options.Index().SetBackground(true),
+		},
+	)
+	if err != nil {
+		log.Printf("Warning: Failed to ensure index on tanggal_penjualan: %v", err)
+	}
+
+	// Build pipeline stages with optimization
 	pipeline := []bson.M{
 		{
 			"$match": bson.M{
@@ -256,11 +268,20 @@ func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate
 				},
 			},
 		},
+		// Project only needed fields before lookup
+		{
+			"$project": bson.M{
+				"_id":               1,
+				"tanggal_penjualan": 1,
+				"jumlah_produk":     1,
+				"total":             1,
+			},
+		},
 		{
 			"$lookup": bson.M{
 				"from":         "produk",
-				"localField":   "id_produk",
-				"foreignField": "id_produk",
+				"localField":   "_id",
+				"foreignField": "_id",
 				"as":           "produk",
 			},
 		},
@@ -273,7 +294,7 @@ func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate
 	if kategoriID != 0 {
 		pipeline = append(pipeline, bson.M{
 			"$match": bson.M{
-				"produk.kategori.id_kategori": kategoriID,
+				"produk.kategori._id": kategoriID,
 			},
 		})
 	}
@@ -282,7 +303,7 @@ func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate
 	if subkategoriID != 0 {
 		pipeline = append(pipeline, bson.M{
 			"$match": bson.M{
-				"produk.subkategori.id_subkategori": subkategoriID,
+				"produk.subkategori._id": subkategoriID,
 			},
 		})
 	}
@@ -310,16 +331,24 @@ func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate
 
 	pipeline = append(pipeline, sortStage)
 
-	// Execute pipeline
-	cursor, err := collection.Aggregate(ctx, pipeline)
+	// Add pagination and limit
+	pipeline = append(pipeline, bson.M{
+		"$limit": 1000, // Limit to 1000 documents per page
+	})
+
+	// Execute pipeline with timeout
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Aggregate(ctx, pipeline, options.Aggregate().SetAllowDiskUse(true))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("aggregate error: %v", err)
 	}
 	defer cursor.Close(ctx)
 
 	var penjualanList []domain.Penjualan
 	if err = cursor.All(ctx, &penjualanList); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cursor error: %v", err)
 	}
 
 	return penjualanList, nil

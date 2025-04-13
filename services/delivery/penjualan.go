@@ -39,8 +39,8 @@ func NewHttpDeliveryPenjualan(app fiber.Router, HTTP domain.PenjualanUseCase, us
 	protected.Use(middleware.AuthMiddleware("admin", "owner"))
 	protected.Post("/create", handler.CreateBulk)
 	protected.Get("/getall", handler.GetAll)
-	protected.Get("/by-id/:id_penjualan", handler.GetByID)
-	protected.Delete("/delete/:id_penjualan", handler.Delete)
+	protected.Get("/by-id/:_id", handler.GetByID)
+	protected.Delete("/delete/:_id", handler.Delete)
 	protected.Get("/fix-old-sales-data", handler.FixOldSalesData)
 }
 
@@ -213,7 +213,7 @@ func (d *HttpDeliveryPenjualan) CreateBulk(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryPenjualan) Delete(c *fiber.Ctx) error {
-	id := c.Params("id_penjualan")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"status":  http.StatusBadRequest,
@@ -246,7 +246,7 @@ func (d *HttpDeliveryPenjualan) Delete(c *fiber.Ctx) error {
 }
 
 func (d *HttpDeliveryPenjualan) GetByID(c *fiber.Ctx) error {
-	id := c.Params("id_penjualan")
+	id := c.Params("_id")
 	if id == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"status":  http.StatusBadRequest,

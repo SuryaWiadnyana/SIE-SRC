@@ -6,7 +6,7 @@ import (
 )
 
 type Penjualan struct {
-	IDPenjualan string `json:"id_penjualan" bson:"id_penjualan"`
+	IDPenjualan string `json:"id_penjualan" bson:"_id"`
 	User        User   `json:"user" bson:"user"`
 	// Produk            []Produk  `json:"produk" bson:"produk"`
 	Tanggal_Penjualan time.Time `json:"tanggal_penjualan" bson:"tanggal_penjualan"`

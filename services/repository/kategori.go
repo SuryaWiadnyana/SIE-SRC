@@ -31,7 +31,7 @@ func (rp *mongoRepoKategori) GenerateNextID(ctx context.Context) (string, error)
 	collection := rp.DB.Collection(_KategoriCollection)
 
 	// Mencari dokumen terakhir diurutkan berdasarkan id_kategori secara menurun
-	opts := options.FindOne().SetSort(bson.M{"id_kategori": -1})
+	opts := options.FindOne().SetSort(bson.M{"_id": -1})
 	var lastKategori domain.Kategori
 
 	err := collection.FindOne(ctx, bson.M{}, opts).Decode(&lastKategori)
@@ -122,7 +122,7 @@ func (rp *mongoRepoKategori) GetByID(ctx context.Context, id string) (*domain.Ka
 	collection := rp.DB.Collection(_KategoriCollection)
 
 	var kategori domain.Kategori
-	err := collection.FindOne(ctx, bson.M{"id_kategori": id}).Decode(&kategori)
+	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&kategori)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("kategori dengan ID %s tidak ditemukan", id)
@@ -175,7 +175,7 @@ func (rp *mongoRepoKategori) Delete(ctx context.Context, id string) error {
 	}
 
 	// Hapus kategori
-	result, err := collection.DeleteOne(ctx, bson.M{"id_kategori": id})
+	result, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return fmt.Errorf("error menghapus kategori: %v", err)
 	}
@@ -222,7 +222,7 @@ func (rp *mongoRepoKategori) Update(ctx context.Context, k *domain.Kategori) err
 	}
 
 	// Perbarui kategori
-	filter := bson.M{"id_kategori": k.IDKategori}
+	filter := bson.M{"_id": k.IDKategori}
 	update := bson.M{
 		"$set": bson.M{
 			"nama_kategori": k.NamaKategori,

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,23 +22,38 @@ type mongoRepoUser struct {
 func (rp *mongoRepoUser) GenerateNextID(ctx context.Context) (string, error) {
 	userCollection := rp.DB.Collection(_UserCollection)
 
-	opts := options.FindOne().SetSort(bson.M{"id_user": -1})
-	var lastUser domain.User
-
-	err := userCollection.FindOne(ctx, bson.M{}, opts).Decode(&lastUser)
+	// Find all users and sort by _id in descending order
+	opts := options.Find().SetSort(bson.M{"_id": -1}).SetLimit(1)
+	cursor, err := userCollection.Find(ctx, bson.M{}, opts)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return "US001", nil
-		}
-		return "", fmt.Errorf("error finding last user: %v", err)
+		return "", fmt.Errorf("error finding users: %v", err)
+	}
+	defer cursor.Close(ctx)
+
+	// If no documents exist, start with US001
+	if !cursor.Next(ctx) {
+		return "US001", nil
 	}
 
+	// Get the last user
+	var lastUser domain.User
+	if err := cursor.Decode(&lastUser); err != nil {
+		return "", fmt.Errorf("error decoding user: %v", err)
+	}
+
+	// If ID doesn't start with US, start with US001
+	if !strings.HasPrefix(lastUser.IDUser, "US") {
+		return "US001", nil
+	}
+
+	// Extract number from USxxx format
 	numStr := lastUser.IDUser[2:]
 	num, err := strconv.Atoi(numStr)
 	if err != nil {
-		return "", fmt.Errorf("error parsing last ID number: %v", err)
+		return "US001", nil
 	}
 
+	// Generate new ID
 	newID := fmt.Sprintf("US%03d", num+1)
 	return newID, nil
 }
@@ -51,46 +67,46 @@ func NewMongoRepoUser(client *mongo.Database) domain.UserRepository {
 var _UserCollection = "users"
 
 func (rp *mongoRepoUser) RegisterUser(ctx context.Context, user *domain.User) (domain.User, error) {
-    collection := rp.DB.Collection(_UserCollection)
+	collection := rp.DB.Collection(_UserCollection)
 
-    // Check if the username already exists
-    existingUser, err := rp.GetUserByUsername(ctx, user.Username)
+	// Check if the username already exists
+	existingUser, err := rp.GetUserByUsername(ctx, user.Username)
 	if err == nil && existingUser != nil {
 		return domain.User{}, fmt.Errorf("username %s sudah digunakan", user.Username)
-    }
+	}
 
-    log.Printf("Attempting to register user: %s", user.Username)
+	log.Printf("Attempting to register user: %s", user.Username)
 
 	_, err = bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-    if err != nil {
-        log.Printf("Error encrypting password for user %s: %v", user.Username, err)
+	if err != nil {
+		log.Printf("Error encrypting password for user %s: %v", user.Username, err)
 		return domain.User{}, fmt.Errorf("gagal mengenkripsi password: %v", err)
-    }
+	}
 
 	// Log the password hashing success
 
-    // Generate ID if empty
-    if user.IDUser == "" {
-        nextID, err := rp.GenerateNextID(ctx)
-        if err != nil {
-            log.Printf("Failed to generate ID for user %s: %v", user.Username, err)
+	// Generate ID if empty
+	if user.IDUser == "" {
+		nextID, err := rp.GenerateNextID(ctx)
+		if err != nil {
+			log.Printf("Failed to generate ID for user %s: %v", user.Username, err)
 			return domain.User{}, fmt.Errorf("gagal generate ID: %v", err)
-        }
-        user.IDUser = nextID
-    }
-    
-    // Set default status to "Aktif" if not specified
-    if user.Status == "" {
-        user.Status = "Aktif"
-    }
+		}
+		user.IDUser = nextID
+	}
 
-    _, err = collection.InsertOne(ctx, user)
-    if err != nil {
-        log.Printf("Failed to insert user into the database: %v", err)
+	// Set default status to "Aktif" if not specified
+	if user.Status == "" {
+		user.Status = "Aktif"
+	}
+
+	_, err = collection.InsertOne(ctx, user)
+	if err != nil {
+		log.Printf("Failed to insert user into the database: %v", err)
 		return domain.User{}, fmt.Errorf("gagal membuat user: %v", err)
-    }
+	}
 
-    // Log user creation success
+	// Log user creation success
 	log.Printf("User registered successfully: %s", user.Username)
 
 	return *user, nil
@@ -133,7 +149,7 @@ func (rp *mongoRepoUser) GetUserById(ctx context.Context, id string) (*domain.Us
 	collection := rp.DB.Collection(_UserCollection)
 
 	var User domain.User
-	err := collection.FindOne(ctx, bson.M{"id_user": id}).Decode(&User)
+	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&User)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("user dengan ID %s tidak ditemukan", id)
@@ -209,7 +225,7 @@ func (rp *mongoRepoUser) StatusUser(ctx context.Context, id string, status strin
 
 	// Update the user's status
 	update := bson.M{"$set": bson.M{"status": status}}
-	result, err := collection.UpdateOne(ctx, bson.M{"id_user": id}, update)
+	result, err := collection.UpdateOne(ctx, bson.M{"_id": id}, update)
 	if err != nil {
 		return fmt.Errorf("error mengubah status user: %v", err)
 	}
