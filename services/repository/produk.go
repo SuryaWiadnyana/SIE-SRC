@@ -587,7 +587,7 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 			itemset := domain.FrequentItemsetResponse{
 				Produk:     []string{item},
 				Support:    support,
-				Confidence: 1.0, // Confidence untuk 1-itemset selalu 1
+				Confidence: 1.0, // Confidence untuk 1-itemset selalu 1 karena support(A)/support(A) = 1
 				ProdukList: []string{itemNames[item]},
 			}
 			result = append(result, itemset)
@@ -645,22 +645,16 @@ func (rp *mongoRepoProduk) GetFrequentItemsets(ctx context.Context, minSupport f
 
 			// Rumus Hitung support untuk pasangan produk
 			pairSupport := pairCount / totalTransactions
-			// Rumus Hitung confidence untuk kedua arah (A->B dan B->A)
+			// Rumus Hitung confidence untuk arah item1 -> item2
 			confidence1 := pairCount / itemCounts[item1]
-			confidence2 := pairCount / itemCounts[item2]
 
 			// Tambahkan ke hasil jika memenuhi minimum support dan confidence
-			if pairSupport >= minSupport && (confidence1 >= minConfidence || confidence2 >= minConfidence) {
-				// Pilih confidence tertinggi antara kedua arah
-				maxConfidence := confidence1
-				if confidence2 > confidence1 {
-					maxConfidence = confidence2
-				}
-
+			if pairSupport >= minSupport && confidence1 >= minConfidence {
+				// Gunakan confidence1 untuk arah item1 -> item2
 				itemset := domain.FrequentItemsetResponse{
 					Produk:     []string{item1, item2},
 					Support:    pairSupport,
-					Confidence: maxConfidence,
+					Confidence: confidence1,
 					ProdukList: []string{itemNames[item1], itemNames[item2]},
 				}
 				result = append(result, itemset)

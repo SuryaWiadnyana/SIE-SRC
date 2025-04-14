@@ -48,7 +48,7 @@ func (uc *PenjualanUseCase) Delete(Ctx context.Context, id string) error {
 }
 
 // GetLaporanPenjualan retrieves sales report data with filters
-func (uc *PenjualanUseCase) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
+func (uc *PenjualanUseCase) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID string, sort string) ([]domain.Penjualan, error) {
 	// Validate date range
 	if startDate.After(endDate) {
 		return nil, errors.New("tanggal awal tidak boleh lebih besar dari tanggal akhir")

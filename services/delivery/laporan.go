@@ -59,8 +59,8 @@ func (d *HttpDeliveryLaporan) GetLaporanPenjualan(c *fiber.Ctx) error {
 	}
 
 	// Get optional filters
-	kategoriID := c.Query("_id")
-	subkategoriID := c.Query("_id")
+	kategoriID := c.Query("kategori_id")
+	subkategoriID := c.Query("subkategori_id")
 	sortOption := c.Query("sort")
 
 	// Get all sales data

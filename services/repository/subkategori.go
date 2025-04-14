@@ -74,14 +74,11 @@ func (rp *mongoRepoSubKategori) CreateNewSubKategori(ctx context.Context, subK *
 		return domain.SubKategori{}, fmt.Errorf("error memeriksa kategori: %v", err)
 	}
 
-	// Set nama kategori
-	subK.Kategori.NamaKategori = kategori.NamaKategori
-
 	// Cek apakah nama subkategori sudah ada dalam kategori yang sama
 	var existingSubKategori domain.SubKategori
 	err = collection.FindOne(ctx, bson.M{
-		"nama_subkategori":     subK.NamaSubKategori,
-		"kategori._id": subK.Kategori.IDKategori,
+		"nama_subkategori": subK.NamaSubKategori,
+		"kategori._id":     subK.Kategori.IDKategori,
 	}).Decode(&existingSubKategori)
 	if err == nil {
 		return domain.SubKategori{}, fmt.Errorf("subkategori dengan nama %s sudah ada dalam kategori ini", subK.NamaSubKategori)
@@ -235,41 +232,41 @@ func (rp *mongoRepoSubKategori) UpdateSubKategori(ctx context.Context, subK *dom
 func (rp *mongoRepoSubKategori) GetByKategoriID(ctx context.Context, kategoriID string) ([]domain.SubKategori, error) {
 	collection := rp.DB.Collection(_SubKategoriCollection)
 	filter := bson.M{"kategori._id": kategoriID}
-	
+
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	
+
 	var subkategoriList []domain.SubKategori
 	if err = cursor.All(ctx, &subkategoriList); err != nil {
 		return nil, err
 	}
-	
+
 	return subkategoriList, nil
 }
 
 // DeleteByKategoriID menghapus semua subkategori berdasarkan ID kategori
 func (rp *mongoRepoSubKategori) DeleteByKategoriID(ctx context.Context, kategoriID string) error {
 	collection := rp.DB.Collection(_SubKategoriCollection)
-	
+
 	// Periksa apakah ada subkategori dengan kategori ID tersebut
 	subkategoriList, err := rp.GetByKategoriID(ctx, kategoriID)
 	if err != nil {
 		return fmt.Errorf("error mendapatkan subkategori: %v", err)
 	}
-	
+
 	if len(subkategoriList) == 0 {
 		return nil // Tidak ada subkategori untuk dihapus
 	}
-	
+
 	// Kumpulkan ID subkategori untuk memeriksa penggunaan di produk
 	subkategoriIDs := make([]string, len(subkategoriList))
 	for i, subK := range subkategoriList {
 		subkategoriIDs[i] = subK.IDSubKategori
 	}
-	
+
 	// Periksa apakah subkategori digunakan oleh produk
 	produkCollection := rp.DB.Collection("produk")
 	count, err := produkCollection.CountDocuments(ctx, bson.M{"sub_kategori": bson.M{"$in": subkategoriIDs}})
@@ -279,13 +276,13 @@ func (rp *mongoRepoSubKategori) DeleteByKategoriID(ctx context.Context, kategori
 	if count > 0 {
 		return fmt.Errorf("subkategori tidak dapat dihapus karena masih digunakan oleh %d produk", count)
 	}
-	
+
 	// Hapus semua subkategori dengan kategori ID tersebut
 	result, err := collection.DeleteMany(ctx, bson.M{"kategori._id": kategoriID})
 	if err != nil {
 		return fmt.Errorf("error menghapus subkategori: %v", err)
 	}
-	
+
 	log.Printf("Berhasil menghapus %d subkategori untuk kategori ID %s", result.DeletedCount, kategoriID)
 	return nil
 }

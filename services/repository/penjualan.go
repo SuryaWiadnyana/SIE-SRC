@@ -243,7 +243,7 @@ func (rp *mongoRepoPenjualan) Delete(ctx context.Context, id string) error {
 }
 
 // GetLaporanPenjualan retrieves sales report data with filters
-func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID uint, sort string) ([]domain.Penjualan, error) {
+func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate, endDate time.Time, kategoriID, subkategoriID string, sort string) ([]domain.Penjualan, error) {
 	collection := rp.DB.Collection(_Penjualan)
 
 	// Ensure index exists for tanggal_penjualan
@@ -275,38 +275,15 @@ func (rp *mongoRepoPenjualan) GetLaporanPenjualan(ctx context.Context, startDate
 				"tanggal_penjualan": 1,
 				"jumlah_produk":     1,
 				"total":             1,
+				"user":              1,
+				"subtotal":          1,
+				"updated_at":        1,
 			},
-		},
-		{
-			"$lookup": bson.M{
-				"from":         "produk",
-				"localField":   "_id",
-				"foreignField": "_id",
-				"as":           "produk",
-			},
-		},
-		{
-			"$unwind": "$produk",
 		},
 	}
 
-	// Add kategori filter if provided
-	if kategoriID != 0 {
-		pipeline = append(pipeline, bson.M{
-			"$match": bson.M{
-				"produk.kategori._id": kategoriID,
-			},
-		})
-	}
-
-	// Add subkategori filter if provided
-	if subkategoriID != 0 {
-		pipeline = append(pipeline, bson.M{
-			"$match": bson.M{
-				"produk.subkategori._id": subkategoriID,
-			},
-		})
-	}
+	// Note: kategori and subkategori filters are handled in the delivery layer
+	// because they require joining with detail_penjualan and produk collections
 
 	// Add sort stage
 	sortStage := bson.M{

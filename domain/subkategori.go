@@ -5,7 +5,7 @@ import "context"
 type SubKategori struct {
 	IDSubKategori   string    `json:"id_subkategori" bson:"_id"`
 	NamaSubKategori string    `json:"nama_subkategori" bson:"nama_subkategori"`
-	Kategori        *Kategori `json:"kategori" bson:"kategori"`
+	Kategori        *Kategori `json:"kategori"`
 }
 
 type SubKategoriRepository interface {
